@@ -16,7 +16,8 @@ final class MainTabBarController: UITabBarController {
         let trackerViewController = UINavigationController(rootViewController: TrackerViewController())
         trackerViewController.tabBarItem = UITabBarItem(title: "", image: UIImage(named: "Record"), tag: 0)
         
-        let statisticsViewController = UINavigationController(rootViewController: StatisticsViewController())
+        //let statisticsViewController = UINavigationController(rootViewController: StatisticsViewController())
+        let statisticsViewController = StatisticsViewController()
         statisticsViewController.tabBarItem = UITabBarItem(title: "", image: UIImage(named: "Hare"), tag: 1)
         self.viewControllers = [trackerViewController, statisticsViewController]
     }
