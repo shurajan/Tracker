@@ -6,9 +6,13 @@
 //
 import UIKit
 
-final class TrackerViewController: LightStatusBarViewController {
+final class TrackersViewController: LightStatusBarViewController {
     private var constraints = [NSLayoutConstraint]()
     
+    private var categories = [TrackerCategory]()
+    private var completedTrackers = [TrackerRecord]()
+    
+    //MARK: - UI components
     private lazy var plusButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(named: "Add tracker"), for: UIControl.State.normal)
@@ -95,6 +99,12 @@ final class TrackerViewController: LightStatusBarViewController {
         navigationItem.searchController = searchController
         
         addAndActivateConstraints(from: constraints)
+    }
+    
+    //MARK: - Private Methods
+    
+    func addCategory(category: TrackerCategory){
+        self.categories = categories + [category]
     }
     
 }
