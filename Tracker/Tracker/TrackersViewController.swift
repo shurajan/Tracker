@@ -17,6 +17,8 @@ final class TrackersViewController: LightStatusBarViewController {
         let button = UIButton()
         button.setImage(UIImage(named: "Add tracker"), for: UIControl.State.normal)
         button.accessibilityIdentifier = "plusButton"
+        button.addTarget(self, action: #selector(plusButtonTapped(_:)), for: .touchUpInside)
+        
         constraints.append(contentsOf: [
             button.widthAnchor.constraint(equalToConstant: 42),
             button.heightAnchor.constraint(equalToConstant: 42),
@@ -102,9 +104,18 @@ final class TrackersViewController: LightStatusBarViewController {
     }
     
     //MARK: - Private Methods
-    
     func addCategory(category: TrackerCategory){
         self.categories = categories + [category]
     }
     
+    //MARK: - IB Outlet
+    @IBAction
+    private func plusButtonTapped(_ sender: UIButton) {
+        let trackerCreationViewController = TrackerCreationViewController()
+        trackerCreationViewController.modalPresentationStyle = .overCurrentContext
+        trackerCreationViewController.modalTransitionStyle = .crossDissolve
+        
+        // Показываем контроллер, который будет выезжать снизу
+        present(trackerCreationViewController, animated: false, completion: nil)
+    }
 }
