@@ -7,8 +7,6 @@
 import UIKit
 
 final class TrackersViewController: LightStatusBarViewController {
-    private var constraints = [NSLayoutConstraint]()
-    
     private var categories = [TrackerCategory]()
     private var completedTrackers = [TrackerRecord]()
     
@@ -18,11 +16,7 @@ final class TrackersViewController: LightStatusBarViewController {
         button.setImage(UIImage(named: "Add tracker"), for: UIControl.State.normal)
         button.accessibilityIdentifier = "plusButton"
         button.addTarget(self, action: #selector(plusButtonTapped(_:)), for: .touchUpInside)
-        
-        constraints.append(contentsOf: [
-            button.widthAnchor.constraint(equalToConstant: 42),
-            button.heightAnchor.constraint(equalToConstant: 42),
-        ])
+        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
@@ -34,11 +28,8 @@ final class TrackersViewController: LightStatusBarViewController {
         picker.preferredDatePickerStyle = .compact
         picker.locale = Locale(identifier: "ru_RU")
         picker.accessibilityIdentifier = "datePicker"
-        constraints.append(contentsOf: [
-            picker.widthAnchor.constraint(equalToConstant: 100),
-            picker.heightAnchor.constraint(equalToConstant: 34),
-        ])
         
+        picker.translatesAutoresizingMaskIntoConstraints = false
         return picker
     }()
     
@@ -47,34 +38,32 @@ final class TrackersViewController: LightStatusBarViewController {
         return searchController
     }()
     
-    private lazy var placeHolderView: UIStackView = {
+    private lazy var dizzyImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "Dizzy"))
         imageView.contentMode = .scaleAspectFit
-        
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Создаем UILabel
+        return imageView
+    }()
+    
+    private lazy var questionLabel: UILabel = {
         let label = UILabel()
         label.text = "Что будем отслеживать?"
         label.textAlignment = .center
         label.font = UIFont.boldSystemFont(ofSize: 12.0)
         label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var placeHolderView: UIStackView = {
+        // Создаем UILabel
+
         
-        let stackView = UIStackView(arrangedSubviews: [imageView, label])
+        let stackView = UIStackView(arrangedSubviews: [dizzyImageView, questionLabel])
         stackView.axis = .vertical
         stackView.spacing = 8
         stackView.alignment = .center
         stackView.distribution = .fillProportionally
-        
-        constraints.append(contentsOf: [
-            imageView.widthAnchor.constraint(equalToConstant: 80),
-            imageView.heightAnchor.constraint(equalToConstant: 80),
-            stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
-        ])
-        
+        stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
     
@@ -92,15 +81,26 @@ final class TrackersViewController: LightStatusBarViewController {
         
         view.backgroundColor = UIColor.ysWhite
         
-        addView(control: datePicker)
-        addView(control: plusButton)
-        addView(control: placeHolderView)
+        view.addSubview(datePicker)
+        view.addSubview(plusButton)
+        view.addSubview(placeHolderView)
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: plusButton)
         navigationItem.searchController = searchController
         
-        addAndActivateConstraints(from: constraints)
+        NSLayoutConstraint.activate([
+            plusButton.widthAnchor.constraint(equalToConstant: 42),
+            plusButton.heightAnchor.constraint(equalToConstant: 42),
+            datePicker.widthAnchor.constraint(equalToConstant: 100),
+            datePicker.heightAnchor.constraint(equalToConstant: 34),
+            dizzyImageView.widthAnchor.constraint(equalToConstant: 80),
+            dizzyImageView.heightAnchor.constraint(equalToConstant: 80),
+            placeHolderView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            placeHolderView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            placeHolderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            placeHolderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+        ])
     }
     
     //MARK: - Private Methods
@@ -112,10 +112,20 @@ final class TrackersViewController: LightStatusBarViewController {
     @IBAction
     private func plusButtonTapped(_ sender: UIButton) {
         let trackerCreationViewController = TrackerCreationViewController()
-        trackerCreationViewController.modalPresentationStyle = .overCurrentContext
-        trackerCreationViewController.modalTransitionStyle = .crossDissolve
-        
-        // Показываем контроллер, который будет выезжать снизу
+        trackerCreationViewController.delegate = self
+        trackerCreationViewController.modalPresentationStyle = .pageSheet
         present(trackerCreationViewController, animated: false, completion: nil)
+    }
+}
+
+extension TrackersViewController: TrackersViewControllerProtocol {
+    func showNewHabbitViewController() {
+        let newHabitViewController = NewHabitViewController()
+        newHabitViewController.delegate = self
+        newHabitViewController.modalPresentationStyle = .pageSheet
+        present(newHabitViewController, animated: false, completion: nil)
+    }
+    
+    func showIrregularEventController() {
     }
 }

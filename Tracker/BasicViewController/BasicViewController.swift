@@ -16,16 +16,3 @@ class BasicViewController: UIViewController {
         setNeedsStatusBarAppearanceUpdate()
     }
 }
-
-//MARK: - Add new view to view controller
-extension BasicViewController {
-    internal final func addView(control newControl: UIView) {
-        newControl.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(newControl)
-    }
-    
-    internal final func addAndActivateConstraints(from controlConstraints:[NSLayoutConstraint] = []) {
-        constraints.append(contentsOf: controlConstraints)
-        NSLayoutConstraint.activate(constraints)
-    }
-}
