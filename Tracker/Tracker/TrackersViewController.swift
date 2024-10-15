@@ -56,8 +56,6 @@ final class TrackersViewController: LightStatusBarViewController {
     
     private lazy var placeHolderView: UIStackView = {
         // Создаем UILabel
-
-        
         let stackView = UIStackView(arrangedSubviews: [dizzyImageView, questionLabel])
         stackView.axis = .vertical
         stackView.spacing = 8
@@ -70,14 +68,17 @@ final class TrackersViewController: LightStatusBarViewController {
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
-        drawSelf()
+        setupLayout()
+        
+        //TODO: - added in sprint_14 as a stub
+        let category = TrackerCategory(id: UUID(), title: "Базовая", trackers: [])
+        addCategory(category: category)
     }
     
     //MARK: - View Layout methods
-    private func drawSelf(){
+    private func setupLayout(){
         self.title = "Трекеры"
         navigationController?.navigationBar.prefersLargeTitles = true
-        
         
         view.backgroundColor = UIColor.ysWhite
         
@@ -103,7 +104,7 @@ final class TrackersViewController: LightStatusBarViewController {
         ])
     }
     
-    //MARK: - Private Methods
+    //MARK: - Public Methods
     func addCategory(category: TrackerCategory){
         self.categories = categories + [category]
     }
@@ -111,7 +112,7 @@ final class TrackersViewController: LightStatusBarViewController {
     //MARK: - IB Outlet
     @IBAction
     private func plusButtonTapped(_ sender: UIButton) {
-        let trackerCreationViewController = TrackerCreationViewController()
+        let trackerCreationViewController = TrackerTypeSelectorViewController()
         trackerCreationViewController.delegate = self
         trackerCreationViewController.modalPresentationStyle = .pageSheet
         present(trackerCreationViewController, animated: false, completion: nil)
@@ -119,13 +120,26 @@ final class TrackersViewController: LightStatusBarViewController {
 }
 
 extension TrackersViewController: TrackersViewControllerProtocol {
-    func showNewHabbitViewController() {
-        let newHabitViewController = NewHabitViewController()
-        newHabitViewController.delegate = self
-        newHabitViewController.modalPresentationStyle = .pageSheet
-        present(newHabitViewController, animated: false, completion: nil)
+    func didCreateNewTracker(tracker: Tracker) {
+        guard let category = categories[safe: 0] else {return}
+        let trackers = category.trackers + [tracker]
+        categories.remove(at: 0)
+        categories.append(TrackerCategory(id: category.id, title: category.title, trackers: trackers))
+    }
+    
+    func showNewHabitViewController() {
+        let newTrackerViewController = NewTrackerViewController()
+        newTrackerViewController.eventType = .habit
+        newTrackerViewController.delegate = self
+        newTrackerViewController.modalPresentationStyle = .pageSheet
+        present(newTrackerViewController, animated: false, completion: nil)
     }
     
     func showIrregularEventController() {
+        let newTrackerViewController = NewTrackerViewController()
+        newTrackerViewController.eventType = .one_off
+        newTrackerViewController.delegate = self
+        newTrackerViewController.modalPresentationStyle = .pageSheet
+        present(newTrackerViewController, animated: false, completion: nil)
     }
 }

@@ -7,7 +7,7 @@
 
 import UIKit
 
-class TrackerCreationViewController: BasicViewController {
+final class TrackerTypeSelectorViewController: BasicViewController {
     var delegate: TrackersViewControllerProtocol?
     
     private var constraints = [NSLayoutConstraint]()
@@ -38,16 +38,17 @@ class TrackerCreationViewController: BasicViewController {
         button.backgroundColor = .black
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 16
+        button.addTarget(self, action: #selector(irregularEventButtonTapped(_:)), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        drawSelf()
+        setupLayout()
     }
     
-    private func drawSelf(){
+    private func setupLayout(){
         view.backgroundColor = .ysWhite
         
         view.addSubview(titleLabel)
@@ -80,7 +81,15 @@ class TrackerCreationViewController: BasicViewController {
     private func habitButtonTapped(_ sender: UIButton) {
         dismiss(animated: false) { [weak self] in
             guard let self else {return}
-            self.delegate?.showNewHabbitViewController()
+            self.delegate?.showNewHabitViewController()
+        }
+    }
+    
+    @IBAction
+    private func irregularEventButtonTapped(_ sender: UIButton) {
+        dismiss(animated: false) { [weak self] in
+            guard let self else {return}
+            self.delegate?.showIrregularEventController()
         }
     }
 }

@@ -7,12 +7,29 @@
 
 import UIKit
 
-class NewHabitViewController: BasicViewController {
-    var delegate: TrackersViewControllerProtocol?
+enum EventType: Int {
+    case one_off = 1
+    case habit = 2
+    
+    var description: String {
+        switch self {
+        case .habit:
+            return "Новая привычка"
+        case .one_off:
+            return "Нерегулярное событие"
+        }
+    }
+}
 
+final class NewTrackerViewController: BasicViewController {
+    var delegate: TrackersViewControllerProtocol?
+    
+    var eventType: EventType = .one_off
+    private var selectedDays = [WeekDays]()
+    
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Новая привычка"
+        label.text = eventType.description
         label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -23,7 +40,7 @@ class NewHabitViewController: BasicViewController {
         let textField = PaddedTextField()
         textField.placeholder = "Введите название трекера"
         textField.layer.cornerRadius = 17
-    
+        
         textField.backgroundColor = .ysBackground
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
@@ -51,6 +68,7 @@ class NewHabitViewController: BasicViewController {
         button.layer.borderWidth = 1
         button.translatesAutoresizingMaskIntoConstraints = false
         button.layer.borderColor = UIColor.ysRed.cgColor
+        button.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         return button
     }()
     
@@ -62,6 +80,7 @@ class NewHabitViewController: BasicViewController {
         button.backgroundColor = .ysGray
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
         return button
     }()
     
@@ -74,14 +93,40 @@ class NewHabitViewController: BasicViewController {
         return hStackView
     }()
     
+    private let categoryCell: UITableViewCell = {
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
+        cell.textLabel?.text = "Категория"
+        cell.accessoryType = .disclosureIndicator
+        cell.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        cell.backgroundColor = .ysBackground
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 17)
+        cell.detailTextLabel?.textColor = .ysGray
+        cell.textLabel?.textColor = .ysBlack
+        
+        return cell
+    }()
+    
+    private let scheduleCell: UITableViewCell = {
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
+        cell.textLabel?.text = "Расписание"
+        cell.accessoryType = .disclosureIndicator
+        cell.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        cell.backgroundColor = .ysBackground
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 17)
+        cell.detailTextLabel?.textColor = .ysGray
+        cell.textLabel?.textColor = .ysBlack
+        
+        return cell
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        drawSelf()
+        setupLayout()
     }
     
-    private func drawSelf(){
+    private func setupLayout(){
         view.backgroundColor = .ysWhite
-
+        
         view.addSubview(titleLabel)
         view.addSubview(trackerNameTextField)
         view.addSubview(tableView)
@@ -99,7 +144,7 @@ class NewHabitViewController: BasicViewController {
             tableView.topAnchor.constraint(equalTo: trackerNameTextField.bottomAnchor, constant: 24),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            tableView.heightAnchor.constraint(equalToConstant: 150),
+            tableView.heightAnchor.constraint(equalToConstant: CGFloat(eventType.rawValue * 75)),
             
             buttonsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             buttonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
@@ -107,60 +152,93 @@ class NewHabitViewController: BasicViewController {
             buttonsStackView.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
+    
+    @IBAction
+    private func cancelButtonTapped() {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    @IBAction
+    private func createButtonTapped() {
+        guard let name = trackerNameTextField.text else {return}
+        
+        let schedule = (eventType == .habit) ? TrackerSchedule.weekly(selectedDays) : TrackerSchedule.specificDate(Date())
+
+        let tracker = Tracker(id: UUID(),
+                              name: name,
+                              color: TrackerColor.selection1,
+                              emoji: .goldMedal,
+                              schedule: schedule)
+        
+        delegate?.didCreateNewTracker(tracker: tracker)
+        dismiss(animated: true, completion: nil)
+    }
 }
 
-extension NewHabitViewController: UITableViewDelegate {
-
+extension NewTrackerViewController: UITableViewDelegate {
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
         if indexPath.row == 0 {
             // Переход на экран выбора категории
-            print("0")
             //let categoryVC = CategoryViewController()
             //navigationController?.pushViewController(categoryVC, animated: true)
         } else {
-            print("1")
-            // Переход на экран расписания
-            //let scheduleVC = ScheduleViewController()
-            //navigationController?.pushViewController(scheduleVC, animated: true)
+            let scheduleViewController = ScheduleViewController()
+            scheduleViewController.selectedDays = selectedDays
+            scheduleViewController.delegate = self
+            scheduleViewController.modalPresentationStyle = .pageSheet
+            present(scheduleViewController, animated: true, completion: nil)
             
         }
     }
     
-    // Задаем высоту ячеек
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 75 // Высота каждой ячейки
     }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        
+        if indexPath.row == eventType.rawValue - 1 {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: tableView.bounds.width)
+        } else {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        }
+    }
 }
 
-extension NewHabitViewController: UITableViewDataSource {
+extension NewTrackerViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2
+        return eventType.rawValue
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        
-        // Настройка текста для каждой ячейки
         if indexPath.row == 0 {
-            cell.textLabel?.text = "Категория"
+            return categoryCell
         } else {
-            cell.textLabel?.text = "Расписание"
+            return scheduleCell
         }
+    }
+}
+
+extension NewTrackerViewController: ScheduleDelegateProtocol {
+    func didSelectDays(_ selectedDays: [WeekDays]) {
+        self.selectedDays = selectedDays.sorted()
         
-        // Добавление стрелки справа
-        cell.accessoryType = .disclosureIndicator
-        cell.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        // Стилизация фона и текста
-        cell.backgroundColor = .ysBackground
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 17)
-        cell.textLabel?.textColor = .black
+        var detail = ""
+        for day in selectedDays {
+            if detail != "" {
+                detail = detail + ", " + day.shortDescription
+            } else {
+                detail = day.shortDescription
+            }
+        }
+        scheduleCell.detailTextLabel?.text = detail
         
-        return cell
     }
 }

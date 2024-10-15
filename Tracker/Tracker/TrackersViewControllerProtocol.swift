@@ -6,6 +6,7 @@
 //
 
 protocol TrackersViewControllerProtocol {
-    func showNewHabbitViewController()
+    func showNewHabitViewController()
     func showIrregularEventController()
+    func didCreateNewTracker(tracker: Tracker)
 }
