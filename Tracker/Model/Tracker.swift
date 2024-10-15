@@ -56,6 +56,13 @@ enum WeekDays: Int, CaseIterable, Comparable {
         return WeekDays(rawValue: intValue)
     }
     
+    static func fromGregorianStyle(_ intValue: Int) -> WeekDays? {
+        if intValue == 1 {
+            return .from(7)
+        }
+        return .from(intValue-1)
+    }
+    
     // Преобразование WeekDays в строку
     var description: String {
         switch self {

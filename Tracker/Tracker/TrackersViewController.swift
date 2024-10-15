@@ -26,6 +26,7 @@ final class TrackersViewController: LightStatusBarViewController {
         picker.layer.cornerRadius = 8
         picker.datePickerMode = .date
         picker.preferredDatePickerStyle = .compact
+        picker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         picker.locale = Locale(identifier: "ru_RU")
         picker.accessibilityIdentifier = "datePicker"
         
@@ -104,9 +105,26 @@ final class TrackersViewController: LightStatusBarViewController {
         ])
     }
     
-    //MARK: - Public Methods
-    func addCategory(category: TrackerCategory){
+    //MARK: - Private Methods
+    private func addCategory(category: TrackerCategory){
         self.categories = categories + [category]
+    }
+    
+    private func filterTrackers(by date: Date, trackers: [Tracker]) -> [Tracker] {
+        var calendar = Calendar.current
+        let dayOfWeek = calendar.component(.weekday, from: date)
+        
+        return trackers.filter { tracker in
+            switch tracker.schedule {
+            case .weekly(let days):
+                if let weekDay = WeekDays.fromGregorianStyle(dayOfWeek) {
+                    return days.contains(weekDay)
+                }
+                return false
+            case .specificDate(let specificDate):
+                return calendar.isDate(specificDate, inSameDayAs: date)
+            }
+        }
     }
     
     //MARK: - IB Outlet
@@ -116,6 +134,18 @@ final class TrackersViewController: LightStatusBarViewController {
         trackerCreationViewController.delegate = self
         trackerCreationViewController.modalPresentationStyle = .pageSheet
         present(trackerCreationViewController, animated: false, completion: nil)
+    }
+    
+    @IBAction
+    func datePickerValueChanged(_ sender: UIDatePicker) {
+        let selectedDate = sender.date
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd.MM.yyyy" // Формат даты
+        let formattedDate = dateFormatter.string(from: selectedDate)
+        print("Выбранная дата: \(formattedDate)")
+        
+        let selectedTrackers = filterTrackers(by: selectedDate, trackers: categories[0].trackers)
+        print(selectedTrackers)
     }
 }
 
