@@ -21,7 +21,7 @@ enum EventType: Int {
     }
 }
 
-final class NewTrackerViewController: BasicViewController {
+final class NewTrackerViewController: LightStatusBarViewController {
     var delegate: TrackersViewControllerProtocol?
     
     var eventType: EventType = .one_off
@@ -160,17 +160,23 @@ final class NewTrackerViewController: BasicViewController {
     
     @IBAction
     private func createButtonTapped() {
-        guard let name = trackerNameTextField.text else {return}
+        guard let name = trackerNameTextField.text,
+              !name.isEmpty,
+              let delegate
+        else {return}
         
-        let schedule = (eventType == .habit) ? TrackerSchedule.weekly(selectedDays) : TrackerSchedule.specificDate(Date())
+        
+        let schedule = (eventType == .habit) ? TrackerSchedule.weekly(selectedDays) : TrackerSchedule.specificDate(delegate.selectedDate)
+        let color = (eventType == .habit) ? TrackerColor.selection1 : TrackerColor.selection2
+        let emoji = (eventType == .habit) ? Emoji.angel : Emoji.broccoli
 
         let tracker = Tracker(id: UUID(),
                               name: name,
-                              color: TrackerColor.selection1,
-                              emoji: .goldMedal,
+                              color: color,
+                              emoji: emoji,
                               schedule: schedule)
         
-        delegate?.didCreateNewTracker(tracker: tracker)
+        delegate.didCreateNewTracker(tracker: tracker)
         dismiss(animated: true, completion: nil)
     }
 }

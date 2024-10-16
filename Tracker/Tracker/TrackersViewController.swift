@@ -7,8 +7,11 @@
 import UIKit
 
 final class TrackersViewController: LightStatusBarViewController {
+    private(set) var selectedDate: Date = Date()
+    
     private var categories = [TrackerCategory]()
     private var completedTrackers = [TrackerRecord]()
+    private var filteredTrackers: [Tracker] = []
     
     //MARK: - UI components
     private lazy var plusButton: UIButton = {
@@ -66,14 +69,24 @@ final class TrackersViewController: LightStatusBarViewController {
         return stackView
     }()
     
+    
+    private lazy var trackerCollectionView: UICollectionView = {
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.backgroundColor = .ysWhite
+        collectionView.register(TrackerCollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+        return collectionView
+    }()
+    
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupLayout()
-        
         //TODO: - added in sprint_14 as a stub
         let category = TrackerCategory(id: UUID(), title: "Базовая", trackers: [])
         addCategory(category: category)
+        setupLayout()
     }
     
     //MARK: - View Layout methods
@@ -86,6 +99,7 @@ final class TrackersViewController: LightStatusBarViewController {
         view.addSubview(datePicker)
         view.addSubview(plusButton)
         view.addSubview(placeHolderView)
+        view.addSubview(trackerCollectionView)
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: plusButton)
@@ -98,11 +112,19 @@ final class TrackersViewController: LightStatusBarViewController {
             datePicker.heightAnchor.constraint(equalToConstant: 34),
             dizzyImageView.widthAnchor.constraint(equalToConstant: 80),
             dizzyImageView.heightAnchor.constraint(equalToConstant: 80),
+            
             placeHolderView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             placeHolderView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             placeHolderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            placeHolderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+            placeHolderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            
+            trackerCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            trackerCollectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            trackerCollectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            trackerCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
+        
+        refreshViewForDate(date: selectedDate)
     }
     
     //MARK: - Private Methods
@@ -111,7 +133,7 @@ final class TrackersViewController: LightStatusBarViewController {
     }
     
     private func filterTrackers(by date: Date, trackers: [Tracker]) -> [Tracker] {
-        var calendar = Calendar.current
+        let calendar = Calendar.current
         let dayOfWeek = calendar.component(.weekday, from: date)
         
         return trackers.filter { tracker in
@@ -127,6 +149,49 @@ final class TrackersViewController: LightStatusBarViewController {
         }
     }
     
+    private func updateCollectionView(old oldTrackers: [Tracker], new newTrackers: [Tracker]) {
+        let addedTrackers = newTrackers.filter { !oldTrackers.contains($0) }
+        let removedTrackers = oldTrackers.filter { !newTrackers.contains($0) }
+        
+        let addedIndexPaths = addedTrackers.compactMap { tracker -> IndexPath? in
+            if let index = newTrackers.firstIndex(of: tracker) {
+                return IndexPath(item: index, section: 0)
+            }
+            return nil
+        }
+        
+        let removedIndexPaths = removedTrackers.compactMap { tracker -> IndexPath? in
+            if let index = oldTrackers.firstIndex(of: tracker) {
+                return IndexPath(item: index, section: 0)
+            }
+            return nil
+        }
+        
+        trackerCollectionView.performBatchUpdates({
+            if !removedIndexPaths.isEmpty{
+                trackerCollectionView.deleteItems(at: removedIndexPaths)
+            }
+            if !addedIndexPaths.isEmpty{
+                trackerCollectionView.insertItems(at: addedIndexPaths)
+            }
+        }, completion: nil)
+    }
+    
+    private func refreshViewForDate(date: Date){
+        let oldFilteredTrackers: [Tracker] = filteredTrackers
+        filteredTrackers = filterTrackers(by: date, trackers: categories[safe: 0]?.trackers ?? [])
+        trackerCollectionView.isHidden = false
+        updateCollectionView(old: oldFilteredTrackers, new: filteredTrackers)
+        
+        if filteredTrackers.isEmpty {
+            trackerCollectionView.isHidden = true
+            placeHolderView.isHidden = false
+        } else {
+            trackerCollectionView.isHidden = false
+            placeHolderView.isHidden = true
+        }
+    }
+    
     //MARK: - IB Outlet
     @IBAction
     private func plusButtonTapped(_ sender: UIButton) {
@@ -138,23 +203,38 @@ final class TrackersViewController: LightStatusBarViewController {
     
     @IBAction
     func datePickerValueChanged(_ sender: UIDatePicker) {
-        let selectedDate = sender.date
+        selectedDate = sender.date
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd.MM.yyyy" // Формат даты
         let formattedDate = dateFormatter.string(from: selectedDate)
         print("Выбранная дата: \(formattedDate)")
-        
-        let selectedTrackers = filterTrackers(by: selectedDate, trackers: categories[0].trackers)
-        print(selectedTrackers)
+        refreshViewForDate(date: selectedDate)
     }
 }
 
+//MARK: - TrackersViewControllerProtocol
 extension TrackersViewController: TrackersViewControllerProtocol {
+    func didCreateTrackerRecord(record: TrackerRecord) -> Int {
+        if let index = completedTrackers.firstIndex(where: {
+            $0.trackerId == record.trackerId &&
+            Calendar.current.isDate($0.date, inSameDayAs: record.date) }) {
+            completedTrackers.remove(at: index)
+            print("Запись удалена: \(record)")
+        } else {
+            completedTrackers.append(record)
+            print("Запись добавлена: \(record)")
+        }
+        
+        let count = completedTrackers.filter { $0.trackerId == record.trackerId }.count
+        return count
+    }
+    
     func didCreateNewTracker(tracker: Tracker) {
         guard let category = categories[safe: 0] else {return}
         let trackers = category.trackers + [tracker]
         categories.remove(at: 0)
         categories.append(TrackerCategory(id: category.id, title: category.title, trackers: trackers))
+        refreshViewForDate(date: selectedDate)
     }
     
     func showNewHabitViewController() {
@@ -171,5 +251,49 @@ extension TrackersViewController: TrackersViewControllerProtocol {
         newTrackerViewController.delegate = self
         newTrackerViewController.modalPresentationStyle = .pageSheet
         present(newTrackerViewController, animated: false, completion: nil)
+    }
+}
+
+// MARK: - UICollectionViewDataSource, UICollectionViewDelegate
+extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return filteredTrackers.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as? TrackerCollectionViewCell else {
+            return UICollectionViewCell()
+        }
+        
+        let tracker = filteredTrackers[indexPath.item]
+        let count = completedTrackers.filter { $0.trackerId == tracker.id }.count
+        let isDone = !completedTrackers.filter { $0.trackerId == tracker.id && $0.date == selectedDate}.isEmpty
+        cell.configure(with: tracker, selectedDate: selectedDate, count: count, isDone: isDone)
+        cell.delegate = self
+        return cell
+    }
+}
+
+
+extension TrackersViewController: UICollectionViewDelegateFlowLayout {
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let totalSpacing: CGFloat = 16 + 16 + 10
+        let availableWidth = collectionView.frame.width - totalSpacing
+        
+        let itemWidth = availableWidth / 2
+        
+        return CGSize(width: itemWidth, height: 148)
+    }
+    
+    // Отступы между ячейками
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 10
+    }
+    
+    // Отступы между строками (можно настроить)
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 10
     }
 }

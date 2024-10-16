@@ -109,10 +109,15 @@ enum TrackerSchedule {
     case specificDate(Date)
 }
 
-struct Tracker {
+struct Tracker: Equatable {
     let id: UUID
     let name: String
     let color: TrackerColor
     let emoji: Emoji
     let schedule: TrackerSchedule
+    
+    // Реализация Equatable сравнивает только по id
+    static func == (lhs: Tracker, rhs: Tracker) -> Bool {
+        return lhs.id == rhs.id
+    }
 }

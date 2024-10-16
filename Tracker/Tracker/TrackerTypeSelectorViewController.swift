@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class TrackerTypeSelectorViewController: BasicViewController {
+final class TrackerTypeSelectorViewController: LightStatusBarViewController {
     var delegate: TrackersViewControllerProtocol?
     
     private var constraints = [NSLayoutConstraint]()
