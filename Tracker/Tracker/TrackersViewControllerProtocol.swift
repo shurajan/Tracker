@@ -7,7 +7,7 @@
 import Foundation
 
 protocol TrackersViewControllerProtocol {
-    var selectedDate: Date { get }
+    var currentDate: Date { get }
     
     func showNewHabitViewController()
     func showIrregularEventController()

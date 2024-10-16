@@ -6,8 +6,28 @@
 //
 import UIKit
 
+struct GeometricParams {
+    let cellCount: Int
+    let leftInset: CGFloat
+    let rightInset: CGFloat
+    let cellSpacing: CGFloat
+    let paddingWidth: CGFloat
+    
+    init(cellCount: Int, leftInset: CGFloat, rightInset: CGFloat, cellSpacing: CGFloat) {
+        self.cellCount = cellCount
+        self.leftInset = leftInset
+        self.rightInset = rightInset
+        self.cellSpacing = cellSpacing
+        self.paddingWidth = leftInset + rightInset + CGFloat(cellCount - 1) * cellSpacing
+    }
+}
+
 final class TrackersViewController: LightStatusBarViewController {
-    private(set) var selectedDate: Date = Date()
+    private(set) var currentDate: Date = Date()
+    private let params: GeometricParams = GeometricParams(cellCount: 2,
+                                                          leftInset: 16,
+                                                          rightInset: 16,
+                                                          cellSpacing: 10)
     
     private var categories = [TrackerCategory]()
     private var completedTrackers = [TrackerRecord]()
@@ -76,6 +96,9 @@ final class TrackersViewController: LightStatusBarViewController {
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.backgroundColor = .ysWhite
+        collectionView.register(UICollectionReusableView.self,
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                                withReuseIdentifier: "header")
         collectionView.register(TrackerCollectionViewCell.self, forCellWithReuseIdentifier: "cell")
         return collectionView
     }()
@@ -124,7 +147,7 @@ final class TrackersViewController: LightStatusBarViewController {
             trackerCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
         
-        refreshViewForDate(date: selectedDate)
+        refreshViewForDate(date: currentDate)
     }
     
     //MARK: - Private Methods
@@ -148,46 +171,17 @@ final class TrackersViewController: LightStatusBarViewController {
             }
         }
     }
-    
-    private func updateCollectionView(old oldTrackers: [Tracker], new newTrackers: [Tracker]) {
-        let addedTrackers = newTrackers.filter { !oldTrackers.contains($0) }
-        let removedTrackers = oldTrackers.filter { !newTrackers.contains($0) }
-        
-        let addedIndexPaths = addedTrackers.compactMap { tracker -> IndexPath? in
-            if let index = newTrackers.firstIndex(of: tracker) {
-                return IndexPath(item: index, section: 0)
-            }
-            return nil
-        }
-        
-        let removedIndexPaths = removedTrackers.compactMap { tracker -> IndexPath? in
-            if let index = oldTrackers.firstIndex(of: tracker) {
-                return IndexPath(item: index, section: 0)
-            }
-            return nil
-        }
-        
-        trackerCollectionView.performBatchUpdates({
-            if !removedIndexPaths.isEmpty{
-                trackerCollectionView.deleteItems(at: removedIndexPaths)
-            }
-            if !addedIndexPaths.isEmpty{
-                trackerCollectionView.insertItems(at: addedIndexPaths)
-            }
-        }, completion: nil)
-    }
+
     
     private func refreshViewForDate(date: Date){
-        let oldFilteredTrackers: [Tracker] = filteredTrackers
         filteredTrackers = filterTrackers(by: date, trackers: categories[safe: 0]?.trackers ?? [])
-        trackerCollectionView.isHidden = false
-        updateCollectionView(old: oldFilteredTrackers, new: filteredTrackers)
         
         if filteredTrackers.isEmpty {
             trackerCollectionView.isHidden = true
             placeHolderView.isHidden = false
         } else {
             trackerCollectionView.isHidden = false
+            trackerCollectionView.reloadData()
             placeHolderView.isHidden = true
         }
     }
@@ -203,12 +197,13 @@ final class TrackersViewController: LightStatusBarViewController {
     
     @IBAction
     func datePickerValueChanged(_ sender: UIDatePicker) {
-        selectedDate = sender.date
+        currentDate = sender.date
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd.MM.yyyy" // Формат даты
-        let formattedDate = dateFormatter.string(from: selectedDate)
+        let formattedDate = dateFormatter.string(from: currentDate)
         print("Выбранная дата: \(formattedDate)")
-        refreshViewForDate(date: selectedDate)
+        refreshViewForDate(date: currentDate)
+        dismiss(animated: true)
     }
 }
 
@@ -234,7 +229,7 @@ extension TrackersViewController: TrackersViewControllerProtocol {
         let trackers = category.trackers + [tracker]
         categories.remove(at: 0)
         categories.append(TrackerCategory(id: category.id, title: category.title, trackers: trackers))
-        refreshViewForDate(date: selectedDate)
+        refreshViewForDate(date: currentDate)
     }
     
     func showNewHabitViewController() {
@@ -261,6 +256,10 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         return filteredTrackers.count
     }
     
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return categories.count
+    }
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as? TrackerCollectionViewCell else {
             return UICollectionViewCell()
@@ -268,32 +267,60 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         
         let tracker = filteredTrackers[indexPath.item]
         let count = completedTrackers.filter { $0.trackerId == tracker.id }.count
-        let isDone = !completedTrackers.filter { $0.trackerId == tracker.id && $0.date == selectedDate}.isEmpty
-        cell.configure(with: tracker, selectedDate: selectedDate, count: count, isDone: isDone)
+        let isDone = !completedTrackers.filter { $0.trackerId == tracker.id && $0.date == currentDate}.isEmpty
+        cell.configure(with: tracker, selectedDate: currentDate, count: count, isDone: isDone)
         cell.delegate = self
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        if kind == UICollectionView.elementKindSectionHeader {
+            // Получаем зарегистрированный заголовок
+            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "header", for: indexPath)
+            headerView.translatesAutoresizingMaskIntoConstraints = false
+            let label = UILabel(frame: headerView.bounds)
+            label.translatesAutoresizingMaskIntoConstraints = false
+            label.text = categories[safe: indexPath.row]?.title
+            label.textAlignment = .left
+            label.textColor = .ysBlack
+            label.font = UIFont.boldSystemFont(ofSize: 19)
+            headerView.addSubview(label)
+            
+            NSLayoutConstraint.activate([
+                headerView.heightAnchor.constraint(equalToConstant: 54),
+                label.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 28),
+                label.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 24),
+            ])
+            
+            return headerView
+        }
+        return UICollectionReusableView()
     }
 }
 
 
 extension TrackersViewController: UICollectionViewDelegateFlowLayout {
-    
+        
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let totalSpacing: CGFloat = 16 + 16 + 10
-        let availableWidth = collectionView.frame.width - totalSpacing
-        
-        let itemWidth = availableWidth / 2
-        
-        return CGSize(width: itemWidth, height: 148)
+        let availableWidth = collectionView.frame.width - params.paddingWidth
+        let cellWidth =  availableWidth / CGFloat(params.cellCount)
+        return CGSize(width: cellWidth,
+                      height: 148)
     }
     
-    // Отступы между ячейками
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        UIEdgeInsets(top: 10, left: params.leftInset, bottom: 10, right: params.rightInset)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat{
+        10
+    }
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return 10
+        params.cellSpacing
     }
     
-    // Отступы между строками (можно настроить)
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 10
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.frame.width, height: 50) // Высота 50 и полная ширина коллекции
     }
 }

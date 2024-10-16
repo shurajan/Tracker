@@ -16,7 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window = UIWindow()
         window?.rootViewController = DarkStatusBarViewController()
         window?.makeKeyAndVisible()
-        
+ 
         return true
     }
 

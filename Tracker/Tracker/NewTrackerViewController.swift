@@ -166,7 +166,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
         else {return}
         
         
-        let schedule = (eventType == .habit) ? TrackerSchedule.weekly(selectedDays) : TrackerSchedule.specificDate(delegate.selectedDate)
+        let schedule = (eventType == .habit) ? TrackerSchedule.weekly(selectedDays) : TrackerSchedule.specificDate(delegate.currentDate)
         let color = (eventType == .habit) ? TrackerColor.selection1 : TrackerColor.selection2
         let emoji = (eventType == .habit) ? Emoji.angel : Emoji.broccoli
 

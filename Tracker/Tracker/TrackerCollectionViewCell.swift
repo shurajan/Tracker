@@ -7,11 +7,12 @@
 
 import UIKit
 
-class TrackerCollectionViewCell: UICollectionViewCell {
+final class TrackerCollectionViewCell: UICollectionViewCell {
     var delegate: TrackersViewControllerProtocol?
     
     private var tracker: Tracker?
     private var selectedDate: Date?
+    private var count: Int = 0
     
     private lazy var emojiLabel: UILabel = {
         let label = UILabel()
@@ -40,7 +41,8 @@ class TrackerCollectionViewCell: UICollectionViewCell {
     }()
     
     private lazy var plusButton: UIButton = {
-        let button = UIButton(type: .system)
+        let button = UIButton()
+        button.layer.masksToBounds = true
         button.addTarget(self, action: #selector(plusButtonTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -58,17 +60,14 @@ class TrackerCollectionViewCell: UICollectionViewCell {
     func configure(with tracker: Tracker, selectedDate: Date, count: Int, isDone: Bool) {
         self.tracker = tracker
         self.selectedDate = selectedDate
+        self.count = count
         
         emojiLabel.text = tracker.emoji.rawValue
         nameLabel.text = tracker.name
         cardView.backgroundColor = tracker.color.uiColor
         
         daysLabel.text = formatDaysText(count)
-        
-        let buttonImage = isDone ? UIImage(named: "Done") : UIImage(systemName: "plus.circle.fill")
-        plusButton.setImage(buttonImage, for: .normal)
-        
-        plusButton.tintColor = tracker.color.uiColor
+        setupPlusButton(isDone: isDone, color: tracker.color.uiColor)
     }
     
     override init(frame: CGRect) {
@@ -113,6 +112,13 @@ class TrackerCollectionViewCell: UICollectionViewCell {
         ])
     }
     
+    private func setupPlusButton(isDone: Bool, color: UIColor) {
+        let buttonImage = isDone ? UIImage(systemName: "checkmark.circle.fill") : UIImage(systemName: "plus.circle.fill")
+        plusButton.setImage(buttonImage, for: .normal)
+        plusButton.tintColor = color
+        plusButton.alpha = isDone ? 0.7 : 1
+    }
+    
     private func formatDaysText(_ count: Int) -> String {
         let lastDigit = count % 10
         let lastTwoDigits = count % 100
@@ -137,7 +143,13 @@ class TrackerCollectionViewCell: UICollectionViewCell {
         else { return }
         
         let record = TrackerRecord(trackerId: tracker.id, date: selectedDate)
-        let count = delegate.didCreateTrackerRecord(record: record)
+        let newCount = delegate.didCreateTrackerRecord(record: record)
+        
+        let isDone = newCount > count
+        
+        setupPlusButton(isDone: isDone, color: tracker.color.uiColor)
+        
+        count = newCount
         daysLabel.text = formatDaysText(count)
     }
 }
