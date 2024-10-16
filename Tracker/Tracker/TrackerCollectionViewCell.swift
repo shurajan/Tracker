@@ -142,8 +142,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
               selectedDate < Date()
         else { return }
         
-        let record = TrackerRecord(trackerId: tracker.id, date: selectedDate)
-        let newCount = delegate.didCreateTrackerRecord(record: record)
+        let newCount = delegate.didCreateTrackerRecord(tracker: tracker, date: selectedDate)
         
         let isDone = newCount > count
         

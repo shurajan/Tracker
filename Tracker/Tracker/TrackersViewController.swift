@@ -22,6 +22,7 @@ struct GeometricParams {
     }
 }
 
+
 final class TrackersViewController: LightStatusBarViewController {
     private(set) var currentDate: Date = Date()
     private let params: GeometricParams = GeometricParams(cellCount: 2,
@@ -30,8 +31,10 @@ final class TrackersViewController: LightStatusBarViewController {
                                                           cellSpacing: 10)
     
     private var categories = [TrackerCategory]()
-    private var completedTrackers = [TrackerRecord]()
     private var filteredTrackers: [Tracker] = []
+    private var completedTrackers = [TrackerRecord]()
+    private var completedTrackersSet: Set<UUID> = []
+    
     
     //MARK: - UI components
     private lazy var plusButton: UIButton = {
@@ -171,7 +174,7 @@ final class TrackersViewController: LightStatusBarViewController {
             }
         }
     }
-
+    
     
     private func refreshViewForDate(date: Date){
         filteredTrackers = filterTrackers(by: date, trackers: categories[safe: 0]?.trackers ?? [])
@@ -209,19 +212,33 @@ final class TrackersViewController: LightStatusBarViewController {
 
 //MARK: - TrackersViewControllerProtocol
 extension TrackersViewController: TrackersViewControllerProtocol {
-    func didCreateTrackerRecord(record: TrackerRecord) -> Int {
-        if let index = completedTrackers.firstIndex(where: {
-            $0.trackerId == record.trackerId &&
-            Calendar.current.isDate($0.date, inSameDayAs: record.date) }) {
-            completedTrackers.remove(at: index)
-            print("Запись удалена: \(record)")
-        } else {
+    func didCreateTrackerRecord(tracker: Tracker, date: Date) -> Int {
+        let isSetContainingID = completedTrackersSet.contains(tracker.id)
+        
+        if !isSetContainingID {
+            let record = TrackerRecord(trackerId: tracker.id, date: date)
             completedTrackers.append(record)
-            print("Запись добавлена: \(record)")
+            completedTrackersSet.insert(tracker.id)
+            return 1
         }
         
-        let count = completedTrackers.filter { $0.trackerId == record.trackerId }.count
-        return count
+        let index = completedTrackers.firstIndex(where: {
+            $0.trackerId == tracker.id &&
+            Calendar.current.isDate($0.date, inSameDayAs: date)
+        })
+        
+        if let index {
+            completedTrackers.remove(at: index)
+            let count = completedTrackers.filter { $0.trackerId == tracker.id }.count
+            if count == 0 {
+                completedTrackersSet.remove(tracker.id)
+            }
+            return count
+        } else {
+            let record = TrackerRecord(trackerId: tracker.id, date: date)
+            completedTrackers.append(record)
+            return completedTrackers.filter { $0.trackerId == tracker.id }.count
+        }
     }
     
     func didCreateNewTracker(tracker: Tracker) {
@@ -266,9 +283,21 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         }
         
         let tracker = filteredTrackers[indexPath.item]
-        let count = completedTrackers.filter { $0.trackerId == tracker.id }.count
-        let isDone = !completedTrackers.filter { $0.trackerId == tracker.id && $0.date == currentDate}.isEmpty
-        cell.configure(with: tracker, selectedDate: currentDate, count: count, isDone: isDone)
+        
+        if !completedTrackersSet.contains(tracker.id) {
+            cell.configure(with: tracker, selectedDate: currentDate, count: 0, isDone: false)
+        } else {
+            switch tracker.schedule {
+            case .weekly(_):
+                let count = completedTrackers.filter { $0.trackerId == tracker.id }.count
+                let isDone = !completedTrackers.filter { $0.trackerId == tracker.id && $0.date == currentDate}.isEmpty
+                cell.configure(with: tracker, selectedDate: currentDate, count: count, isDone: isDone)
+            case .specificDate(_):
+                cell.configure(with: tracker, selectedDate: currentDate, count: 1, isDone: true)
+                
+            }
+        }
+        
         cell.delegate = self
         return cell
     }
@@ -300,7 +329,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
 
 
 extension TrackersViewController: UICollectionViewDelegateFlowLayout {
-        
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let availableWidth = collectionView.frame.width - params.paddingWidth
         let cellWidth =  availableWidth / CGFloat(params.cellCount)

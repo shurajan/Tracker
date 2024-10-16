@@ -12,5 +12,5 @@ protocol TrackersViewControllerProtocol {
     func showNewHabitViewController()
     func showIrregularEventController()
     func didCreateNewTracker(tracker: Tracker)
-    func didCreateTrackerRecord(record: TrackerRecord) -> Int
+    func didCreateTrackerRecord(tracker: Tracker, date: Date) -> Int
 }
