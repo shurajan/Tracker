@@ -152,3 +152,4 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         daysLabel.text = formatDaysText(count)
     }
 }
+

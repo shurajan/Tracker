@@ -11,27 +11,8 @@
 		D943B5E12CA70B0E00242A5C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = D943B5E02CA70B0E00242A5C /* .gitignore */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		D943B5C12CA70AF800242A5C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D943B5A22CA70AF700242A5C /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D943B5A92CA70AF700242A5C;
-			remoteInfo = Tracker;
-		};
-		D943B5CB2CA70AF800242A5C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D943B5A22CA70AF700242A5C /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D943B5A92CA70AF700242A5C;
-			remoteInfo = Tracker;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
 		D943B5AA2CA70AF700242A5C /* Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		D943B5C02CA70AF800242A5C /* TrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D943B5CA2CA70AF800242A5C /* TrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D943B5DE2CA70B0600242A5C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		D943B5E02CA70B0E00242A5C /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -55,34 +36,10 @@
 			path = Tracker;
 			sourceTree = "<group>";
 		};
-		D943B5C32CA70AF800242A5C /* TrackerTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = TrackerTests;
-			sourceTree = "<group>";
-		};
-		D943B5CD2CA70AF800242A5C /* TrackerUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = TrackerUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		D943B5A72CA70AF700242A5C /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D943B5BD2CA70AF800242A5C /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D943B5C72CA70AF800242A5C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -96,8 +53,6 @@
 			isa = PBXGroup;
 			children = (
 				D943B5AC2CA70AF700242A5C /* Tracker */,
-				D943B5C32CA70AF800242A5C /* TrackerTests */,
-				D943B5CD2CA70AF800242A5C /* TrackerUITests */,
 				D943B5AB2CA70AF700242A5C /* Products */,
 				D943B5DE2CA70B0600242A5C /* README.md */,
 				D943B5E02CA70B0E00242A5C /* .gitignore */,
@@ -108,8 +63,6 @@
 			isa = PBXGroup;
 			children = (
 				D943B5AA2CA70AF700242A5C /* Tracker.app */,
-				D943B5C02CA70AF800242A5C /* TrackerTests.xctest */,
-				D943B5CA2CA70AF800242A5C /* TrackerUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -139,52 +92,6 @@
 			productReference = D943B5AA2CA70AF700242A5C /* Tracker.app */;
 			productType = "com.apple.product-type.application";
 		};
-		D943B5BF2CA70AF800242A5C /* TrackerTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D943B5D82CA70AF800242A5C /* Build configuration list for PBXNativeTarget "TrackerTests" */;
-			buildPhases = (
-				D943B5BC2CA70AF800242A5C /* Sources */,
-				D943B5BD2CA70AF800242A5C /* Frameworks */,
-				D943B5BE2CA70AF800242A5C /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				D943B5C22CA70AF800242A5C /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				D943B5C32CA70AF800242A5C /* TrackerTests */,
-			);
-			name = TrackerTests;
-			packageProductDependencies = (
-			);
-			productName = TrackerTests;
-			productReference = D943B5C02CA70AF800242A5C /* TrackerTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		D943B5C92CA70AF800242A5C /* TrackerUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D943B5DB2CA70AF800242A5C /* Build configuration list for PBXNativeTarget "TrackerUITests" */;
-			buildPhases = (
-				D943B5C62CA70AF800242A5C /* Sources */,
-				D943B5C72CA70AF800242A5C /* Frameworks */,
-				D943B5C82CA70AF800242A5C /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				D943B5CC2CA70AF800242A5C /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				D943B5CD2CA70AF800242A5C /* TrackerUITests */,
-			);
-			name = TrackerUITests;
-			packageProductDependencies = (
-			);
-			productName = TrackerUITests;
-			productReference = D943B5CA2CA70AF800242A5C /* TrackerUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -197,14 +104,6 @@
 				TargetAttributes = {
 					D943B5A92CA70AF700242A5C = {
 						CreatedOnToolsVersion = 16.0;
-					};
-					D943B5BF2CA70AF800242A5C = {
-						CreatedOnToolsVersion = 16.0;
-						TestTargetID = D943B5A92CA70AF700242A5C;
-					};
-					D943B5C92CA70AF800242A5C = {
-						CreatedOnToolsVersion = 16.0;
-						TestTargetID = D943B5A92CA70AF700242A5C;
 					};
 				};
 			};
@@ -223,8 +122,6 @@
 			projectRoot = "";
 			targets = (
 				D943B5A92CA70AF700242A5C /* Tracker */,
-				D943B5BF2CA70AF800242A5C /* TrackerTests */,
-				D943B5C92CA70AF800242A5C /* TrackerUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -239,20 +136,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D943B5BE2CA70AF800242A5C /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D943B5C82CA70AF800242A5C /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -263,34 +146,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D943B5BC2CA70AF800242A5C /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D943B5C62CA70AF800242A5C /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		D943B5C22CA70AF800242A5C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D943B5A92CA70AF700242A5C /* Tracker */;
-			targetProxy = D943B5C12CA70AF800242A5C /* PBXContainerItemProxy */;
-		};
-		D943B5CC2CA70AF800242A5C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D943B5A92CA70AF700242A5C /* Tracker */;
-			targetProxy = D943B5CB2CA70AF800242A5C /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		D943B5D42CA70AF800242A5C /* Debug */ = {
@@ -305,8 +161,8 @@
 				INFOPLIST_FILE = Tracker/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -337,8 +193,8 @@
 				INFOPLIST_FILE = Tracker/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -476,96 +332,6 @@
 			};
 			name = Release;
 		};
-		D943B5D92CA70AF800242A5C /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = N7PHJ342NN;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.bralnin.practicum.TrackerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Tracker";
-			};
-			name = Debug;
-		};
-		D943B5DA2CA70AF800242A5C /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = N7PHJ342NN;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.bralnin.practicum.TrackerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Tracker";
-			};
-			name = Release;
-		};
-		D943B5DC2CA70AF800242A5C /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = N7PHJ342NN;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.bralnin.practicum.TrackerUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				TEST_TARGET_NAME = Tracker;
-			};
-			name = Debug;
-		};
-		D943B5DD2CA70AF800242A5C /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = N7PHJ342NN;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.bralnin.practicum.TrackerUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				TEST_TARGET_NAME = Tracker;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -583,24 +349,6 @@
 			buildConfigurations = (
 				D943B5D42CA70AF800242A5C /* Debug */,
 				D943B5D52CA70AF800242A5C /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		D943B5D82CA70AF800242A5C /* Build configuration list for PBXNativeTarget "TrackerTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				D943B5D92CA70AF800242A5C /* Debug */,
-				D943B5DA2CA70AF800242A5C /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		D943B5DB2CA70AF800242A5C /* Build configuration list for PBXNativeTarget "TrackerUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				D943B5DC2CA70AF800242A5C /* Debug */,
-				D943B5DD2CA70AF800242A5C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -33,7 +33,8 @@ final class TrackersViewController: LightStatusBarViewController {
     private var categories = [TrackerCategory]()
     private var filteredTrackers: [Tracker] = []
     private var completedTrackers = [TrackerRecord]()
-    private var completedTrackersSet: Set<UUID> = []
+    //Set для минимизации обходов массива completedTrackers
+    private var completedTrackersSet: Set<TrackerRecord> = []
     
     
     //MARK: - UI components
@@ -118,7 +119,11 @@ final class TrackersViewController: LightStatusBarViewController {
     //MARK: - View Layout methods
     private func setupLayout(){
         self.title = "Трекеры"
+    
         navigationController?.navigationBar.prefersLargeTitles = true
+        navigationController?.navigationBar.largeTitleTextAttributes = [
+            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 34, weight: .bold)
+        ]
         
         view.backgroundColor = UIColor.ysWhite
         
@@ -213,25 +218,27 @@ final class TrackersViewController: LightStatusBarViewController {
 //MARK: - TrackersViewControllerProtocol
 extension TrackersViewController: TrackersViewControllerProtocol {
     func didCreateTrackerRecord(tracker: Tracker, date: Date) -> Int {
-        let isSetContainingID = completedTrackersSet.contains(tracker.id)
+        let record = TrackerRecord(trackerId: tracker.id, date: date)
+        
+        let isSetContainingID = completedTrackersSet.contains(record)
         
         if !isSetContainingID {
-            let record = TrackerRecord(trackerId: tracker.id, date: date)
             completedTrackers.append(record)
-            completedTrackersSet.insert(tracker.id)
-            return 1
+            completedTrackersSet.insert(record)
+            if case .specificDate(_) = tracker.schedule {
+                return 1
+            }
+            return completedTrackers.filter { $0.trackerId == tracker.id }.count
         }
         
-        let index = completedTrackers.firstIndex(where: {
-            $0.trackerId == tracker.id &&
-            Calendar.current.isDate($0.date, inSameDayAs: date)
-        })
+        let index = completedTrackers.firstIndex(where: {$0 == record})
         
         if let index {
+            //Удаляем так как нажали на сделанную ячейку
             completedTrackers.remove(at: index)
             let count = completedTrackers.filter { $0.trackerId == tracker.id }.count
             if count == 0 {
-                completedTrackersSet.remove(tracker.id)
+                completedTrackersSet.remove(record)
             }
             return count
         } else {
@@ -283,19 +290,15 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         }
         
         let tracker = filteredTrackers[indexPath.item]
+        let record = TrackerRecord(trackerId: tracker.id, date: currentDate)
+        let isDone = completedTrackersSet.contains(record)
         
-        if !completedTrackersSet.contains(tracker.id) {
-            cell.configure(with: tracker, selectedDate: currentDate, count: 0, isDone: false)
+        if case .specificDate(_) = tracker.schedule {
+            let count = isDone ? 1 : 0
+            cell.configure(with: tracker, selectedDate: currentDate, count: count, isDone: isDone)
         } else {
-            switch tracker.schedule {
-            case .weekly(_):
-                let count = completedTrackers.filter { $0.trackerId == tracker.id }.count
-                let isDone = !completedTrackers.filter { $0.trackerId == tracker.id && $0.date == currentDate}.isEmpty
-                cell.configure(with: tracker, selectedDate: currentDate, count: count, isDone: isDone)
-            case .specificDate(_):
-                cell.configure(with: tracker, selectedDate: currentDate, count: 1, isDone: true)
-                
-            }
+            let count = completedTrackers.filter { $0.trackerId == tracker.id }.count
+            cell.configure(with: tracker, selectedDate: currentDate, count: count, isDone: isDone)
         }
         
         cell.delegate = self
@@ -350,6 +353,6 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: collectionView.frame.width, height: 50) // Высота 50 и полная ширина коллекции
+        return CGSize(width: collectionView.frame.width, height: 50)
     }
 }

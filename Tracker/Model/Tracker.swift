@@ -116,7 +116,6 @@ struct Tracker: Equatable {
     let emoji: Emoji
     let schedule: TrackerSchedule
     
-    // Реализация Equatable сравнивает только по id
     static func == (lhs: Tracker, rhs: Tracker) -> Bool {
         return lhs.id == rhs.id
     }

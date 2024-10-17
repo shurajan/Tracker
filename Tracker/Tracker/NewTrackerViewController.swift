@@ -39,12 +39,12 @@ final class NewTrackerViewController: LightStatusBarViewController {
     private lazy var trackerNameTextField: PaddedTextField = {
         let textField = PaddedTextField()
         textField.placeholder = "Введите название трекера"
-        textField.layer.cornerRadius = 17
-        
+        textField.layer.cornerRadius = 16
+        textField.delegate = self
         textField.backgroundColor = .ysBackground
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
-    }()
+    }() 
     
     private lazy var tableView: UITableView  = {
         let table = UITableView()
@@ -139,7 +139,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
             trackerNameTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
             trackerNameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             trackerNameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            trackerNameTextField.heightAnchor.constraint(equalToConstant: 50),
+            trackerNameTextField.heightAnchor.constraint(equalToConstant: 75),
             
             tableView.topAnchor.constraint(equalTo: trackerNameTextField.bottomAnchor, constant: 24),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -187,9 +187,10 @@ extension NewTrackerViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         
         if indexPath.row == 0 {
+            //TODO: - реализовать экран создания категории
             // Переход на экран выбора категории
-            //let categoryVC = CategoryViewController()
-            //navigationController?.pushViewController(categoryVC, animated: true)
+            //let categoryViewController = CategoryViewController()
+            //navigationController?.pushViewController(categoryViewController, animated: true)
         } else {
             let scheduleViewController = ScheduleViewController()
             scheduleViewController.selectedDays = selectedDays
@@ -246,5 +247,14 @@ extension NewTrackerViewController: ScheduleDelegateProtocol {
         }
         scheduleCell.detailTextLabel?.text = detail
         
+    }
+}
+
+// MARK: - UITextViewDelegate
+extension NewTrackerViewController: UITextFieldDelegate{
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        let currentText = textView.text ?? ""
+        let newText = (currentText as NSString).replacingCharacters(in: range, with: text)
+        return newText.count <= 38
     }
 }
