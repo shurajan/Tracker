@@ -33,7 +33,6 @@ final class TrackersViewController: LightStatusBarViewController {
     private var categories = [TrackerCategory]()
     private var filteredTrackers: [Tracker] = []
     private var completedTrackers = [TrackerRecord]()
-    //Set для минимизации обходов массива completedTrackers
     private var completedTrackersSet: Set<TrackerRecord> = []
     
     
@@ -66,14 +65,14 @@ final class TrackersViewController: LightStatusBarViewController {
         return searchController
     }()
     
-    private lazy var dizzyImageView: UIImageView = {
+    private var dizzyImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "Dizzy"))
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
     
-    private lazy var questionLabel: UILabel = {
+    private var questionLabel: UILabel = {
         let label = UILabel()
         label.text = "Что будем отслеживать?"
         label.textAlignment = .center
@@ -83,8 +82,9 @@ final class TrackersViewController: LightStatusBarViewController {
     }()
     
     private lazy var placeHolderView: UIStackView = {
-        // Создаем UILabel
         let stackView = UIStackView(arrangedSubviews: [dizzyImageView, questionLabel])
+        stackView.addSubview(dizzyImageView)
+        stackView.addSubview(questionLabel)
         stackView.axis = .vertical
         stackView.spacing = 8
         stackView.alignment = .center
@@ -141,6 +141,7 @@ final class TrackersViewController: LightStatusBarViewController {
             plusButton.heightAnchor.constraint(equalToConstant: 42),
             datePicker.widthAnchor.constraint(equalToConstant: 100),
             datePicker.heightAnchor.constraint(equalToConstant: 34),
+            
             dizzyImageView.widthAnchor.constraint(equalToConstant: 80),
             dizzyImageView.heightAnchor.constraint(equalToConstant: 80),
             

@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "dizzy@1x.png",
+      "filename" : "Dizzy@1x.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "dizzy@2x.png",
+      "filename" : "Dizzy@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "dizzy@3x.png",
+      "filename" : "Dizzy@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

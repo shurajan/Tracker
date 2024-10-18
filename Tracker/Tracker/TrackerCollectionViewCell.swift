@@ -102,21 +102,28 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             nameLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -12),
             nameLabel.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -12),
             
-            daysLabel.topAnchor.constraint(equalTo: cardView.bottomAnchor, constant: 16),
-            daysLabel.leadingAnchor.constraint(equalTo: emojiLabel.leadingAnchor),
-            
             plusButton.topAnchor.constraint(equalTo: cardView.bottomAnchor, constant: 8),
             plusButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
             plusButton.widthAnchor.constraint(equalToConstant: 34),
-            plusButton.heightAnchor.constraint(equalToConstant: 34)
+            plusButton.heightAnchor.constraint(equalToConstant: 34),
+            
+            daysLabel.centerYAnchor.constraint(equalTo: plusButton.centerYAnchor),
+            daysLabel.topAnchor.constraint(equalTo: cardView.bottomAnchor, constant: 16),
+            daysLabel.leadingAnchor.constraint(equalTo: emojiLabel.leadingAnchor),
         ])
     }
     
     private func setupPlusButton(isDone: Bool, color: UIColor) {
         let buttonImage = isDone ? UIImage(systemName: "checkmark.circle.fill") : UIImage(systemName: "plus.circle.fill")
+        
         plusButton.setImage(buttonImage, for: .normal)
         plusButton.tintColor = color
         plusButton.alpha = isDone ? 0.7 : 1
+        
+        plusButton.contentVerticalAlignment = .fill
+        plusButton.contentHorizontalAlignment = .fill
+        plusButton.imageView?.contentMode = .scaleAspectFit
+        plusButton.imageEdgeInsets = .zero
     }
     
     private func formatDaysText(_ count: Int) -> String {

@@ -64,6 +64,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
         let button = UIButton(type: .system)
         button.setTitle("Отменить", for: .normal)
         button.setTitleColor(.red, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.layer.cornerRadius = 16
         button.layer.borderWidth = 1
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -77,6 +78,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
         let button = UIButton(type: .system)
         button.setTitle("Создать", for: .normal)
         button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.backgroundColor = .ysGray
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -252,9 +254,23 @@ extension NewTrackerViewController: ScheduleDelegateProtocol {
 
 // MARK: - UITextViewDelegate
 extension NewTrackerViewController: UITextFieldDelegate{
-    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-        let currentText = textView.text ?? ""
-        let newText = (currentText as NSString).replacingCharacters(in: range, with: text)
-        return newText.count <= 38
+
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentText = textField.text ?? ""
+        guard let stringRange = Range(range, in: currentText) else { return false }
+        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+        let length = (updatedText as NSString).length
+        if length > 0 {
+            createButton.backgroundColor = .ysBlack
+        } else {
+            createButton.backgroundColor = .ysGray
+        }
+        return length <= 38
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }

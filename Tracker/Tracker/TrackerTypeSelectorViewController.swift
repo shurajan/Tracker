@@ -24,8 +24,9 @@ final class TrackerTypeSelectorViewController: LightStatusBarViewController {
     private lazy var habitButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Привычка", for: .normal)
-        button.backgroundColor = .black
-        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.setTitleColor(.ysWhite, for: .normal)
+        button.backgroundColor = .ysBlack
         button.layer.cornerRadius = 16
         button.addTarget(self, action: #selector(habitButtonTapped(_:)), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -35,8 +36,9 @@ final class TrackerTypeSelectorViewController: LightStatusBarViewController {
     private lazy var irregularEventButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Нерегулярные событие", for: .normal)
-        button.backgroundColor = .black
-        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.setTitleColor(.ysWhite, for: .normal)
+        button.backgroundColor = .ysBlack
         button.layer.cornerRadius = 16
         button.addTarget(self, action: #selector(irregularEventButtonTapped(_:)), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -66,12 +68,12 @@ final class TrackerTypeSelectorViewController: LightStatusBarViewController {
             habitButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: -58),
             habitButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             habitButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            habitButton.heightAnchor.constraint(equalToConstant: 50),
+            habitButton.heightAnchor.constraint(equalToConstant: 60),
             
             irregularEventButton.topAnchor.constraint(equalTo: habitButton.bottomAnchor, constant: 16),
             irregularEventButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             irregularEventButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            irregularEventButton.heightAnchor.constraint(equalToConstant: 50)
+            irregularEventButton.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
     
