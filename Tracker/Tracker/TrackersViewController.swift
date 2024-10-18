@@ -205,12 +205,8 @@ final class TrackersViewController: LightStatusBarViewController {
     }
     
     @IBAction
-    func datePickerValueChanged(_ sender: UIDatePicker) {
+    private func datePickerValueChanged(_ sender: UIDatePicker) {
         currentDate = sender.date
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd.MM.yyyy" // Формат даты
-        let formattedDate = dateFormatter.string(from: currentDate)
-        print("Выбранная дата: \(formattedDate)")
         refreshViewForDate(date: currentDate)
         dismiss(animated: true)
     }
