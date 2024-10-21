@@ -24,8 +24,20 @@ enum EventType: Int {
 final class NewTrackerViewController: LightStatusBarViewController {
     var delegate: TrackersViewControllerProtocol?
     
-    var eventType: EventType = .one_off
-    private var selectedDays = [WeekDays]()
+    private lazy var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.bounces = false
+        scrollView.alwaysBounceVertical = false
+        scrollView.alwaysBounceHorizontal = false
+        return scrollView
+    }()
+    
+    private lazy var contentView: UIView = {
+        let contentView = UIView()
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        return contentView
+    }()
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
@@ -44,7 +56,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
         textField.backgroundColor = .ysBackground
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
-    }() 
+    }()
     
     private lazy var tableView: UITableView  = {
         let table = UITableView()
@@ -59,7 +71,18 @@ final class NewTrackerViewController: LightStatusBarViewController {
         return table
     }()
     
-    // Кнопка "Отменить"
+    private lazy var emojiSelectionView: EmojiSelectionView  = {
+        let view = EmojiSelectionView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private lazy var colorSelectionView: ColorSelectionView  = {
+        let view = ColorSelectionView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Отменить", for: .normal)
@@ -73,7 +96,6 @@ final class NewTrackerViewController: LightStatusBarViewController {
         return button
     }()
     
-    // Кнопка "Создать"
     private lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Создать", for: .normal)
@@ -121,6 +143,9 @@ final class NewTrackerViewController: LightStatusBarViewController {
         return cell
     }()
     
+    var eventType: EventType = .one_off
+    private var selectedDays = [WeekDays]()
+        
     override func viewDidLoad() {
         super.viewDidLoad()
         setupLayout()
@@ -129,28 +154,54 @@ final class NewTrackerViewController: LightStatusBarViewController {
     private func setupLayout(){
         view.backgroundColor = .ysWhite
         
-        view.addSubview(titleLabel)
-        view.addSubview(trackerNameTextField)
-        view.addSubview(tableView)
-        view.addSubview(buttonsStackView)
+        view.addSubview(scrollView)
+        contentView.addSubview(titleLabel)
+        contentView.addSubview(trackerNameTextField)
+        contentView.addSubview(tableView)
+        contentView.addSubview(emojiSelectionView)
+        contentView.addSubview(colorSelectionView)
+        contentView.addSubview(buttonsStackView)
+        scrollView.addSubview(contentView)
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            
+            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            titleLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             
             trackerNameTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
-            trackerNameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            trackerNameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            trackerNameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            trackerNameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             trackerNameTextField.heightAnchor.constraint(equalToConstant: 75),
             
             tableView.topAnchor.constraint(equalTo: trackerNameTextField.bottomAnchor, constant: 24),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            tableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            tableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             tableView.heightAnchor.constraint(equalToConstant: CGFloat(eventType.rawValue * 75)),
             
-            buttonsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            buttonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            buttonsStackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -24),
+            emojiSelectionView.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 20),
+            emojiSelectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            emojiSelectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            emojiSelectionView.heightAnchor.constraint(equalToConstant: CGFloat(220)),
+            
+            colorSelectionView.topAnchor.constraint(equalTo: emojiSelectionView.bottomAnchor, constant: 20),
+            colorSelectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            colorSelectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            colorSelectionView.heightAnchor.constraint(equalToConstant: CGFloat(220)),
+            
+            buttonsStackView.topAnchor.constraint(equalTo: colorSelectionView.bottomAnchor, constant: 16),
+            buttonsStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            buttonsStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            buttonsStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24),
             buttonsStackView.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
@@ -255,7 +306,6 @@ extension NewTrackerViewController: ScheduleDelegateProtocol {
 // MARK: - UITextViewDelegate
 extension NewTrackerViewController: UITextFieldDelegate{
 
-    
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let currentText = textField.text ?? ""
         guard let stringRange = Range(range, in: currentText) else { return false }
@@ -266,7 +316,7 @@ extension NewTrackerViewController: UITextFieldDelegate{
         } else {
             createButton.backgroundColor = .ysGray
         }
-        return length <= 38
+        return length <= Constants.trackerNameMaxLength
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
