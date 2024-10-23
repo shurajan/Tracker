@@ -144,7 +144,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
     }()
     
     var eventType: EventType = .one_off
-    private var selectedDays = [WeekDays]()
+    private var selectedDays = WeekDays()
         
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -218,15 +218,15 @@ final class NewTrackerViewController: LightStatusBarViewController {
               let delegate
         else {return}
         
-        
-        let schedule = (eventType == .habit) ? TrackerSchedule.weekly(selectedDays) : TrackerSchedule.specificDate(delegate.currentDate)
         let color = (eventType == .habit) ? TrackerColor.selection1 : TrackerColor.selection2
         let emoji = (eventType == .habit) ? Emoji.angel : Emoji.broccoli
-
+        let schedule = (eventType == .habit) ? self.selectedDays : nil
+        
         let tracker = Tracker(id: UUID(),
                               name: name,
                               color: color,
                               emoji: emoji,
+                              date: delegate.currentDate,
                               schedule: schedule)
         
         delegate.didCreateNewTracker(tracker: tracker)
@@ -287,8 +287,8 @@ extension NewTrackerViewController: UITableViewDataSource {
 }
 
 extension NewTrackerViewController: ScheduleDelegateProtocol {
-    func didSelectDays(_ selectedDays: [WeekDays]) {
-        self.selectedDays = selectedDays.sorted()
+    func didSelectDays(_ selectedDays: WeekDays) {
+        self.selectedDays = selectedDays
         
         var detail = ""
         for day in selectedDays {

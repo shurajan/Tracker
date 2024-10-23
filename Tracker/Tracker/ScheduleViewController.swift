@@ -8,8 +8,7 @@ import UIKit
 
 final class ScheduleViewController: LightStatusBarViewController {
     
-    // Enum вместо массива строк для дней недели
-    var selectedDays = [WeekDays]()
+    var selectedDays = WeekDays()
     
     weak var delegate: ScheduleDelegateProtocol?
 
@@ -78,14 +77,14 @@ final class ScheduleViewController: LightStatusBarViewController {
     
     @IBAction
     private func switchChanged(_ sender: UISwitch) {
-        let day = WeekDays(rawValue: sender.tag)!
+        guard let day = WeekDays.from(sender.tag - 1) else {
+            return
+        }
         
         if sender.isOn {
-            selectedDays.append(day)
+            selectedDays.insert(day)
         } else {
-            if let index = selectedDays.firstIndex(of: day) {
-                selectedDays.remove(at: index)
-            }
+            selectedDays.remove(day)
         }
     }
     
@@ -117,14 +116,14 @@ extension ScheduleViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let day = WeekDays.from(indexPath.row+1) else {return UITableViewCell()}
+        guard let day = WeekDays.from(indexPath.row) else {return UITableViewCell()}
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         cell.textLabel?.text = day.description
         
         let switchView = UISwitch()
         switchView.isOn = selectedDays.contains(day)
-        switchView.tag = indexPath.row + 1 // Используем tag для хранения значения дня недели
+        switchView.tag = indexPath.row + 1
         switchView.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
         cell.accessoryView = switchView
         

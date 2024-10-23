@@ -6,37 +6,34 @@
 //
 import UIKit
 
-enum WeekDays: Int, CaseIterable, Comparable {
-    case Понедельник = 1
-    case Вторник
-    case Среда
-    case Четверг
-    case Пятница
-    case Суббота
-    case Воскресенье
+struct WeekDays: OptionSet {
+    let rawValue: Int
     
-    static func < (lhs: WeekDays, rhs: WeekDays) -> Bool {
-        return lhs.rawValue < rhs.rawValue
-    }
+    static let Понедельник = WeekDays(rawValue: 1 << 0)
+    static let Вторник = WeekDays(rawValue: 1 << 1)
+    static let Среда = WeekDays(rawValue: 1 << 2)
+    static let Четверг = WeekDays(rawValue: 1 << 3)
+    static let Пятница = WeekDays(rawValue: 1 << 4)
+    static let Суббота = WeekDays(rawValue: 1 << 5)
+    static let Воскресенье = WeekDays(rawValue: 1 << 6)
     
-    // Возвращает количество дней в неделе
+    // Все дни недели
+    static let Daily: WeekDays = [.Понедельник, .Вторник, .Среда, .Четверг, .Пятница, .Суббота, .Воскресенье]
+    
     static var count: Int {
-        return WeekDays.Воскресенье.rawValue
+        return 7
     }
-    
-    // Преобразование Int в WeekDays (безопасно)
+
     static func from(_ intValue: Int) -> WeekDays? {
-        return WeekDays(rawValue: intValue)
+        guard intValue >= 0 && intValue < count else { return nil }
+        return WeekDays(rawValue: 1 << intValue)
     }
     
     static func fromGregorianStyle(_ intValue: Int) -> WeekDays? {
-        if intValue == 1 {
-            return .from(7)
-        }
-        return .from(intValue-1)
+        guard intValue >= 1 && intValue <= 7 else { return nil }
+        return intValue == 1 ? .Воскресенье : WeekDays(rawValue: 1 << (intValue - 2))
     }
     
-    // Преобразование WeekDays в строку
     var description: String {
         switch self {
         case .Понедельник:
@@ -53,9 +50,12 @@ enum WeekDays: Int, CaseIterable, Comparable {
             return "Суббота"
         case .Воскресенье:
             return "Воскресенье"
+        default:
+            return "Неизвестный день"
         }
     }
     
+    // Краткое описание дня недели
     var shortDescription: String {
         switch self {
         case .Понедельник:
@@ -72,6 +72,24 @@ enum WeekDays: Int, CaseIterable, Comparable {
             return "Сб"
         case .Воскресенье:
             return "Вс"
+        default:
+            return "?"
+        }
+    }
+}
+
+extension WeekDays: Sequence {
+    public func makeIterator() -> AnyIterator<WeekDays> {
+        var currentBit = 1
+        return AnyIterator {
+            while currentBit < (1 << 7) {
+                let day = WeekDays(rawValue: currentBit)
+                currentBit <<= 1
+                if self.contains(day) {
+                    return day
+                }
+            }
+            return nil
         }
     }
 }

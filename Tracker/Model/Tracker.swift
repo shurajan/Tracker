@@ -7,17 +7,18 @@
 
 import UIKit
 
-enum TrackerSchedule {
-    case weekly([WeekDays])
+/*enum TrackerSchedule {
+    case weekly(WeekDays)
     case specificDate(Date)
-}
+}*/
 
 struct Tracker: Equatable {
     let id: UUID
     let name: String
     let color: TrackerColor
     let emoji: Emoji
-    let schedule: TrackerSchedule
+    let date: Date
+    let schedule: WeekDays?
     
     static func == (lhs: Tracker, rhs: Tracker) -> Bool {
         return lhs.id == rhs.id

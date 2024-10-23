@@ -155,18 +155,15 @@ final class TrackersViewController: LightStatusBarViewController {
         let dayOfWeek = calendar.component(.weekday, from: date)
         
         return trackers.filter { tracker in
-            switch tracker.schedule {
-            case .weekly(let days):
-                if let weekDay = WeekDays.fromGregorianStyle(dayOfWeek) {
-                    return days.contains(weekDay)
-                }
-                return false
-            case .specificDate(let specificDate):
-                return calendar.isDate(specificDate, inSameDayAs: date)
+            if let schedule = tracker.schedule,
+               let weekDay = WeekDays.fromGregorianStyle(dayOfWeek) {
+                return schedule.contains(weekDay)
             }
+            
+            return calendar.isDate(tracker.date, inSameDayAs: date)
+
         }
     }
-    
     
     private func refreshViewForDate(date: Date){
         filteredTrackers = filterTrackers(by: date, trackers: categories[safe: 0]?.trackers ?? [])
@@ -208,27 +205,24 @@ extension TrackersViewController: TrackersViewControllerProtocol {
         if !isSetContainingID {
             completedTrackers.append(record)
             completedTrackersSet.insert(record)
-            if case .specificDate(_) = tracker.schedule {
+            
+            if tracker.schedule == nil {
                 return 1
             }
+            
             return completedTrackers.filter { $0.trackerId == tracker.id }.count
         }
         
         let index = completedTrackers.firstIndex(where: {$0 == record})
-        
+
         if let index {
-            //Удаляем так как нажали на сделанную ячейку
             completedTrackers.remove(at: index)
+            completedTrackersSet.remove(record)
             let count = completedTrackers.filter { $0.trackerId == tracker.id }.count
-            if count == 0 {
-                completedTrackersSet.remove(record)
-            }
             return count
-        } else {
-            let record = TrackerRecord(trackerId: tracker.id, date: date)
-            completedTrackers.append(record)
-            return completedTrackers.filter { $0.trackerId == tracker.id }.count
         }
+        
+        return 0
     }
     
     func didCreateNewTracker(tracker: Tracker) {
@@ -276,11 +270,11 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         let record = TrackerRecord(trackerId: tracker.id, date: currentDate)
         let isDone = completedTrackersSet.contains(record)
         
-        if case .specificDate(_) = tracker.schedule {
-            let count = isDone ? 1 : 0
+        if tracker.schedule != nil {
+            let count = completedTrackers.filter { $0.trackerId == tracker.id }.count
             cell.configure(with: tracker, selectedDate: currentDate, count: count, isDone: isDone)
         } else {
-            let count = completedTrackers.filter { $0.trackerId == tracker.id }.count
+            let count = isDone ? 1 : 0
             cell.configure(with: tracker, selectedDate: currentDate, count: count, isDone: isDone)
         }
         

@@ -6,5 +6,5 @@
 //
 
 protocol ScheduleDelegateProtocol: AnyObject {
-    func didSelectDays(_ selectedDays: [WeekDays])
+    func didSelectDays(_ selectedDays: WeekDays)
 }
