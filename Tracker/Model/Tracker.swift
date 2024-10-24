@@ -7,11 +7,6 @@
 
 import UIKit
 
-/*enum TrackerSchedule {
-    case weekly(WeekDays)
-    case specificDate(Date)
-}*/
-
 struct Tracker: Equatable {
     let id: UUID
     let name: String
