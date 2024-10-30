@@ -39,6 +39,7 @@ class ColorSelectionView: UIView, UICollectionViewDelegate, UICollectionViewData
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(ColorCollectionViewCell.self, forCellWithReuseIdentifier: "ColorCell")
+        collectionView.isScrollEnabled = false
         return collectionView
     }()
     

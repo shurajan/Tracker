@@ -39,6 +39,7 @@ class EmojiSelectionView: UIView, UICollectionViewDelegate, UICollectionViewData
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.delegate = self
         collectionView.dataSource = self
+        collectionView.isScrollEnabled = false
         collectionView.register(EmojiCollectionViewCell.self, forCellWithReuseIdentifier: "EmojiCell")
         return collectionView
     }()

@@ -16,6 +16,8 @@ final class TrackerStore: BasicStore {
         trackerCoreDate.colorHex = tracker.color.rawValue
         trackerCoreDate.emoji = tracker.emoji.rawValue
         trackerCoreDate.date = tracker.date
-        trackerCoreDate.schedule = tracker.schedule?.rawValue
+        if let schedule = tracker.schedule?.rawValue{
+            trackerCoreDate.schedule = Int32(schedule)
+        }
     }
 }
