@@ -8,10 +8,9 @@
 import UIKit
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
-    var delegate: TrackersViewControllerProtocol?
+    private var delegate: TrackersPresenterProtocol?
     
     private var tracker: Tracker?
-    private var selectedDate: Date?
     private var count: Int = 0
     
     private lazy var emojiLabel: UILabel = {
@@ -57,10 +56,12 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }()
     
     
-    func configure(with tracker: Tracker, selectedDate: Date, count: Int, isDone: Bool) {
+    func configure(with tracker: Tracker, dataProvider delegate: TrackersPresenterProtocol) {
+        self.delegate = delegate
         self.tracker = tracker
-        self.selectedDate = selectedDate
-        self.count = count
+        
+        let isDone = delegate.isDone(trackerID: tracker.id)
+        self.count = delegate.countCompletions(trackerID: tracker.id)
         
         emojiLabel.text = tracker.emoji.rawValue
         nameLabel.text = tracker.name
@@ -144,12 +145,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     @IBAction
     private func plusButtonTapped() {
         guard let tracker,
-              let selectedDate,
               let delegate,
-              selectedDate < Date()
+              delegate.currentDate < Date()
         else { return }
         
-        let newCount = delegate.didCreateTrackerRecord(tracker: tracker, date: selectedDate)
+        let newCount = delegate.addNewTrackerRecord(tracker: tracker)
         
         let isDone = newCount > count
         

@@ -22,7 +22,7 @@ enum EventType: Int {
 }
 
 final class NewTrackerViewController: LightStatusBarViewController {
-    var delegate: TrackersViewControllerProtocol?
+    var delegate: TrackersPresenterProtocol?
     
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -229,7 +229,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
                               date: delegate.currentDate,
                               schedule: schedule)
         
-        delegate.didCreateNewTracker(tracker: tracker)
+        delegate.addNewTracker(tracker)
         dismiss(animated: true, completion: nil)
     }
 }

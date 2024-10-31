@@ -7,10 +7,20 @@
 import UIKit
 
 
+protocol TrackersViewProtocol: AnyObject {
+    //var currentDate: Date { get }
+    
+    func showNewHabitViewController()
+    func showIrregularEventController()
+    
+    func showTrackers(_ trackers: [Tracker])
+    func showCategories(_ categories: [TrackerCategory])
+}
 
 
 final class TrackersViewController: LightStatusBarViewController {
-    private(set) var currentDate: Date = Date()
+    private var presenter: TrackersPresenterProtocol?
+    //private(set) var currentDate: Date = Date()
     private let params: GeometricParams = GeometricParams(cellCount: 2,
                                                           leftInset: 16,
                                                           rightInset: 16,
@@ -18,8 +28,8 @@ final class TrackersViewController: LightStatusBarViewController {
     
     private var categories = [TrackerCategory]()
     private var filteredTrackers: [Tracker] = []
-    private var completedTrackers = [TrackerRecord]()
-    private var completedTrackersSet: Set<TrackerRecord> = []
+    //private var completedTrackers = [TrackerRecord]()
+   //private var completedTrackersSet: Set<TrackerRecord> = []
     
     
     //MARK: - UI components
@@ -96,9 +106,11 @@ final class TrackersViewController: LightStatusBarViewController {
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
+        presenter = TrackersPresenter(view: self)
         //TODO: - added in sprint_14 as a stub
         let category = TrackerCategory(id: UUID(), title: "Базовая", trackers: [])
-        addCategory(category: category)
+        presenter?.addNewCategory(category)
+        
         setupLayout()
     }
     
@@ -142,40 +154,7 @@ final class TrackersViewController: LightStatusBarViewController {
             trackerCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
         
-        refreshViewForDate(date: currentDate)
-    }
-    
-    //MARK: - Private Methods
-    private func addCategory(category: TrackerCategory){
-        self.categories = categories + [category]
-    }
-    
-    private func filterTrackers(by date: Date, trackers: [Tracker]) -> [Tracker] {
-        let calendar = Calendar.current
-        let dayOfWeek = calendar.component(.weekday, from: date)
-        
-        return trackers.filter { tracker in
-            if let schedule = tracker.schedule,
-               let weekDay = WeekDays.fromGregorianStyle(dayOfWeek) {
-                return schedule.contains(weekDay)
-            }
-            
-            return calendar.isDate(tracker.date, inSameDayAs: date)
-
-        }
-    }
-    
-    private func refreshViewForDate(date: Date){
-        filteredTrackers = filterTrackers(by: date, trackers: categories[safe: 0]?.trackers ?? [])
-        
-        if filteredTrackers.isEmpty {
-            trackerCollectionView.isHidden = true
-            placeHolderView.isHidden = false
-        } else {
-            trackerCollectionView.isHidden = false
-            trackerCollectionView.reloadData()
-            placeHolderView.isHidden = true
-        }
+        presenter?.loadTrackers()
     }
     
     //MARK: - IB Outlet
@@ -189,66 +168,12 @@ final class TrackersViewController: LightStatusBarViewController {
     
     @IBAction
     private func datePickerValueChanged(_ sender: UIDatePicker) {
-        currentDate = sender.date
-        refreshViewForDate(date: currentDate)
+        presenter?.currentDate = sender.date
+        presenter?.loadTrackers()
         dismiss(animated: true)
     }
 }
 
-//MARK: - TrackersViewControllerProtocol
-extension TrackersViewController: TrackersViewControllerProtocol {
-    func didCreateTrackerRecord(tracker: Tracker, date: Date) -> Int {
-        let record = TrackerRecord(trackerId: tracker.id, date: date)
-        
-        let isSetContainingID = completedTrackersSet.contains(record)
-        
-        if !isSetContainingID {
-            completedTrackers.append(record)
-            completedTrackersSet.insert(record)
-            
-            if tracker.schedule == nil {
-                return 1
-            }
-            
-            return completedTrackers.filter { $0.trackerId == tracker.id }.count
-        }
-        
-        let index = completedTrackers.firstIndex(where: {$0 == record})
-
-        if let index {
-            completedTrackers.remove(at: index)
-            completedTrackersSet.remove(record)
-            let count = completedTrackers.filter { $0.trackerId == tracker.id }.count
-            return count
-        }
-        
-        return 0
-    }
-    
-    func didCreateNewTracker(tracker: Tracker) {
-        guard let category = categories[safe: 0] else {return}
-        let trackers = category.trackers + [tracker]
-        categories.remove(at: 0)
-        categories.append(TrackerCategory(id: category.id, title: category.title, trackers: trackers))
-        refreshViewForDate(date: currentDate)
-    }
-    
-    func showNewHabitViewController() {
-        let newTrackerViewController = NewTrackerViewController()
-        newTrackerViewController.eventType = .habit
-        newTrackerViewController.delegate = self
-        newTrackerViewController.modalPresentationStyle = .pageSheet
-        present(newTrackerViewController, animated: false, completion: nil)
-    }
-    
-    func showIrregularEventController() {
-        let newTrackerViewController = NewTrackerViewController()
-        newTrackerViewController.eventType = .one_off
-        newTrackerViewController.delegate = self
-        newTrackerViewController.modalPresentationStyle = .pageSheet
-        present(newTrackerViewController, animated: false, completion: nil)
-    }
-}
 
 // MARK: - UICollectionViewDataSource, UICollectionViewDelegate
 extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDelegate {
@@ -262,29 +187,21 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as? TrackerCollectionViewCell else {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as? TrackerCollectionViewCell,
+              let presenter
+        else {
             return UICollectionViewCell()
         }
         
         let tracker = filteredTrackers[indexPath.item]
-        let record = TrackerRecord(trackerId: tracker.id, date: currentDate)
-        let isDone = completedTrackersSet.contains(record)
         
-        if tracker.schedule != nil {
-            let count = completedTrackers.filter { $0.trackerId == tracker.id }.count
-            cell.configure(with: tracker, selectedDate: currentDate, count: count, isDone: isDone)
-        } else {
-            let count = isDone ? 1 : 0
-            cell.configure(with: tracker, selectedDate: currentDate, count: count, isDone: isDone)
-        }
+        cell.configure(with: tracker, dataProvider: presenter)
         
-        cell.delegate = self
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionHeader {
-            // Получаем зарегистрированный заголовок
             let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "header", for: indexPath)
             headerView.translatesAutoresizingMaskIntoConstraints = false
             let label = UILabel(frame: headerView.bounds)
@@ -332,4 +249,43 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         return CGSize(width: collectionView.frame.width, height: 50)
     }
+}
+
+//MARK: - TrackersViewProtocol
+extension TrackersViewController: TrackersViewProtocol {
+    func showNewHabitViewController() {
+        let newTrackerViewController = NewTrackerViewController()
+        newTrackerViewController.eventType = .habit
+        newTrackerViewController.delegate = presenter
+        newTrackerViewController.modalPresentationStyle = .pageSheet
+        present(newTrackerViewController, animated: false, completion: nil)
+    }
+    
+    func showIrregularEventController() {
+        let newTrackerViewController = NewTrackerViewController()
+        newTrackerViewController.eventType = .one_off
+        newTrackerViewController.delegate = presenter
+        newTrackerViewController.modalPresentationStyle = .pageSheet
+        present(newTrackerViewController, animated: false, completion: nil)
+    }
+    
+    func showTrackers(_ trackers: [Tracker]) {
+        guard let presenter else {return}
+        
+        filteredTrackers = trackers
+        
+        if filteredTrackers.isEmpty {
+            trackerCollectionView.isHidden = true
+            placeHolderView.isHidden = false
+        } else {
+            trackerCollectionView.isHidden = false
+            trackerCollectionView.reloadData()
+            placeHolderView.isHidden = true
+        }
+    }
+    
+    func showCategories(_ categories: [TrackerCategory]) {
+        self.categories = categories
+    }
+        
 }
