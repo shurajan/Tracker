@@ -8,28 +8,19 @@ import UIKit
 
 
 protocol TrackersViewProtocol: AnyObject {
-    //var currentDate: Date { get }
-    
     func showNewHabitViewController()
     func showIrregularEventController()
-    
-    func showTrackers(_ trackers: [Tracker])
-    func showCategories(_ categories: [TrackerCategory])
 }
 
 
 final class TrackersViewController: LightStatusBarViewController {
-    private var presenter: TrackersPresenterProtocol?
-    //private(set) var currentDate: Date = Date()
+    //private var presenter: TrackersPresenterProtocol?
+    private var dataProvider: TrackerDataProviderProtocol?
+    
     private let params: GeometricParams = GeometricParams(cellCount: 2,
                                                           leftInset: 16,
                                                           rightInset: 16,
                                                           cellSpacing: 10)
-    
-    private var categories = [TrackerCategory]()
-    private var filteredTrackers: [Tracker] = []
-    //private var completedTrackers = [TrackerRecord]()
-   //private var completedTrackersSet: Set<TrackerRecord> = []
     
     
     //MARK: - UI components
@@ -106,11 +97,10 @@ final class TrackersViewController: LightStatusBarViewController {
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
-        presenter = TrackersPresenter(view: self)
-        //TODO: - added in sprint_14 as a stub
-        let category = TrackerCategory(id: UUID(), title: "Базовая", trackers: [])
-        presenter?.addNewCategory(category)
-        
+
+        dataProvider = try? TrackersDataProvider(delegate: self)
+        dataProvider?.addTestCategory()
+        trackerCollectionView.reloadData()
         setupLayout()
     }
     
@@ -153,8 +143,6 @@ final class TrackersViewController: LightStatusBarViewController {
             trackerCollectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             trackerCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
-        
-        presenter?.loadTrackers()
     }
     
     //MARK: - IB Outlet
@@ -168,8 +156,7 @@ final class TrackersViewController: LightStatusBarViewController {
     
     @IBAction
     private func datePickerValueChanged(_ sender: UIDatePicker) {
-        presenter?.currentDate = sender.date
-        presenter?.loadTrackers()
+        dataProvider?.currentDate = sender.date.startOfDay()
         dismiss(animated: true)
     }
 }
@@ -179,37 +166,46 @@ final class TrackersViewController: LightStatusBarViewController {
 extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return filteredTrackers.count
+        return dataProvider?.numberOfRowsInSection(section) ?? 0
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return categories.count
+        return dataProvider?.numberOfSections() ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as? TrackerCollectionViewCell,
-              let presenter
+              let dataProvider,
+              let tracker = dataProvider.object(at: indexPath)
         else {
             return UICollectionViewCell()
         }
         
-        let tracker = filteredTrackers[indexPath.item]
-        
-        cell.configure(with: tracker, dataProvider: presenter)
-        
+        cell.configure(with: tracker, dataProvider: dataProvider)
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionHeader {
-            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "header", for: indexPath)
+            guard let headerView = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: "header",
+                for: indexPath
+            ) as? UICollectionReusableView,
+                  let dataProvider = dataProvider,
+                  let sectionTitle = dataProvider.titleForSection(indexPath.section) else {
+                return UICollectionReusableView()
+            }
+            
             headerView.translatesAutoresizingMaskIntoConstraints = false
             let label = UILabel(frame: headerView.bounds)
             label.translatesAutoresizingMaskIntoConstraints = false
-            label.text = categories[safe: indexPath.row]?.title
+            label.text = sectionTitle
             label.textAlignment = .left
             label.textColor = .ysBlack
             label.font = UIFont.boldSystemFont(ofSize: 19)
+            
+            headerView.subviews.forEach { $0.removeFromSuperview() }
             headerView.addSubview(label)
             
             NSLayoutConstraint.activate([
@@ -256,7 +252,7 @@ extension TrackersViewController: TrackersViewProtocol {
     func showNewHabitViewController() {
         let newTrackerViewController = NewTrackerViewController()
         newTrackerViewController.eventType = .habit
-        newTrackerViewController.delegate = presenter
+        newTrackerViewController.delegate = dataProvider
         newTrackerViewController.modalPresentationStyle = .pageSheet
         present(newTrackerViewController, animated: false, completion: nil)
     }
@@ -264,28 +260,40 @@ extension TrackersViewController: TrackersViewProtocol {
     func showIrregularEventController() {
         let newTrackerViewController = NewTrackerViewController()
         newTrackerViewController.eventType = .one_off
-        newTrackerViewController.delegate = presenter
+        newTrackerViewController.delegate = dataProvider
         newTrackerViewController.modalPresentationStyle = .pageSheet
         present(newTrackerViewController, animated: false, completion: nil)
     }
-    
-    func showTrackers(_ trackers: [Tracker]) {
-        guard let presenter else {return}
-        
-        filteredTrackers = trackers
-        
-        if filteredTrackers.isEmpty {
-            trackerCollectionView.isHidden = true
-            placeHolderView.isHidden = false
-        } else {
-            trackerCollectionView.isHidden = false
-            trackerCollectionView.reloadData()
-            placeHolderView.isHidden = true
+            
+}
+
+
+extension TrackersViewController: DataProviderDelegate {
+    func didUpdate(_ update: TrackersStoreUpdate) {
+        trackerCollectionView.performBatchUpdates {
+            let currentSections = trackerCollectionView.numberOfSections
+            let updatedSections = dataProvider?.numberOfSections() ?? 0
+            
+            if updatedSections > currentSections {
+                let indexesToInsert = IndexSet(integersIn: currentSections..<updatedSections)
+                trackerCollectionView.insertSections(indexesToInsert)
+            } else if updatedSections < currentSections {
+                let indexesToDelete = IndexSet(integersIn: updatedSections..<currentSections)
+                trackerCollectionView.deleteSections(indexesToDelete)
+            }
+            
+            // Обрабатываем добавленные и удаленные элементы внутри секций
+            let insertedIndexPaths = update.insertedIndexes.map { IndexPath(item: $0, section: 0) }
+            trackerCollectionView.insertItems(at: insertedIndexPaths)
+            
+            let deletedIndexPaths = update.deletedIndexes.map { IndexPath(item: $0, section: 0) }
+            trackerCollectionView.deleteItems(at: deletedIndexPaths)
         }
+        
     }
     
-    func showCategories(_ categories: [TrackerCategory]) {
-        self.categories = categories
+    func reloadData() {
+        trackerCollectionView.reloadData()
     }
-        
+    
 }

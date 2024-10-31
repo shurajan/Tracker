@@ -8,7 +8,7 @@
 import UIKit
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
-    private var delegate: TrackersPresenterProtocol?
+    private var delegate: TrackerDataProviderProtocol?
     
     private var tracker: Tracker?
     private var count: Int = 0
@@ -56,12 +56,12 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }()
     
     
-    func configure(with tracker: Tracker, dataProvider delegate: TrackersPresenterProtocol) {
+    func configure(with tracker: Tracker, dataProvider delegate: TrackerDataProviderProtocol) {
         self.delegate = delegate
         self.tracker = tracker
         
-        let isDone = delegate.isDone(trackerID: tracker.id)
-        self.count = delegate.countCompletions(trackerID: tracker.id)
+        let isDone = false//delegate.isDone(trackerID: tracker.id)
+        self.count = 0 //delegate.countCompletions(trackerID: tracker.id)
         
         emojiLabel.text = tracker.emoji.rawValue
         nameLabel.text = tracker.name
@@ -149,13 +149,13 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
               delegate.currentDate < Date()
         else { return }
         
-        let newCount = delegate.addNewTrackerRecord(tracker: tracker)
+        try? delegate.addRecord(tracker)
         
-        let isDone = newCount > count
+        //let isDone = newCount > count
         
-        setupPlusButton(isDone: isDone, color: tracker.color.uiColor)
+        setupPlusButton(isDone: false, color: tracker.color.uiColor)
         
-        count = newCount
+        //count = newCount
         daysLabel.text = formatDaysText(count)
     }
 }

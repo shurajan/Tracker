@@ -43,4 +43,13 @@ extension Date {
     var timeStampString: String {
         return Date.ISODateFormatter.string(from: self)
     }
+    
+    func startOfDay() -> Date {
+        return Calendar.current.startOfDay(for: self)
+    }
+    
+    func isSameDay(as date: Date) -> Bool {
+        let calendar = Calendar.current
+        return calendar.isDate(self, inSameDayAs: date)
+    }
 }

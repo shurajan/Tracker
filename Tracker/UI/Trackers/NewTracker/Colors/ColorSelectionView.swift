@@ -76,7 +76,6 @@ class ColorSelectionView: UIView, UICollectionViewDelegate, UICollectionViewData
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        print(TrackerColor.allCases.count)
         return TrackerColor.allCases.count
     }
     

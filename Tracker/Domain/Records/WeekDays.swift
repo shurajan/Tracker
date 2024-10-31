@@ -7,7 +7,7 @@
 import UIKit
 
 struct WeekDays: OptionSet {
-    let rawValue: Int
+    let rawValue: Int32
     
     static let Понедельник = WeekDays(rawValue: 1 << 0)
     static let Вторник = WeekDays(rawValue: 1 << 1)
@@ -24,7 +24,7 @@ struct WeekDays: OptionSet {
         return 7
     }
 
-    static func from(_ intValue: Int) -> WeekDays? {
+    static func from(_ intValue: Int32) -> WeekDays? {
         guard intValue >= 0 && intValue < count else { return nil }
         return WeekDays(rawValue: 1 << intValue)
     }
@@ -80,7 +80,7 @@ struct WeekDays: OptionSet {
 
 extension WeekDays: Sequence {
     public func makeIterator() -> AnyIterator<WeekDays> {
-        var currentBit = 1
+        var currentBit: Int32 = 1
         return AnyIterator {
             while currentBit < (1 << 7) {
                 let day = WeekDays(rawValue: currentBit)

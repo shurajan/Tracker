@@ -15,6 +15,7 @@ struct Tracker: Equatable {
     let date: Date
     let schedule: WeekDays?
     
+    
     static func == (lhs: Tracker, rhs: Tracker) -> Bool {
         return lhs.id == rhs.id
     }

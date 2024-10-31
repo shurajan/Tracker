@@ -77,7 +77,7 @@ final class ScheduleViewController: LightStatusBarViewController {
     
     @IBAction
     private func switchChanged(_ sender: UISwitch) {
-        guard let day = WeekDays.from(sender.tag - 1) else {
+        guard let day = WeekDays.from(Int32(sender.tag - 1)) else {
             return
         }
         
@@ -116,7 +116,7 @@ extension ScheduleViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let day = WeekDays.from(indexPath.row) else {return UITableViewCell()}
+        guard let day = WeekDays.from(Int32(indexPath.row)) else {return UITableViewCell()}
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         cell.textLabel?.text = day.description
