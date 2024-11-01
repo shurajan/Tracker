@@ -13,15 +13,14 @@ enum TrackerCategoryStoreError: Error {
 
 final class TrackerCategoryStore: BasicStore {
     
-    func addTrackerCategory(_ trackerCategory :TrackerCategory) throws {
-        do {
-            let trackerCategoryCoreData = TrackerCategoryCoreData(context: self.managedObjectContext)
-            trackerCategoryCoreData.title = trackerCategory.title
-            try save()
-        } catch{
-            print(error)
-            throw TrackerCategoryStoreError.createCategoryError
+    func addTrackerCategory(category : TrackerCategory) throws {
+        Log.info(message: category.title)
+        if let existingCategory = getTrackerCategoryCoreData(by: category.title) {
+            return
         }
+        let trackerCategoryCoreData = TrackerCategoryCoreData(context: self.managedObjectContext)
+        trackerCategoryCoreData.title = category.title
+        
     }
     
     func getTrackerCategoryCoreData(by title: String) -> TrackerCategoryCoreData? {

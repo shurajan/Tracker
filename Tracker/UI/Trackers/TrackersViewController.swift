@@ -14,8 +14,7 @@ protocol TrackersViewProtocol: AnyObject {
 
 
 final class TrackersViewController: LightStatusBarViewController {
-    //private var presenter: TrackersPresenterProtocol?
-    private var dataProvider: TrackerDataProviderProtocol?
+    private var dataProvider: TrackersViewDataProviderProtocol?
     
     private let params: GeometricParams = GeometricParams(cellCount: 2,
                                                           leftInset: 16,
@@ -52,14 +51,14 @@ final class TrackersViewController: LightStatusBarViewController {
         return searchController
     }()
     
-    private var dizzyImageView: UIImageView = {
+    private let dizzyImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "Dizzy"))
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
     
-    private var questionLabel: UILabel = {
+    private let questionLabel: UILabel = {
         let label = UILabel()
         label.text = "Что будем отслеживать?"
         label.textAlignment = .center
@@ -68,16 +67,11 @@ final class TrackersViewController: LightStatusBarViewController {
         return label
     }()
     
-    private lazy var placeHolderView: UIStackView = {
-        let stackView = UIStackView(arrangedSubviews: [dizzyImageView, questionLabel])
-        stackView.addSubview(dizzyImageView)
-        stackView.addSubview(questionLabel)
-        stackView.axis = .vertical
-        stackView.spacing = 8
-        stackView.alignment = .center
-        stackView.distribution = .fillProportionally
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        return stackView
+    private let placeHolderView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
     
     
@@ -97,17 +91,15 @@ final class TrackersViewController: LightStatusBarViewController {
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        dataProvider = try? TrackersDataProvider(delegate: self)
-        dataProvider?.addTestCategory()
-        trackerCollectionView.reloadData()
+        
+        dataProvider = try? TrackersViewDataProvider(delegate: self)
         setupLayout()
     }
     
     //MARK: - View Layout methods
     private func setupLayout(){
         self.title = "Трекеры"
-    
+        
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationBar.largeTitleTextAttributes = [
             NSAttributedString.Key.font: UIFont.systemFont(ofSize: 34, weight: .bold)
@@ -117,31 +109,42 @@ final class TrackersViewController: LightStatusBarViewController {
         
         view.addSubview(datePicker)
         view.addSubview(plusButton)
-        view.addSubview(placeHolderView)
         view.addSubview(trackerCollectionView)
+        view.addSubview(placeHolderView)
+        
+        placeHolderView.addSubview(dizzyImageView)
+        placeHolderView.addSubview(questionLabel)
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: plusButton)
         navigationItem.searchController = searchController
         
         NSLayoutConstraint.activate([
+            // Constraints for plusButton and datePicker
             plusButton.widthAnchor.constraint(equalToConstant: 42),
             plusButton.heightAnchor.constraint(equalToConstant: 42),
             datePicker.widthAnchor.constraint(equalToConstant: 100),
             datePicker.heightAnchor.constraint(equalToConstant: 34),
             
-            dizzyImageView.widthAnchor.constraint(equalToConstant: 80),
-            dizzyImageView.heightAnchor.constraint(equalToConstant: 80),
+            // Constraints for trackerCollectionView
+            trackerCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            trackerCollectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            trackerCollectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            trackerCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
             placeHolderView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             placeHolderView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             placeHolderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             placeHolderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
-            trackerCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            trackerCollectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            trackerCollectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            trackerCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            dizzyImageView.centerXAnchor.constraint(equalTo: placeHolderView.centerXAnchor),
+            dizzyImageView.topAnchor.constraint(equalTo: placeHolderView.topAnchor),
+            dizzyImageView.widthAnchor.constraint(equalToConstant: 80),
+            dizzyImageView.heightAnchor.constraint(equalToConstant: 80),
+            
+            questionLabel.topAnchor.constraint(equalTo: dizzyImageView.bottomAnchor, constant: 8),
+            questionLabel.centerXAnchor.constraint(equalTo: placeHolderView.centerXAnchor),
+            questionLabel.bottomAnchor.constraint(equalTo: placeHolderView.bottomAnchor)
         ])
     }
     
@@ -264,32 +267,46 @@ extension TrackersViewController: TrackersViewProtocol {
         newTrackerViewController.modalPresentationStyle = .pageSheet
         present(newTrackerViewController, animated: false, completion: nil)
     }
-            
+    
 }
 
 
 extension TrackersViewController: DataProviderDelegate {
-    func didUpdate(_ update: TrackersStoreUpdate) {
-        trackerCollectionView.performBatchUpdates {
-            let currentSections = trackerCollectionView.numberOfSections
-            let updatedSections = dataProvider?.numberOfSections() ?? 0
-            
-            if updatedSections > currentSections {
-                let indexesToInsert = IndexSet(integersIn: currentSections..<updatedSections)
-                trackerCollectionView.insertSections(indexesToInsert)
-            } else if updatedSections < currentSections {
-                let indexesToDelete = IndexSet(integersIn: updatedSections..<currentSections)
-                trackerCollectionView.deleteSections(indexesToDelete)
+    
+    func didUpdate(_ update: IndexUpdate) {
+        trackerCollectionView.performBatchUpdates({
+            if !update.deletedSections.isEmpty {
+                trackerCollectionView.deleteSections(update.deletedSections)
             }
             
-            // Обрабатываем добавленные и удаленные элементы внутри секций
-            let insertedIndexPaths = update.insertedIndexes.map { IndexPath(item: $0, section: 0) }
-            trackerCollectionView.insertItems(at: insertedIndexPaths)
+            if !update.insertedSections.isEmpty {
+                trackerCollectionView.insertSections(update.insertedSections)
+            }
             
-            let deletedIndexPaths = update.deletedIndexes.map { IndexPath(item: $0, section: 0) }
-            trackerCollectionView.deleteItems(at: deletedIndexPaths)
-        }
-        
+            for (section, items) in update.insertedItems {
+                let indexPaths = items.map { IndexPath(item: $0, section: section) }
+                trackerCollectionView.insertItems(at: indexPaths)
+            }
+            
+            for (section, items) in update.deletedItems {
+                let indexPaths = items.map { IndexPath(item: $0, section: section) }
+                trackerCollectionView.deleteItems(at: indexPaths)
+            }
+            
+            for (section, items) in update.updatedItems {
+                let indexPaths = items.map { IndexPath(item: $0, section: section) }
+                trackerCollectionView.reloadItems(at: indexPaths)
+            }
+            
+            for move in update.movedItems {
+                trackerCollectionView.moveItem(at: move.from, to: move.to)
+            }
+        }, completion: nil)
+    }
+    
+    func updatePlaceholderVisibility(isHidden: Bool) {
+        self.trackerCollectionView.isHidden = !isHidden
+        self.placeHolderView.isHidden = isHidden
     }
     
     func reloadData() {

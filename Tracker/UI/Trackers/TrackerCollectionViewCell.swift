@@ -8,7 +8,7 @@
 import UIKit
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
-    private var delegate: TrackerDataProviderProtocol?
+    private var delegate: TrackersViewDataProviderProtocol?
     
     private var tracker: Tracker?
     private var count: Int = 0
@@ -56,7 +56,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }()
     
     
-    func configure(with tracker: Tracker, dataProvider delegate: TrackerDataProviderProtocol) {
+    func configure(with tracker: Tracker, dataProvider delegate: TrackersViewDataProviderProtocol) {
         self.delegate = delegate
         self.tracker = tracker
         
@@ -149,7 +149,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
               delegate.currentDate < Date()
         else { return }
         
-        try? delegate.addRecord(tracker)
+        //try? delegate.addTracker(tracker)
         
         //let isDone = newCount > count
         

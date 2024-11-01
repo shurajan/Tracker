@@ -1,0 +1,178 @@
+//
+//  TrackersDataProvider.swift
+//  Tracker
+//
+//  Created by Alexander Bralnin on 31.10.2024.
+//
+
+import Foundation
+import CoreData
+
+final class TrackersViewDataProvider: NSObject {
+    var currentDate: Date = Date() {
+        didSet {
+            updateFetchRequest()
+        }
+    }
+    private let delegate: DataProviderDelegate?
+    private let context: NSManagedObjectContext
+    private let dataStore: TrackerStore
+    
+    private var insertedSections = IndexSet()
+    private var deletedSections = IndexSet()
+    private var insertedItems = [Int: IndexSet]()
+    private var deletedItems = [Int: IndexSet]()
+    private var updatedItems = [Int: IndexSet]()
+    private var movedItems = [(from: IndexPath, to: IndexPath)]()
+        
+    private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
+        let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "tracker_category.title", ascending: false)]
+        fetchRequest.predicate = NSPredicate(format: "date == %@", currentDate.startOfDay() as NSDate)
+        
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
+                                                                  managedObjectContext: context,
+                                                                  sectionNameKeyPath: "tracker_category.title",
+                                                                  cacheName: nil)
+        fetchedResultsController.delegate = self
+        try? fetchedResultsController.performFetch()
+        return fetchedResultsController
+    }()
+    
+    
+    init(delegate: DataProviderDelegate) throws {
+        self.delegate = delegate
+        self.dataStore = TrackerStore()
+        self.context = dataStore.managedObjectContext
+    }
+    
+    private func updateFetchRequest() {
+        let fetchRequest = fetchedResultsController.fetchRequest
+        fetchRequest.predicate = NSPredicate(format: "date == %@", currentDate.startOfDay() as NSDate)
+        
+        do {
+            try fetchedResultsController.performFetch()
+            delegate?.reloadData()
+            delegate?.updatePlaceholderVisibility(isHidden: hasItems())
+        } catch {
+            Log.error(error: error, message: "Failed to fetch filtered results")
+        }
+    }
+    
+    private func hasItems() -> Bool {
+        let sections = self.fetchedResultsController.sections ?? []
+        return sections.contains { $0.numberOfObjects > 0 }
+    }
+    
+}
+
+extension TrackersViewDataProvider: TrackersViewDataProviderProtocol {
+    
+    func numberOfSections() -> Int {
+        delegate?.updatePlaceholderVisibility(isHidden: hasItems())
+        return fetchedResultsController.sections?.count ?? 0
+    }
+    
+    func titleForSection(_ section: Int) -> String? {
+        guard let sections = fetchedResultsController.sections else { return nil }
+        return sections[section].name
+    }
+    
+    func numberOfRowsInSection(_ section: Int) -> Int {
+        fetchedResultsController.sections?[section].numberOfObjects ?? 0
+    }
+    
+    func object(at indexPath: IndexPath) -> Tracker? {
+        let record = fetchedResultsController.object(at: indexPath)
+        return try? dataStore.getTracker(from: record)
+    }
+    
+    func addTracker(tracker: Tracker, category: TrackerCategory) throws {
+        dataStore.addTracker(tracker: tracker, category: category)
+        try  dataStore.save()
+    }
+    
+    func deleteTracker(at indexPath: IndexPath) throws {
+        //TODO: - implement
+        Log.warn(message: "Unsupported operation")
+    }
+    
+}
+
+extension TrackersViewDataProvider: NSFetchedResultsControllerDelegate {
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        reset()
+    }
+    
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
+                    didChange sectionInfo: NSFetchedResultsSectionInfo,
+                    atSectionIndex sectionIndex: Int,
+                    for type: NSFetchedResultsChangeType) {
+        switch type {
+        case .insert:
+            insertedSections.insert(sectionIndex)
+        case .delete:
+            deletedSections.insert(sectionIndex)
+        default:
+            break
+        }
+    }
+    
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
+                    didChange anObject: Any,
+                    at indexPath: IndexPath?,
+                    for type: NSFetchedResultsChangeType,
+                    newIndexPath: IndexPath?) {
+        switch type {
+        case .insert:
+            if let newIndexPath = newIndexPath {
+                var indexSet = insertedItems[newIndexPath.section] ?? IndexSet()
+                indexSet.insert(newIndexPath.item)
+                insertedItems[newIndexPath.section] = indexSet
+            }
+        case .delete:
+            if let indexPath = indexPath {
+                var indexSet = deletedItems[indexPath.section] ?? IndexSet()
+                indexSet.insert(indexPath.item)
+                deletedItems[indexPath.section] = indexSet
+            }
+        case .update:
+            if let indexPath = indexPath {
+                var indexSet = updatedItems[indexPath.section] ?? IndexSet()
+                indexSet.insert(indexPath.item)
+                updatedItems[indexPath.section] = indexSet
+            }
+        case .move:
+            if let fromIndexPath = indexPath, let toIndexPath = newIndexPath {
+                movedItems.append((from: fromIndexPath, to: toIndexPath))
+            }
+        @unknown default:
+            fatalError("Unexpected NSFetchedResultsChangeType")
+        }
+    }
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        let update = IndexUpdate(
+            insertedSections: insertedSections,
+            deletedSections: deletedSections,
+            insertedItems: insertedItems,
+            deletedItems: deletedItems,
+            updatedItems: updatedItems,
+            movedItems: movedItems
+        )
+        
+        delegate?.didUpdate(update)
+        delegate?.updatePlaceholderVisibility(isHidden: hasItems())
+        
+        reset()
+    }
+    
+    private func reset(){
+        insertedSections.removeAll()
+        deletedSections.removeAll()
+        insertedItems.removeAll()
+        deletedItems.removeAll()
+        updatedItems.removeAll()
+        movedItems.removeAll()
+    }
+}

@@ -14,7 +14,7 @@ enum TrackerDecodingError: Error {
 final class TrackerStore: BasicStore {
     private var trackerCategoryStore = TrackerCategoryStore()
     
-    func addTracker(what tracker : Tracker, for category : String) {
+    func addTracker(tracker : Tracker, category : TrackerCategory) {
         
         let trackerCoreData = TrackerCoreData(context: self.managedObjectContext)
         trackerCoreData.id = tracker.id
@@ -26,16 +26,13 @@ final class TrackerStore: BasicStore {
             trackerCoreData.schedule = schedule
         }
         
-        if let existingCategory = trackerCategoryStore.getTrackerCategoryCoreData(by: category) {
-            trackerCoreData.tracker_category = existingCategory
-        } else {
-            let newCategory = TrackerCategory(title: category)
-            try? trackerCategoryStore.addTrackerCategory(newCategory)
-            let existingCategory = trackerCategoryStore.getTrackerCategoryCoreData(by: category)
-            trackerCoreData.tracker_category = existingCategory
+        do{
+            try trackerCategoryStore.addTrackerCategory(category: category)
+            let trackerCategoryCoreData = trackerCategoryStore.getTrackerCategoryCoreData(by: category.title)
+            trackerCoreData.tracker_category = trackerCategoryCoreData
+        } catch {
+            Log.error(error: error, message: "failed to save tracker")
         }
-        
-        try? save()
     }
     
     func getTracker(from trackerCoreData: TrackerCoreData) throws -> Tracker {
