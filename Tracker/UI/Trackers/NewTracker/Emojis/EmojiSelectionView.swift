@@ -14,7 +14,7 @@ import UIKit
 
 class EmojiSelectionView: UIView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
-    private var selectedEmojiIndex: IndexPath?
+    private(set) var selectedEmojiIndex: IndexPath?
     
     private let params: GeometricParams = GeometricParams(cellCount: 6,
                                                           leftInset: 20,

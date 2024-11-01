@@ -32,7 +32,10 @@ protocol TrackersViewDataProviderProtocol {
     func numberOfSections() -> Int
     func titleForSection(_ section: Int) -> String?
     func numberOfRowsInSection(_ section: Int) -> Int
-    func object(at: IndexPath) -> Tracker?
+    func tracker(at: IndexPath) -> Tracker?
     func addTracker(tracker: Tracker, category: TrackerCategory) throws
     func deleteTracker(at indexPath: IndexPath) throws
+    func manageTrackerRecord(trackerRecord: TrackerRecord) throws
+    func trackerRecordExist(trackerRecord: TrackerRecord) throws -> Bool
+    func countTrackerRecords(trackerRecord: TrackerRecord) throws -> Int
 }

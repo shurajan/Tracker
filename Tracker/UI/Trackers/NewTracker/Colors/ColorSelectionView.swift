@@ -13,7 +13,7 @@ import UIKit
 
 class ColorSelectionView: UIView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
-    private var selectedColorIndex: IndexPath?
+    private(set) var selectedColorIndex: IndexPath?
     
     private let params: GeometricParams = GeometricParams(cellCount: 6,
                                                           leftInset: 20,
@@ -92,7 +92,6 @@ class ColorSelectionView: UIView, UICollectionViewDelegate, UICollectionViewData
     }
     
     // MARK: - UICollectionViewDelegateFlowLayout
-    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let availableWidth = collectionView.frame.width - params.paddingWidth
         let cellWidth =  availableWidth / CGFloat(params.cellCount)
@@ -115,15 +114,12 @@ class ColorSelectionView: UIView, UICollectionViewDelegate, UICollectionViewData
     // MARK: - UICollectionViewDelegate
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        // Снимаем выделение с предыдущей ячейки, если она есть
         if let previousIndex = selectedColorIndex, let previousCell = collectionView.cellForItem(at: previousIndex) as? ColorCollectionViewCell {
             previousCell.configure(with: TrackerColor.allCases[previousIndex.item].uiColor, isSelected: false)
         }
         
-        // Устанавливаем новый выбранный индекс
         selectedColorIndex = indexPath
         
-        // Обновляем текущую выбранную ячейку
         if let currentCell = collectionView.cellForItem(at: indexPath) as? ColorCollectionViewCell {
             currentCell.configure(with: TrackerColor.allCases[indexPath.item].uiColor, isSelected: true)
         }

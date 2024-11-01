@@ -12,6 +12,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     private var tracker: Tracker?
     private var count: Int = 0
+    private var isDone: Bool = false
     
     private lazy var emojiLabel: UILabel = {
         let label = UILabel()
@@ -59,16 +60,14 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     func configure(with tracker: Tracker, dataProvider delegate: TrackersViewDataProviderProtocol) {
         self.delegate = delegate
         self.tracker = tracker
-        
-        let isDone = false//delegate.isDone(trackerID: tracker.id)
-        self.count = 0 //delegate.countCompletions(trackerID: tracker.id)
+    
         
         emojiLabel.text = tracker.emoji.rawValue
         nameLabel.text = tracker.name
         cardView.backgroundColor = tracker.color.uiColor
         
-        daysLabel.text = formatDaysText(count)
-        setupPlusButton(isDone: isDone, color: tracker.color.uiColor)
+        let trackerRecord = TrackerRecord(trackerId: tracker.id, date: delegate.currentDate)
+        updateStatisticsAndShow(trackerRecord: trackerRecord)
     }
     
     override init(frame: CGRect) {
@@ -142,21 +141,33 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         }
     }
     
+    private func updateStatisticsAndShow(trackerRecord: TrackerRecord) {
+        guard
+            let delegate,
+            let tracker
+        else { return }
+        
+        do {
+            isDone = try delegate.trackerRecordExist(trackerRecord: trackerRecord)
+            count = try delegate.countTrackerRecords(trackerRecord: trackerRecord)
+        } catch {
+            Log.error(error: error)
+        }
+        setupPlusButton(isDone: isDone, color: tracker.color.uiColor)
+        daysLabel.text = formatDaysText(count)
+    }
+    
     @IBAction
     private func plusButtonTapped() {
         guard let tracker,
               let delegate,
               delegate.currentDate < Date()
+                
         else { return }
+        let trackerRecord = TrackerRecord(trackerId: tracker.id, date: delegate.currentDate)
+        try? delegate.manageTrackerRecord(trackerRecord: trackerRecord)
         
-        //try? delegate.addTracker(tracker)
-        
-        //let isDone = newCount > count
-        
-        setupPlusButton(isDone: false, color: tracker.color.uiColor)
-        
-        //count = newCount
-        daysLabel.text = formatDaysText(count)
+        updateStatisticsAndShow(trackerRecord: trackerRecord)
     }
 }
 

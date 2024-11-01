@@ -218,8 +218,12 @@ final class NewTrackerViewController: LightStatusBarViewController {
               let delegate
         else {return}
         
-        let color = (eventType == .habit) ? TrackerColor.selection1 : TrackerColor.selection2
-        let emoji = (eventType == .habit) ? Emoji.angel : Emoji.broccoli
+        let colorIndex = colorSelectionView.selectedColorIndex?.item ?? 0
+        let color = TrackerColor.allCases[colorIndex]
+        
+        let emojiIndex = emojiSelectionView.selectedEmojiIndex?.item ?? 0
+        let emoji = Emoji.allCases[emojiIndex]
+        
         let schedule = (eventType == .habit) ? self.selectedDays : nil
         
         let tracker = Tracker(id: UUID(),

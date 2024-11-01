@@ -14,7 +14,6 @@ enum TrackerCategoryStoreError: Error {
 final class TrackerCategoryStore: BasicStore {
     
     func addTrackerCategory(category : TrackerCategory) throws {
-        Log.info(message: category.title)
         if let existingCategory = getTrackerCategoryCoreData(by: category.title) {
             return
         }

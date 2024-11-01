@@ -17,7 +17,6 @@ struct WeekDays: OptionSet {
     static let Суббота = WeekDays(rawValue: 1 << 5)
     static let Воскресенье = WeekDays(rawValue: 1 << 6)
     
-    // Все дни недели
     static let Daily: WeekDays = [.Понедельник, .Вторник, .Среда, .Четверг, .Пятница, .Суббота, .Воскресенье]
     
     static var count: Int {

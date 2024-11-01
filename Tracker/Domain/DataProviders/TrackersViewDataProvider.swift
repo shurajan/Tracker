@@ -16,7 +16,8 @@ final class TrackersViewDataProvider: NSObject {
     }
     private let delegate: DataProviderDelegate?
     private let context: NSManagedObjectContext
-    private let dataStore: TrackerStore
+    private let trackerStore: TrackerStore
+    private let trackerRecordStore: TrackerRecordStore
     
     private var insertedSections = IndexSet()
     private var deletedSections = IndexSet()
@@ -24,11 +25,11 @@ final class TrackersViewDataProvider: NSObject {
     private var deletedItems = [Int: IndexSet]()
     private var updatedItems = [Int: IndexSet]()
     private var movedItems = [(from: IndexPath, to: IndexPath)]()
-        
+    
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "tracker_category.title", ascending: false)]
-        fetchRequest.predicate = NSPredicate(format: "date == %@", currentDate.startOfDay() as NSDate)
+        fetchRequest.predicate = setupPredicate(date: currentDate)
         
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
                                                                   managedObjectContext: context,
@@ -42,13 +43,27 @@ final class TrackersViewDataProvider: NSObject {
     
     init(delegate: DataProviderDelegate) throws {
         self.delegate = delegate
-        self.dataStore = TrackerStore()
-        self.context = dataStore.managedObjectContext
+        self.trackerStore = TrackerStore()
+        self.trackerRecordStore = TrackerRecordStore()
+        self.context = trackerStore.managedObjectContext
+    }
+    
+    private func setupPredicate(date: Date) -> NSPredicate {
+        let calendar = Calendar.current
+        let currentWeekdayInt = calendar.component(.weekday, from: date)
+        let currentWeekday = WeekDays.fromGregorianStyle(currentWeekdayInt)?.rawValue ?? 0
+        let dateStart = date.startOfDay() as NSDate
+        
+        let format = "date == %@ OR (schedule & %d != 0)"
+        
+        return NSPredicate(format: format,
+                           dateStart,
+                           currentWeekday)
     }
     
     private func updateFetchRequest() {
         let fetchRequest = fetchedResultsController.fetchRequest
-        fetchRequest.predicate = NSPredicate(format: "date == %@", currentDate.startOfDay() as NSDate)
+        fetchRequest.predicate = setupPredicate(date: currentDate)
         
         do {
             try fetchedResultsController.performFetch()
@@ -67,7 +82,6 @@ final class TrackersViewDataProvider: NSObject {
 }
 
 extension TrackersViewDataProvider: TrackersViewDataProviderProtocol {
-    
     func numberOfSections() -> Int {
         delegate?.updatePlaceholderVisibility(isHidden: hasItems())
         return fetchedResultsController.sections?.count ?? 0
@@ -82,14 +96,14 @@ extension TrackersViewDataProvider: TrackersViewDataProviderProtocol {
         fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
     
-    func object(at indexPath: IndexPath) -> Tracker? {
+    func tracker(at indexPath: IndexPath) -> Tracker? {
         let record = fetchedResultsController.object(at: indexPath)
-        return try? dataStore.getTracker(from: record)
+        return try? trackerStore.getTracker(from: record)
     }
     
     func addTracker(tracker: Tracker, category: TrackerCategory) throws {
-        dataStore.addTracker(tracker: tracker, category: category)
-        try  dataStore.save()
+        trackerStore.addTracker(tracker: tracker, category: category)
+        try  trackerStore.save()
     }
     
     func deleteTracker(at indexPath: IndexPath) throws {
@@ -97,6 +111,18 @@ extension TrackersViewDataProvider: TrackersViewDataProviderProtocol {
         Log.warn(message: "Unsupported operation")
     }
     
+    func manageTrackerRecord(trackerRecord: TrackerRecord) throws {
+        trackerRecordStore.manageTrackerRecord(trackerRecord: trackerRecord)
+        try  trackerRecordStore.save()
+    }
+    
+    func trackerRecordExist(trackerRecord: TrackerRecord)-> Bool {
+        return trackerRecordStore.exist(trackerRecord: trackerRecord)
+    }
+    
+    func countTrackerRecords(trackerRecord: TrackerRecord) throws -> Int {
+        return trackerRecordStore.count(by: trackerRecord.trackerId)
+    }
 }
 
 extension TrackersViewDataProvider: NSFetchedResultsControllerDelegate {
