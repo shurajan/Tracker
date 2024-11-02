@@ -152,6 +152,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             count = try delegate.countTrackerRecords(trackerRecord: trackerRecord)
         } catch {
             Log.error(error: error)
+            return
         }
         setupPlusButton(isDone: isDone, color: tracker.color.uiColor)
         daysLabel.text = formatDaysText(count)

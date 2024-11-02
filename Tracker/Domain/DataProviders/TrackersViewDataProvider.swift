@@ -98,7 +98,7 @@ extension TrackersViewDataProvider: TrackersViewDataProviderProtocol {
     
     func tracker(at indexPath: IndexPath) -> Tracker? {
         let record = fetchedResultsController.object(at: indexPath)
-        return try? trackerStore.getTracker(from: record)
+        return try? trackerStore.from(record)
     }
     
     func addTracker(tracker: Tracker, category: TrackerCategory) throws {

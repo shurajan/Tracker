@@ -28,14 +28,14 @@ final class TrackerStore: BasicStore {
         
         do{
             try trackerCategoryStore.addTrackerCategory(category: category)
-            let trackerCategoryCoreData = trackerCategoryStore.getTrackerCategoryCoreData(by: category.title)
+            let trackerCategoryCoreData = trackerCategoryStore.findCoreData(by: category.title)
             trackerCoreData.tracker_category = trackerCategoryCoreData
         } catch {
             Log.error(error: error, message: "failed to save tracker")
         }
     }
     
-    func getTracker(from trackerCoreData: TrackerCoreData) throws -> Tracker {
+    func from(_ trackerCoreData: TrackerCoreData) throws -> Tracker {
         guard let id = trackerCoreData.id,
            let name = trackerCoreData.name,
            let colorHex = trackerCoreData.colorHex,
@@ -54,5 +54,15 @@ final class TrackerStore: BasicStore {
                        date: date,
                        schedule: WeekDays(rawValue: trackerCoreData.schedule)
         )
+    }
+    
+    func findCoreData(by id: UUID) throws -> TrackerCoreData? {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        
+        if let fetchedTracker = try? managedObjectContext.fetch(fetchRequest).first {
+            return fetchedTracker
+        }
+        return nil
     }
 }

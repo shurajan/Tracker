@@ -14,32 +14,32 @@ enum TrackerCategoryStoreError: Error {
 final class TrackerCategoryStore: BasicStore {
     
     func addTrackerCategory(category : TrackerCategory) throws {
-        if let existingCategory = getTrackerCategoryCoreData(by: category.title) {
+        if let existingCategory = find(by: category.title) {
             return
         }
         let trackerCategoryCoreData = TrackerCategoryCoreData(context: self.managedObjectContext)
         trackerCategoryCoreData.title = category.title
         
     }
-    
-    func getTrackerCategoryCoreData(by title: String) -> TrackerCategoryCoreData? {
-        let categoryFetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        categoryFetchRequest.predicate = NSPredicate(format: "title == %@", title)
         
-        if let fetchedCategory = try? managedObjectContext.fetch(categoryFetchRequest).first {
-            return fetchedCategory
-        }
-        return nil
+    func find(by title: String) -> TrackerCategory? {
         
-    }
-    
-    func getTrackerCategory(by title: String) -> TrackerCategory? {
-        
-        if let categoryCoreData = getTrackerCategoryCoreData(by: title){
+        if let categoryCoreData = findCoreData(by: title){
             return TrackerCategory(title: categoryCoreData.title ?? "")
         }
         
         return nil
+    }
+    
+    func findCoreData(by title: String) -> TrackerCategoryCoreData? {
+        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "title == %@", title)
+        
+        if let fetchedCategory = try? managedObjectContext.fetch(fetchRequest).first {
+            return fetchedCategory
+        }
+        return nil
+        
     }
     
 }

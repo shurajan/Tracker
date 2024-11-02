@@ -7,15 +7,34 @@
 
 import CoreData
 
+enum TrackerRecordStoreError: Error {
+    case createTrackerRecordError
+}
+
 final class TrackerRecordStore: BasicStore {
+    private var trackerStore = TrackerStore()
     
     func manageTrackerRecord(trackerRecord :TrackerRecord) {
-        let records = getTrackerRecordCoreData(by: trackerRecord.trackerId, and: trackerRecord.date)
+        let records = findCoreData(by: trackerRecord.trackerId, and: trackerRecord.date)
         
         if records.isEmpty {
-            let trackerRecordCoreData = TrackerRecordCoreData(context: self.managedObjectContext)
-            trackerRecordCoreData.tracker_id = trackerRecord.trackerId
-            trackerRecordCoreData.date = trackerRecord.date.startOfDay()
+            do {
+                guard
+                    let tracker = try trackerStore.findCoreData(by: trackerRecord.trackerId)
+                else {
+                    Log.error(error: TrackerRecordStoreError.createTrackerRecordError, message: "Failed to find tracker with id \(trackerRecord.trackerId)")
+                    return
+                }
+                        
+                let trackerRecordCoreData = TrackerRecordCoreData(context: self.managedObjectContext)
+                trackerRecordCoreData.tracker_id = trackerRecord.trackerId
+                trackerRecordCoreData.date = trackerRecord.date.startOfDay()
+                trackerRecordCoreData.tracker = tracker
+            } catch {
+                Log.error(error: error, message: "Failed to create TrackerRecord for id \(trackerRecord.trackerId)")
+                return
+            }
+    
         } else {
             for record in records {
                 managedObjectContext.delete(record)
@@ -24,12 +43,12 @@ final class TrackerRecordStore: BasicStore {
     }
     
     func count(by id: UUID) -> Int {
-        let recordFetchRequest: NSFetchRequest<NSFetchRequestResult> = TrackerRecordCoreData.fetchRequest()
-        recordFetchRequest.predicate = NSPredicate(format: "tracker_id == %@", id as CVarArg)
-        recordFetchRequest.resultType = .countResultType
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = TrackerRecordCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "tracker_id == %@", id as CVarArg)
+        fetchRequest.resultType = .countResultType
         
         do {
-            let count = try managedObjectContext.count(for: recordFetchRequest)
+            let count = try managedObjectContext.count(for: fetchRequest)
             return count
         } catch {
             Log.error(error: error)
@@ -54,12 +73,12 @@ final class TrackerRecordStore: BasicStore {
         }
     }
     
-    private func getTrackerRecordCoreData(by id: UUID) -> [TrackerRecordCoreData] {
-        let recordFetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
-        recordFetchRequest.predicate = NSPredicate(format: "tracker_id == %@", id as CVarArg)
+    private func findCoreData(by id: UUID) -> [TrackerRecordCoreData] {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "tracker_id == %@", id as CVarArg)
         
         do {
-            let fetchedRecords = try managedObjectContext.fetch(recordFetchRequest)
+            let fetchedRecords = try managedObjectContext.fetch(fetchRequest)
             return fetchedRecords
         } catch {
             Log.error(error: error)
@@ -67,14 +86,14 @@ final class TrackerRecordStore: BasicStore {
         }
     }
     
-    private func getTrackerRecordCoreData(by id: UUID, and date: Date) -> [TrackerRecordCoreData] {
-        let recordFetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+    private func findCoreData(by id: UUID, and date: Date) -> [TrackerRecordCoreData] {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
         
         let dateStart = Calendar.current.startOfDay(for: date) as NSDate
-        recordFetchRequest.predicate = NSPredicate(format: "tracker_id == %@ AND date == %@", id as CVarArg, dateStart)
+        fetchRequest.predicate = NSPredicate(format: "tracker_id == %@ AND date == %@", id as CVarArg, dateStart)
         
         do {
-            let fetchedRecords = try managedObjectContext.fetch(recordFetchRequest)
+            let fetchedRecords = try managedObjectContext.fetch(fetchRequest)
             return fetchedRecords
         } catch {
             Log.error(error: error)

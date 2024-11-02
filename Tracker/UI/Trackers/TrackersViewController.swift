@@ -120,13 +120,11 @@ final class TrackersViewController: LightStatusBarViewController {
         navigationItem.searchController = searchController
         
         NSLayoutConstraint.activate([
-            // Constraints for plusButton and datePicker
             plusButton.widthAnchor.constraint(equalToConstant: 42),
             plusButton.heightAnchor.constraint(equalToConstant: 42),
             datePicker.widthAnchor.constraint(equalToConstant: 100),
             datePicker.heightAnchor.constraint(equalToConstant: 34),
             
-            // Constraints for trackerCollectionView
             trackerCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             trackerCollectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             trackerCollectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
