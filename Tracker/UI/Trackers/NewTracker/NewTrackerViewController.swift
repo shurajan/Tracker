@@ -55,6 +55,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
         textField.delegate = self
         textField.backgroundColor = .ysBackground
         textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.addTarget(self, action: #selector(trackerNameTextFieldChanged), for: .editingChanged)
         return textField
     }()
     
@@ -82,7 +83,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-
+    
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Отменить", for: .normal)
@@ -144,10 +145,14 @@ final class NewTrackerViewController: LightStatusBarViewController {
     }()
     
     var eventType: EventType = .one_off
-    private var selectedDays = WeekDays()
-        
+    private var selectedDays: WeekDays = WeekDays()
+    private var selectedEmojiIndex: IndexPath?
+    private var selectedColorIndex: IndexPath?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        emojiSelectionView.delegate = self
+        colorSelectionView.delegate = self
         setupLayout()
     }
     
@@ -204,6 +209,33 @@ final class NewTrackerViewController: LightStatusBarViewController {
             buttonsStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24),
             buttonsStackView.heightAnchor.constraint(equalToConstant: 60)
         ])
+        updateCreateButtonState(isActive: validateTracker())
+    }
+    
+    private func validateTracker() -> Bool {
+        let isNameFilled = !(trackerNameTextField.text?.isEmpty ?? true)
+        let isEmojiSelected = selectedEmojiIndex != nil
+        let isColorSelected = selectedColorIndex != nil
+        let isScheduled = eventType == .one_off ? true : !selectedDays.isEmpty
+        
+        let result = isNameFilled && isEmojiSelected && isColorSelected && isScheduled
+        
+        return result
+    }
+    
+    private func updateCreateButtonState(isActive: Bool) {
+        if isActive {
+            createButton.backgroundColor = .ysBlack
+            createButton.isEnabled = true
+        } else {
+            createButton.backgroundColor = .ysGray
+            createButton.isEnabled = false
+        }
+    }
+    
+    @IBAction
+    private func trackerNameTextFieldChanged(_ textField: UITextField){
+        updateCreateButtonState(isActive: validateTracker())
     }
     
     @IBAction
@@ -215,14 +247,14 @@ final class NewTrackerViewController: LightStatusBarViewController {
     private func createButtonTapped() {
         guard let name = trackerNameTextField.text,
               !name.isEmpty,
-              let delegate
+              let delegate,
+              let selectedEmojiIndex,
+              let selectedColorIndex
         else {return}
         
-        let colorIndex = colorSelectionView.selectedColorIndex?.item ?? 0
-        let color = TrackerColor.allCases[colorIndex]
+        let color = TrackerColor.allCases[selectedColorIndex.item]
         
-        let emojiIndex = emojiSelectionView.selectedEmojiIndex?.item ?? 0
-        let emoji = Emoji.allCases[emojiIndex]
+        let emoji = Emoji.allCases[selectedEmojiIndex.item]
         
         let schedule = (eventType == .habit) ? self.selectedDays : nil
         
@@ -241,6 +273,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
 extension NewTrackerViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
         tableView.deselectRow(at: indexPath, animated: true)
         
         if indexPath.row == 0 {
@@ -290,7 +323,7 @@ extension NewTrackerViewController: UITableViewDataSource {
     }
 }
 
-extension NewTrackerViewController: ScheduleDelegateProtocol {
+extension NewTrackerViewController: NewTrackerDelegateProtocol {
     func didSelectDays(_ selectedDays: WeekDays) {
         self.selectedDays = selectedDays
         
@@ -303,13 +336,23 @@ extension NewTrackerViewController: ScheduleDelegateProtocol {
             }
         }
         scheduleCell.detailTextLabel?.text = detail
-        
+        updateCreateButtonState(isActive: validateTracker())
+    }
+    
+    func didSelectEmoji(_ indexPath: IndexPath) {
+        self.selectedEmojiIndex = indexPath
+        updateCreateButtonState(isActive: validateTracker())
+    }
+    
+    func didSelectColor(_ indexPath: IndexPath) {
+        self.selectedColorIndex = indexPath
+        updateCreateButtonState(isActive: validateTracker())
     }
 }
 
 // MARK: - UITextViewDelegate
 extension NewTrackerViewController: UITextFieldDelegate{
-
+    
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let currentText = textField.text ?? ""
         guard let stringRange = Range(range, in: currentText) else { return false }

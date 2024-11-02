@@ -10,7 +10,7 @@ final class ScheduleViewController: LightStatusBarViewController {
     
     var selectedDays = WeekDays()
     
-    weak var delegate: ScheduleDelegateProtocol?
+    weak var delegate: NewTrackerDelegateProtocol?
 
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
@@ -90,7 +90,7 @@ final class ScheduleViewController: LightStatusBarViewController {
     
     @IBAction
     private func doneButtonTapped() {
-        delegate?.didSelectDays(selectedDays) // Передаем выбранные дни как enum
+        delegate?.didSelectDays(selectedDays)
         dismiss(animated: true, completion: nil)
     }
 }

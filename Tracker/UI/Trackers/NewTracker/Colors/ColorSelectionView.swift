@@ -12,8 +12,9 @@
 import UIKit
 
 class ColorSelectionView: UIView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    weak var delegate: NewTrackerDelegateProtocol?
     
-    private(set) var selectedColorIndex: IndexPath?
+    private var selectedColorIndex: IndexPath?
     
     private let params: GeometricParams = GeometricParams(cellCount: 6,
                                                           leftInset: 20,
@@ -119,6 +120,7 @@ class ColorSelectionView: UIView, UICollectionViewDelegate, UICollectionViewData
         }
         
         selectedColorIndex = indexPath
+        delegate?.didSelectColor(indexPath)
         
         if let currentCell = collectionView.cellForItem(at: indexPath) as? ColorCollectionViewCell {
             currentCell.configure(with: TrackerColor.allCases[indexPath.item].uiColor, isSelected: true)

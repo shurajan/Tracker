@@ -114,6 +114,12 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func setupPlusButton(isDone: Bool, color: UIColor) {
+        if let currentDate = delegate?.currentDate {
+            let isActive = currentDate < Date()
+            plusButton.alpha = isActive ? 0.7 : 1
+            plusButton.isEnabled = isActive
+        }
+        
         let buttonImage = isDone ? UIImage(systemName: "checkmark.circle.fill") : UIImage(systemName: "plus.circle.fill")
         
         plusButton.setImage(buttonImage, for: .normal)

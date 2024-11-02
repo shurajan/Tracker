@@ -13,8 +13,9 @@
 import UIKit
 
 class EmojiSelectionView: UIView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    weak var delegate: NewTrackerDelegateProtocol?
     
-    private(set) var selectedEmojiIndex: IndexPath?
+    private var selectedEmojiIndex: IndexPath?
     
     private let params: GeometricParams = GeometricParams(cellCount: 6,
                                                           leftInset: 20,
@@ -121,10 +122,9 @@ class EmojiSelectionView: UIView, UICollectionViewDelegate, UICollectionViewData
             previousCell.configure(with: Emoji.allCases[previousIndex.item].rawValue, isSelected: false)
         }
         
-        // Устанавливаем новый выбранный индекс
         selectedEmojiIndex = indexPath
+        delegate?.didSelectEmoji(indexPath)
         
-        // Обновляем текущую выбранную ячейку
         if let currentCell = collectionView.cellForItem(at: indexPath) as? EmojiCollectionViewCell {
             currentCell.configure(with: Emoji.allCases[indexPath.item].rawValue, isSelected: true)
         }
