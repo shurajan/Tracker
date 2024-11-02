@@ -54,11 +54,17 @@ final class TrackersViewDataProvider: NSObject {
         let currentWeekday = WeekDays.fromGregorianStyle(currentWeekdayInt)?.rawValue ?? 0
         let dateStart = date.startOfDay() as NSDate
         
-        let format = "date == %@ OR (schedule & %d != 0)"
+        //let format = "(date == %@ AND (schedule == 0 schedule == nil)) OR (schedule & %d != 0)"
         
-        return NSPredicate(format: format,
-                           dateStart,
-                           currentWeekday)
+        let datePredicate = NSPredicate(format: "date == %@", dateStart)
+        let scheduleZeroPredicate = NSPredicate(format: "schedule == 0 OR schedule == nil")
+        let dateAndNoSchedulePredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, scheduleZeroPredicate])
+        
+        let scheduleContainsDayPredicate = NSPredicate(format: "(schedule & %d) != 0", currentWeekday)
+        
+        let finalPredicate = NSCompoundPredicate(orPredicateWithSubpredicates: [dateAndNoSchedulePredicate, scheduleContainsDayPredicate])
+        
+        return finalPredicate
     }
     
     private func updateFetchRequest() {
