@@ -221,7 +221,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     }
 }
 
-
+//MARK: - UICollectionViewDelegateFlowLayout
 extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -268,7 +268,7 @@ extension TrackersViewController: TrackersViewProtocol {
     
 }
 
-
+//MARK: - DataProviderDelegate
 extension TrackersViewController: DataProviderDelegate {
     
     func didUpdate(_ update: IndexUpdate) {

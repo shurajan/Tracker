@@ -11,7 +11,6 @@ enum DataProviderError: Error {
     case failedToInitializeContext
 }
 
-
 struct IndexUpdate {
     let insertedSections: IndexSet
     let deletedSections: IndexSet

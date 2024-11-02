@@ -233,6 +233,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
         }
     }
     
+    //MARK: - IB Outlet
     @IBAction
     private func trackerNameTextFieldChanged(_ textField: UITextField){
         updateCreateButtonState(isActive: validateTracker())
@@ -270,6 +271,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
     }
 }
 
+//MARK: - UITableViewDelegate
 extension NewTrackerViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -305,6 +307,7 @@ extension NewTrackerViewController: UITableViewDelegate {
     }
 }
 
+//MARK: - UITableViewDataSource
 extension NewTrackerViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -323,6 +326,7 @@ extension NewTrackerViewController: UITableViewDataSource {
     }
 }
 
+//MARK: - NewTrackerDelegateProtocol
 extension NewTrackerViewController: NewTrackerDelegateProtocol {
     func didSelectDays(_ selectedDays: WeekDays) {
         self.selectedDays = selectedDays
