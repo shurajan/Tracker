@@ -7,10 +7,6 @@
 import Foundation
 
 
-enum DataProviderError: Error {
-    case failedToInitializeContext
-}
-
 struct IndexUpdate {
     let insertedSections: IndexSet
     let deletedSections: IndexSet
@@ -19,7 +15,6 @@ struct IndexUpdate {
     let updatedItems: [Int: IndexSet]
     let movedItems: [(from: IndexPath, to: IndexPath)]
 }
-
 
 protocol TrackersViewModelProtocol {
     var currentDate: Date { get }

@@ -38,8 +38,7 @@ final class TrackerStore: BasicStore {
     private var deletedItems = [Int: IndexSet]()
     private var updatedItems = [Int: IndexSet]()
     private var movedItems = [(from: IndexPath, to: IndexPath)]()
-    
-        
+            
     //MARK: - Private Functions
     private func setupPredicate(date: Date) -> NSPredicate {
         let calendar = Calendar.current

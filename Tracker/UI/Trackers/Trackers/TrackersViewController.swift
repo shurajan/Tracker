@@ -150,6 +150,10 @@ final class TrackersViewController: LightStatusBarViewController {
         self.trackerStore = TrackerStore()
         self.trackerRecordStore = TrackerRecordStore()
         trackerStore?.onDataUpdate = updateCollectionView
+        
+        let isHidden = trackerStore?.hasItems() ?? true
+        self.trackerCollectionView.isHidden = !isHidden
+        self.placeHolderView.isHidden = isHidden
     }
     
     private func updateCollectionView(_ update: IndexUpdate) {
