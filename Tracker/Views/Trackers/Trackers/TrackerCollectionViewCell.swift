@@ -8,11 +8,12 @@
 import UIKit
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
-    var delegate: TrackersViewControllerProtocol?
-    
     private var tracker: Tracker?
-    private var selectedDate: Date?
+    private var date: Date?
+    private var dataProvider: TrackerRecordDataProviderProtocol?
+    
     private var count: Int = 0
+    private var isDone: Bool = false
     
     private lazy var emojiLabel: UILabel = {
         let label = UILabel()
@@ -57,17 +58,17 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }()
     
     
-    func configure(with tracker: Tracker, selectedDate: Date, count: Int, isDone: Bool) {
+    func configure(tracker: Tracker, date: Date , dataProvider: TrackerRecordDataProviderProtocol) {
+        self.dataProvider = dataProvider
+        self.date = date
         self.tracker = tracker
-        self.selectedDate = selectedDate
-        self.count = count
         
         emojiLabel.text = tracker.emoji.rawValue
         nameLabel.text = tracker.name
         cardView.backgroundColor = tracker.color.uiColor
         
-        daysLabel.text = formatDaysText(count)
-        setupPlusButton(isDone: isDone, color: tracker.color.uiColor)
+        let trackerRecord = TrackerRecord(trackerId: tracker.id, date: date)
+        updateStatisticsAndShow(trackerRecord: trackerRecord)
     }
     
     override init(frame: CGRect) {
@@ -114,6 +115,12 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func setupPlusButton(isDone: Bool, color: UIColor) {
+        if let date  {
+            let isActive = date < Date()
+            plusButton.alpha = isActive ? 0.7 : 1
+            plusButton.isEnabled = isActive
+        }
+        
         let buttonImage = isDone ? UIImage(systemName: "checkmark.circle.fill") : UIImage(systemName: "plus.circle.fill")
         
         plusButton.setImage(buttonImage, for: .normal)
@@ -141,22 +148,32 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         }
     }
     
+    private func updateStatisticsAndShow(trackerRecord: TrackerRecord) {
+        guard
+            let dataProvider,
+            let tracker
+        else { return }
+        
+        
+        isDone = dataProvider.exist(trackerRecord: trackerRecord)
+        count = dataProvider.count(trackerRecord: trackerRecord)
+        
+        setupPlusButton(isDone: isDone, color: tracker.color.uiColor)
+        daysLabel.text = formatDaysText(count)
+    }
+    
     @IBAction
     private func plusButtonTapped() {
         guard let tracker,
-              let selectedDate,
-              let delegate,
-              selectedDate < Date()
+              let dataProvider,
+              let date,
+              date < Date()
         else { return }
         
-        let newCount = delegate.didCreateTrackerRecord(tracker: tracker, date: selectedDate)
+        let trackerRecord = TrackerRecord(trackerId: tracker.id, date: date)
+        try? dataProvider.manageTrackerRecord(trackerRecord: trackerRecord)
         
-        let isDone = newCount > count
-        
-        setupPlusButton(isDone: isDone, color: tracker.color.uiColor)
-        
-        count = newCount
-        daysLabel.text = formatDaysText(count)
+        updateStatisticsAndShow(trackerRecord: trackerRecord)
     }
 }
 
