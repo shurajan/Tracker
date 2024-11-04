@@ -8,9 +8,10 @@
 import UIKit
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
-    private var delegate: TrackersViewModelProtocol?
-    
     private var tracker: Tracker?
+    private var date: Date?
+    private var dataProvider: TrackerRecordDataProviderProtocol?
+    
     private var count: Int = 0
     private var isDone: Bool = false
     
@@ -57,16 +58,16 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }()
     
     
-    func configure(with tracker: Tracker, dataProvider delegate: TrackersViewModelProtocol) {
-        self.delegate = delegate
+    func configure(tracker: Tracker, date: Date , dataProvider: TrackerRecordDataProviderProtocol) {
+        self.dataProvider = dataProvider
+        self.date = date
         self.tracker = tracker
-    
         
         emojiLabel.text = tracker.emoji.rawValue
         nameLabel.text = tracker.name
         cardView.backgroundColor = tracker.color.uiColor
         
-        let trackerRecord = TrackerRecord(trackerId: tracker.id, date: delegate.currentDate)
+        let trackerRecord = TrackerRecord(trackerId: tracker.id, date: date)
         updateStatisticsAndShow(trackerRecord: trackerRecord)
     }
     
@@ -114,8 +115,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func setupPlusButton(isDone: Bool, color: UIColor) {
-        if let currentDate = delegate?.currentDate {
-            let isActive = currentDate < Date()
+        if let date  {
+            let isActive = date < Date()
             plusButton.alpha = isActive ? 0.7 : 1
             plusButton.isEnabled = isActive
         }
@@ -149,17 +150,14 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     private func updateStatisticsAndShow(trackerRecord: TrackerRecord) {
         guard
-            let delegate,
+            let dataProvider,
             let tracker
         else { return }
         
-        do {
-            isDone = try delegate.trackerRecordExist(trackerRecord: trackerRecord)
-            count = try delegate.countTrackerRecords(trackerRecord: trackerRecord)
-        } catch {
-            Log.error(error: error)
-            return
-        }
+        
+        isDone = dataProvider.exist(trackerRecord: trackerRecord)
+        count = dataProvider.count(trackerRecord: trackerRecord)
+        
         setupPlusButton(isDone: isDone, color: tracker.color.uiColor)
         daysLabel.text = formatDaysText(count)
     }
@@ -167,12 +165,13 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     @IBAction
     private func plusButtonTapped() {
         guard let tracker,
-              let delegate,
-              delegate.currentDate < Date()
-                
+              let dataProvider,
+              let date,
+              date < Date()
         else { return }
-        let trackerRecord = TrackerRecord(trackerId: tracker.id, date: delegate.currentDate)
-        try? delegate.manageTrackerRecord(trackerRecord: trackerRecord)
+        
+        let trackerRecord = TrackerRecord(trackerId: tracker.id, date: date)
+        try? dataProvider.manageTrackerRecord(trackerRecord: trackerRecord)
         
         updateStatisticsAndShow(trackerRecord: trackerRecord)
     }

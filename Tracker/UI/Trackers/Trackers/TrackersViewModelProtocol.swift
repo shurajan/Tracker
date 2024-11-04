@@ -20,21 +20,20 @@ struct IndexUpdate {
     let movedItems: [(from: IndexPath, to: IndexPath)]
 }
 
-protocol TrackersViewModelDelegate: AnyObject {
-    func didUpdate(_ update: IndexUpdate)
-    func reloadData()
-    func updatePlaceholderVisibility(isHidden: Bool)
-}
 
 protocol TrackersViewModelProtocol {
-    var currentDate: Date { get set }
+    var currentDate: Date { get }
+    var onDataUpdate: ((_ update: IndexUpdate)->Void)? { get set }
+    func setCurrentDate(new date: Date, completion:()->Void)
     func numberOfSections() -> Int
     func titleForSection(_ section: Int) -> String?
     func numberOfRowsInSection(_ section: Int) -> Int
-    func tracker(at: IndexPath) -> Tracker?
     func addTracker(tracker: Tracker, category: TrackerCategory) throws
-    func deleteTracker(at indexPath: IndexPath) throws
-    func manageTrackerRecord(trackerRecord: TrackerRecord) throws
-    func trackerRecordExist(trackerRecord: TrackerRecord) throws -> Bool
-    func countTrackerRecords(trackerRecord: TrackerRecord) throws -> Int
+    func findTracker(at: IndexPath) -> Tracker?
+}
+
+protocol TrackerRecordDataProviderProtocol {
+    func manageTrackerRecord(trackerRecord :TrackerRecord)
+    func count(trackerRecord: TrackerRecord) -> Int
+    func exist(trackerRecord: TrackerRecord) -> Bool
 }

@@ -13,66 +13,7 @@ enum TrackerRecordStoreError: Error {
 
 final class TrackerRecordStore: BasicStore {
     private var trackerStore = TrackerStore()
-    
-    func manageTrackerRecord(trackerRecord :TrackerRecord) {
-        let records = findCoreData(by: trackerRecord.trackerId, and: trackerRecord.date)
         
-        if records.isEmpty {
-            do {
-                guard
-                    let tracker = try trackerStore.findCoreData(by: trackerRecord.trackerId)
-                else {
-                    Log.error(error: TrackerRecordStoreError.createTrackerRecordError, message: "Failed to find tracker with id \(trackerRecord.trackerId)")
-                    return
-                }
-                        
-                let trackerRecordCoreData = TrackerRecordCoreData(context: self.managedObjectContext)
-                trackerRecordCoreData.tracker_id = trackerRecord.trackerId
-                trackerRecordCoreData.date = trackerRecord.date.startOfDay()
-                trackerRecordCoreData.tracker = tracker
-            } catch {
-                Log.error(error: error, message: "Failed to create TrackerRecord for id \(trackerRecord.trackerId)")
-                return
-            }
-    
-        } else {
-            for record in records {
-                managedObjectContext.delete(record)
-            }
-        }
-    }
-    
-    func count(by id: UUID) -> Int {
-        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = TrackerRecordCoreData.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "tracker_id == %@", id as CVarArg)
-        fetchRequest.resultType = .countResultType
-        
-        do {
-            let count = try managedObjectContext.count(for: fetchRequest)
-            return count
-        } catch {
-            Log.error(error: error)
-            return 0
-        }
-    }
-    
-    func exist(trackerRecord :TrackerRecord) -> Bool {
-        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = TrackerRecordCoreData.fetchRequest()
-        let searchDate = trackerRecord.date.startOfDay() as NSDate
-        let id = trackerRecord.trackerId as CVarArg
-        fetchRequest.predicate = NSPredicate(format: "tracker_id == %@ AND date == %@", id as CVarArg, searchDate)
-        fetchRequest.resultType = .countResultType
-        fetchRequest.fetchLimit = 1
-        
-        do {
-            let count = try managedObjectContext.count(for: fetchRequest)
-            return count > 0
-        } catch {
-            Log.error(error: error)
-            return false
-        }
-    }
-    
     private func findCoreData(by id: UUID) -> [TrackerRecordCoreData] {
         let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "tracker_id == %@", id as CVarArg)
@@ -101,4 +42,82 @@ final class TrackerRecordStore: BasicStore {
         }
     }
     
+    private func findTrackerCoreData(by id: UUID) throws -> TrackerCoreData? {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        
+        if let fetchedTracker = try? managedObjectContext.fetch(fetchRequest).first {
+            return fetchedTracker
+        }
+        return nil
+    }
+    
+}
+
+extension TrackerRecordStore: TrackerRecordDataProviderProtocol {
+        
+    func manageTrackerRecord(trackerRecord :TrackerRecord) {
+        let records = findCoreData(by: trackerRecord.trackerId, and: trackerRecord.date)
+        
+        if records.isEmpty {
+            do {
+                guard
+                    let tracker = try findTrackerCoreData(by: trackerRecord.trackerId)
+                else {
+                    Log.error(error: TrackerRecordStoreError.createTrackerRecordError, message: "Failed to find tracker with id \(trackerRecord.trackerId)")
+                    return
+                }
+                
+                let trackerRecordCoreData = TrackerRecordCoreData(context: self.managedObjectContext)
+                trackerRecordCoreData.tracker_id = trackerRecord.trackerId
+                trackerRecordCoreData.date = trackerRecord.date.startOfDay()
+                trackerRecordCoreData.tracker = tracker
+            } catch {
+                Log.error(error: error, message: "Failed to create TrackerRecord for id \(trackerRecord.trackerId)")
+                return
+            }
+            
+        } else {
+            for record in records {
+                managedObjectContext.delete(record)
+            }
+        }
+        
+        do {
+            try save()
+        } catch {
+            Log.error(error: error, message: "Can not save tracker record")
+        }
+    }
+    
+    func count(trackerRecord: TrackerRecord) -> Int {
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = TrackerRecordCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "tracker_id == %@", trackerRecord.trackerId as CVarArg)
+        fetchRequest.resultType = .countResultType
+        
+        do {
+            let count = try managedObjectContext.count(for: fetchRequest)
+            return count
+        } catch {
+            Log.error(error: error)
+            return 0
+        }
+    }
+    
+    func exist(trackerRecord :TrackerRecord) -> Bool {
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = TrackerRecordCoreData.fetchRequest()
+        let searchDate = trackerRecord.date.startOfDay() as NSDate
+        let id = trackerRecord.trackerId as CVarArg
+        fetchRequest.predicate = NSPredicate(format: "tracker_id == %@ AND date == %@", id as CVarArg, searchDate)
+        fetchRequest.resultType = .countResultType
+        fetchRequest.fetchLimit = 1
+        
+        do {
+            let count = try managedObjectContext.count(for: fetchRequest)
+            return count > 0
+        } catch {
+            Log.error(error: error)
+            return false
+        }
+    }
 }

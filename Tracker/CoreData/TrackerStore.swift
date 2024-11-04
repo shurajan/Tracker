@@ -1,23 +1,36 @@
 //
-//  TrackersDataProvider.swift
+//  TrackerStore.swift
 //  Tracker
 //
-//  Created by Alexander Bralnin on 31.10.2024.
+//  Created by Alexander Bralnin on 24.10.2024.
 //
 
-import Foundation
 import CoreData
 
-final class TrackersViewModel: NSObject {
-    var currentDate: Date = Date() {
-        didSet {
-            updateFetchRequest()
-        }
-    }
-    private let delegate: TrackersViewModelDelegate?
-    private let context: NSManagedObjectContext
-    private let trackerStore: TrackerStore
-    private let trackerRecordStore: TrackerRecordStore
+enum TrackerDecodingError: Error {
+    case decodingErrorInvalidValue
+}
+
+final class TrackerStore: BasicStore {
+    var onDataUpdate: ((_ update: IndexUpdate)->Void)?
+    
+    private(set) var currentDate: Date = Date()
+    
+    private var trackerCategoryStore = TrackerCategoryStore()
+    
+    private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
+        let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "tracker_category.title", ascending: false)]
+        fetchRequest.predicate = setupPredicate(date: currentDate)
+        
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
+                                                                  managedObjectContext: managedObjectContext,
+                                                                  sectionNameKeyPath: "tracker_category.title",
+                                                                  cacheName: nil)
+        fetchedResultsController.delegate = self
+        try? fetchedResultsController.performFetch()
+        return fetchedResultsController
+    }()
     
     private var insertedSections = IndexSet()
     private var deletedSections = IndexSet()
@@ -26,28 +39,8 @@ final class TrackersViewModel: NSObject {
     private var updatedItems = [Int: IndexSet]()
     private var movedItems = [(from: IndexPath, to: IndexPath)]()
     
-    private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
-        let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "tracker_category.title", ascending: false)]
-        fetchRequest.predicate = setupPredicate(date: currentDate)
         
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
-                                                                  managedObjectContext: context,
-                                                                  sectionNameKeyPath: "tracker_category.title",
-                                                                  cacheName: nil)
-        fetchedResultsController.delegate = self
-        try? fetchedResultsController.performFetch()
-        return fetchedResultsController
-    }()
-    
-    
-    init(delegate: TrackersViewModelDelegate) throws {
-        self.delegate = delegate
-        self.trackerStore = TrackerStore()
-        self.trackerRecordStore = TrackerRecordStore()
-        self.context = trackerStore.managedObjectContext
-    }
-    
+    //MARK: - Private Functions
     private func setupPredicate(date: Date) -> NSPredicate {
         let calendar = Calendar.current
         let currentWeekdayInt = calendar.component(.weekday, from: date)
@@ -65,71 +58,63 @@ final class TrackersViewModel: NSObject {
         return finalPredicate
     }
     
+    
     private func updateFetchRequest() {
         let fetchRequest = fetchedResultsController.fetchRequest
         fetchRequest.predicate = setupPredicate(date: currentDate)
         
         do {
             try fetchedResultsController.performFetch()
-            delegate?.reloadData()
-            delegate?.updatePlaceholderVisibility(isHidden: hasItems())
         } catch {
             Log.error(error: error, message: "Failed to fetch filtered results")
         }
     }
     
-    private func hasItems() -> Bool {
-        let sections = self.fetchedResultsController.sections ?? []
-        return sections.contains { $0.numberOfObjects > 0 }
+    private func from(_ trackerCoreData: TrackerCoreData) throws -> Tracker {
+        guard let id = trackerCoreData.id,
+           let name = trackerCoreData.name,
+           let colorHex = trackerCoreData.colorHex,
+           let color = TrackerColor(rawValue: colorHex),
+           let emojiString = trackerCoreData.emoji,
+           let emoji = Emoji(rawValue: emojiString),
+              let date = trackerCoreData.date
+        else {
+            throw TrackerDecodingError.decodingErrorInvalidValue
+        }
+        
+        return Tracker(id: id,
+                       name: name,
+                       color: color,
+                       emoji: emoji,
+                       date: date,
+                       schedule: WeekDays(rawValue: trackerCoreData.schedule)
+        )
+    }
+    
+    private func findCoreData(by id: UUID) throws -> TrackerCoreData? {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        
+        if let fetchedTracker = try? managedObjectContext.fetch(fetchRequest).first {
+            return fetchedTracker
+        }
+        return nil
+    }
+    
+    private func findTrackerCategory(by title: String) -> TrackerCategoryCoreData? {
+        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "title == %@", title)
+        
+        if let fetchedCategory = try? managedObjectContext.fetch(fetchRequest).first {
+            return fetchedCategory
+        }
+        return nil
+        
     }
     
 }
 
-extension TrackersViewModel: TrackersViewModelProtocol {
-    func numberOfSections() -> Int {
-        delegate?.updatePlaceholderVisibility(isHidden: hasItems())
-        return fetchedResultsController.sections?.count ?? 0
-    }
-    
-    func titleForSection(_ section: Int) -> String? {
-        guard let sections = fetchedResultsController.sections else { return nil }
-        return sections[section].name
-    }
-    
-    func numberOfRowsInSection(_ section: Int) -> Int {
-        fetchedResultsController.sections?[section].numberOfObjects ?? 0
-    }
-    
-    func tracker(at indexPath: IndexPath) -> Tracker? {
-        let record = fetchedResultsController.object(at: indexPath)
-        return try? trackerStore.from(record)
-    }
-    
-    func addTracker(tracker: Tracker, category: TrackerCategory) throws {
-        trackerStore.addTracker(tracker: tracker, category: category)
-        try  trackerStore.save()
-    }
-    
-    func deleteTracker(at indexPath: IndexPath) throws {
-        //TODO: - implement
-        Log.warn(message: "Unsupported operation")
-    }
-    
-    func manageTrackerRecord(trackerRecord: TrackerRecord) throws {
-        trackerRecordStore.manageTrackerRecord(trackerRecord: trackerRecord)
-        try  trackerRecordStore.save()
-    }
-    
-    func trackerRecordExist(trackerRecord: TrackerRecord)-> Bool {
-        return trackerRecordStore.exist(trackerRecord: trackerRecord)
-    }
-    
-    func countTrackerRecords(trackerRecord: TrackerRecord) throws -> Int {
-        return trackerRecordStore.count(by: trackerRecord.trackerId)
-    }
-}
-
-extension TrackersViewModel: NSFetchedResultsControllerDelegate {
+extension TrackerStore: NSFetchedResultsControllerDelegate {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         reset()
     }
@@ -191,8 +176,9 @@ extension TrackersViewModel: NSFetchedResultsControllerDelegate {
             movedItems: movedItems
         )
         
-        delegate?.didUpdate(update)
-        delegate?.updatePlaceholderVisibility(isHidden: hasItems())
+        if let onDataUpdate = onDataUpdate {
+            onDataUpdate(update)
+        }
         
         reset()
     }
@@ -205,4 +191,63 @@ extension TrackersViewModel: NSFetchedResultsControllerDelegate {
         updatedItems.removeAll()
         movedItems.removeAll()
     }
+}
+
+extension TrackerStore: TrackersViewModelProtocol {
+    func setCurrentDate(new date: Date, completion:()->Void) {
+        self.currentDate = date
+        updateFetchRequest()
+        completion()
+    }
+    
+    func addTracker(tracker : Tracker, category : TrackerCategory) {
+        
+        let trackerCoreData = TrackerCoreData(context: self.managedObjectContext)
+        trackerCoreData.id = tracker.id
+        trackerCoreData.name = tracker.name
+        trackerCoreData.colorHex = tracker.color.rawValue
+        trackerCoreData.emoji = tracker.emoji.rawValue
+        trackerCoreData.date = tracker.date.startOfDay()
+        if let schedule = tracker.schedule?.rawValue{
+            trackerCoreData.schedule = schedule
+        }
+        
+        do{
+            try trackerCategoryStore.addTrackerCategory(category: category)
+            let trackerCategoryCoreData = findTrackerCategory(by: category.title)
+            trackerCoreData.tracker_category = trackerCategoryCoreData
+        } catch {
+            Log.error(error: error, message: "failed to save tracker")
+        }
+        
+        do {
+            try save()
+        } catch {
+            Log.error(error: error, message: "failed to save tracker in storage")
+        }
+    }
+    
+    func findTracker(at indexPath: IndexPath) -> Tracker? {
+        let record = fetchedResultsController.object(at: indexPath)
+        return try? from(record)
+    }
+    
+    func hasItems() -> Bool {
+        let sections = self.fetchedResultsController.sections ?? []
+        return sections.contains { $0.numberOfObjects > 0 }
+    }
+    
+    func numberOfSections() -> Int {
+        return fetchedResultsController.sections?.count ?? 0
+    }
+    
+    func titleForSection(_ section: Int) -> String? {
+        guard let sections = fetchedResultsController.sections else { return nil }
+        return sections[section].name
+    }
+    
+    func numberOfRowsInSection(_ section: Int) -> Int {
+        fetchedResultsController.sections?[section].numberOfObjects ?? 0
+    }
+    
 }

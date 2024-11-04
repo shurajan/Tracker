@@ -7,10 +7,10 @@
 import CoreData
 import UIKit
 
-class BasicStore {
+class BasicStore: NSObject {
     private let context: NSManagedObjectContext
     
-    init() {
+    override init() {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
             fatalError("Не удалось получить AppDelegate")
         }

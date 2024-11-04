@@ -31,7 +31,7 @@ final class TrackerCategoryStore: BasicStore {
         return nil
     }
     
-    func findCoreData(by title: String) -> TrackerCategoryCoreData? {
+    private func findCoreData(by title: String) -> TrackerCategoryCoreData? {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "title == %@", title)
         
@@ -41,5 +41,5 @@ final class TrackerCategoryStore: BasicStore {
         return nil
         
     }
-    
+        
 }

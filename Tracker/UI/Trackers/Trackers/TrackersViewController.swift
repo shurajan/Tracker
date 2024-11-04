@@ -14,13 +14,13 @@ protocol TrackersViewProtocol: AnyObject {
 
 
 final class TrackersViewController: LightStatusBarViewController {
-    private var dataProvider: TrackersViewModelProtocol?
-    
+    private var trackerStore: TrackerStore?
+    private var trackerRecordStore: TrackerRecordStore?
     private let params: GeometricParams = GeometricParams(cellCount: 2,
                                                           leftInset: 16,
                                                           rightInset: 16,
                                                           cellSpacing: 10)
-    
+    private var selectedDate = Date().startOfDay()
     
     //MARK: - UI components
     private lazy var plusButton: UIButton = {
@@ -91,9 +91,9 @@ final class TrackersViewController: LightStatusBarViewController {
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        dataProvider = try? TrackersViewModel(delegate: self)
         setupLayout()
+        setupStore()
+        datePicker.date = selectedDate
     }
     
     //MARK: - View Layout methods
@@ -146,6 +146,49 @@ final class TrackersViewController: LightStatusBarViewController {
         ])
     }
     
+    private func setupStore(){
+        self.trackerStore = TrackerStore()
+        self.trackerRecordStore = TrackerRecordStore()
+        trackerStore?.onDataUpdate = updateCollectionView
+    }
+    
+    private func updateCollectionView(_ update: IndexUpdate) {
+        trackerCollectionView.performBatchUpdates({
+            if !update.deletedSections.isEmpty {
+                trackerCollectionView.deleteSections(update.deletedSections)
+            }
+            
+            if !update.insertedSections.isEmpty {
+                trackerCollectionView.insertSections(update.insertedSections)
+            }
+            
+            for (section, items) in update.insertedItems {
+                let indexPaths = items.map { IndexPath(item: $0, section: section) }
+                trackerCollectionView.insertItems(at: indexPaths)
+            }
+            
+            for (section, items) in update.deletedItems {
+                let indexPaths = items.map { IndexPath(item: $0, section: section) }
+                trackerCollectionView.deleteItems(at: indexPaths)
+            }
+            
+            for (section, items) in update.updatedItems {
+                let indexPaths = items.map { IndexPath(item: $0, section: section) }
+                trackerCollectionView.reloadItems(at: indexPaths)
+            }
+            
+            for move in update.movedItems {
+                trackerCollectionView.moveItem(at: move.from, to: move.to)
+            }
+        }, completion: nil)
+        
+        if let trackerStore {
+            let isHidden = trackerStore.hasItems()
+            self.trackerCollectionView.isHidden = !isHidden
+            self.placeHolderView.isHidden = isHidden
+        }
+    }
+    
     //MARK: - IB Outlet
     @IBAction
     private func plusButtonTapped(_ sender: UIButton) {
@@ -157,7 +200,20 @@ final class TrackersViewController: LightStatusBarViewController {
     
     @IBAction
     private func datePickerValueChanged(_ sender: UIDatePicker) {
-        dataProvider?.currentDate = sender.date.startOfDay()
+        selectedDate = sender.date.startOfDay()
+        guard let trackerStore else {return}
+            
+        trackerStore.setCurrentDate(new: selectedDate){ [weak self]  in
+            guard let self,
+                  let trackerStore = self.trackerStore
+            else {return}
+            
+            self.trackerCollectionView.reloadData()
+            let isHidden = trackerStore.hasItems()
+            self.trackerCollectionView.isHidden = !isHidden
+            self.placeHolderView.isHidden = isHidden
+        }
+        
         dismiss(animated: true)
     }
 }
@@ -167,22 +223,23 @@ final class TrackersViewController: LightStatusBarViewController {
 extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return dataProvider?.numberOfRowsInSection(section) ?? 0
+        return trackerStore?.numberOfRowsInSection(section) ?? 0
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return dataProvider?.numberOfSections() ?? 0
+        return trackerStore?.numberOfSections() ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as? TrackerCollectionViewCell,
-              let dataProvider,
-              let tracker = dataProvider.tracker(at: indexPath)
+              let trackerStore,
+              let tracker = trackerStore.findTracker(at: indexPath),
+              let trackerRecordStore
         else {
             return UICollectionViewCell()
         }
         
-        cell.configure(with: tracker, dataProvider: dataProvider)
+        cell.configure(tracker: tracker, date: selectedDate, dataProvider: trackerRecordStore)
         return cell
     }
     
@@ -193,7 +250,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
                 withReuseIdentifier: "header",
                 for: indexPath
             ) as? UICollectionReusableView,
-                  let dataProvider = dataProvider,
+                  let dataProvider = trackerStore,
                   let sectionTitle = dataProvider.titleForSection(indexPath.section) else {
                 return UICollectionReusableView()
             }
@@ -253,7 +310,7 @@ extension TrackersViewController: TrackersViewProtocol {
     func showNewHabitViewController() {
         let newTrackerViewController = NewTrackerViewController()
         newTrackerViewController.eventType = .habit
-        newTrackerViewController.delegate = dataProvider
+        newTrackerViewController.delegate = trackerStore
         newTrackerViewController.modalPresentationStyle = .pageSheet
         present(newTrackerViewController, animated: true, completion: nil)
     }
@@ -261,54 +318,9 @@ extension TrackersViewController: TrackersViewProtocol {
     func showIrregularEventController() {
         let newTrackerViewController = NewTrackerViewController()
         newTrackerViewController.eventType = .one_off
-        newTrackerViewController.delegate = dataProvider
+        newTrackerViewController.delegate = trackerStore
         newTrackerViewController.modalPresentationStyle = .pageSheet
         present(newTrackerViewController, animated: true, completion: nil)
-    }
-    
-}
-
-//MARK: - DataProviderDelegate
-extension TrackersViewController: TrackersViewModelDelegate {
-    
-    func didUpdate(_ update: IndexUpdate) {
-        trackerCollectionView.performBatchUpdates({
-            if !update.deletedSections.isEmpty {
-                trackerCollectionView.deleteSections(update.deletedSections)
-            }
-            
-            if !update.insertedSections.isEmpty {
-                trackerCollectionView.insertSections(update.insertedSections)
-            }
-            
-            for (section, items) in update.insertedItems {
-                let indexPaths = items.map { IndexPath(item: $0, section: section) }
-                trackerCollectionView.insertItems(at: indexPaths)
-            }
-            
-            for (section, items) in update.deletedItems {
-                let indexPaths = items.map { IndexPath(item: $0, section: section) }
-                trackerCollectionView.deleteItems(at: indexPaths)
-            }
-            
-            for (section, items) in update.updatedItems {
-                let indexPaths = items.map { IndexPath(item: $0, section: section) }
-                trackerCollectionView.reloadItems(at: indexPaths)
-            }
-            
-            for move in update.movedItems {
-                trackerCollectionView.moveItem(at: move.from, to: move.to)
-            }
-        }, completion: nil)
-    }
-    
-    func updatePlaceholderVisibility(isHidden: Bool) {
-        self.trackerCollectionView.isHidden = !isHidden
-        self.placeHolderView.isHidden = isHidden
-    }
-    
-    func reloadData() {
-        trackerCollectionView.reloadData()
     }
     
 }
