@@ -8,13 +8,13 @@
 import Foundation
 import CoreData
 
-final class TrackersViewDataProvider: NSObject {
+final class TrackersViewModel: NSObject {
     var currentDate: Date = Date() {
         didSet {
             updateFetchRequest()
         }
     }
-    private let delegate: DataProviderDelegate?
+    private let delegate: TrackersViewModelDelegate?
     private let context: NSManagedObjectContext
     private let trackerStore: TrackerStore
     private let trackerRecordStore: TrackerRecordStore
@@ -41,7 +41,7 @@ final class TrackersViewDataProvider: NSObject {
     }()
     
     
-    init(delegate: DataProviderDelegate) throws {
+    init(delegate: TrackersViewModelDelegate) throws {
         self.delegate = delegate
         self.trackerStore = TrackerStore()
         self.trackerRecordStore = TrackerRecordStore()
@@ -85,7 +85,7 @@ final class TrackersViewDataProvider: NSObject {
     
 }
 
-extension TrackersViewDataProvider: TrackersViewDataProviderProtocol {
+extension TrackersViewModel: TrackersViewModelProtocol {
     func numberOfSections() -> Int {
         delegate?.updatePlaceholderVisibility(isHidden: hasItems())
         return fetchedResultsController.sections?.count ?? 0
@@ -129,7 +129,7 @@ extension TrackersViewDataProvider: TrackersViewDataProviderProtocol {
     }
 }
 
-extension TrackersViewDataProvider: NSFetchedResultsControllerDelegate {
+extension TrackersViewModel: NSFetchedResultsControllerDelegate {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         reset()
     }

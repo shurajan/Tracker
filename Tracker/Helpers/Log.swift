@@ -4,18 +4,13 @@
 //
 //  Created by Alexander Bralnin on 01.11.2024.
 //
-
-
-
 import Foundation
 
 final class Log {
-    private static let shared = Log()
-    
-    class func info(message: String,
-                    filePath: String = #file,
-                    line: Int = #line,
-                    function: String = #function) {
+    static func info(message: String,
+                     filePath: String = #file,
+                     line: Int = #line,
+                     function: String = #function) {
         let file = getFileName(from: filePath)
         
         print ("""
@@ -25,12 +20,13 @@ final class Log {
                """)
     }
     
-    class func error(error: Error,
-                     message: String? = nil,
-                     filePath: String = #file,
-                     line: Int = #line,
-                     function: String = #function) {
+    static func error(error: Error,
+                      message: String? = nil,
+                      filePath: String = #file,
+                      line: Int = #line,
+                      function: String = #function) {
         let file = getFileName(from: filePath)
+        
         print ("""
                \(Date().timeStampString) \
                ERROR: \(file):\(line) - \(function): \
@@ -38,10 +34,10 @@ final class Log {
                """)
     }
     
-    class func warn(message: String,
-                    filePath: String = #file,
-                    line: Int = #line,
-                    function: String = #function) {
+    static func warn(message: String,
+                     filePath: String = #file,
+                     line: Int = #line,
+                     function: String = #function) {
         let file = getFileName(from: filePath)
         
         print ("""
@@ -51,8 +47,8 @@ final class Log {
                """)
     }
     
-    //MARK: - Private functions
-    private class func getFileName(from filePath: String) -> String {
+    // MARK: - Private functions
+    private static func getFileName(from filePath: String) -> String {
         guard let url = URL(string: filePath) else {
             return filePath
         }

@@ -14,7 +14,7 @@ protocol TrackersViewProtocol: AnyObject {
 
 
 final class TrackersViewController: LightStatusBarViewController {
-    private var dataProvider: TrackersViewDataProviderProtocol?
+    private var dataProvider: TrackersViewModelProtocol?
     
     private let params: GeometricParams = GeometricParams(cellCount: 2,
                                                           leftInset: 16,
@@ -92,7 +92,7 @@ final class TrackersViewController: LightStatusBarViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        dataProvider = try? TrackersViewDataProvider(delegate: self)
+        dataProvider = try? TrackersViewModel(delegate: self)
         setupLayout()
     }
     
@@ -152,7 +152,7 @@ final class TrackersViewController: LightStatusBarViewController {
         let trackerCreationViewController = TrackerTypeSelectorViewController()
         trackerCreationViewController.delegate = self
         trackerCreationViewController.modalPresentationStyle = .pageSheet
-        present(trackerCreationViewController, animated: false, completion: nil)
+        present(trackerCreationViewController, animated: true, completion: nil)
     }
     
     @IBAction
@@ -255,7 +255,7 @@ extension TrackersViewController: TrackersViewProtocol {
         newTrackerViewController.eventType = .habit
         newTrackerViewController.delegate = dataProvider
         newTrackerViewController.modalPresentationStyle = .pageSheet
-        present(newTrackerViewController, animated: false, completion: nil)
+        present(newTrackerViewController, animated: true, completion: nil)
     }
     
     func showIrregularEventController() {
@@ -263,13 +263,13 @@ extension TrackersViewController: TrackersViewProtocol {
         newTrackerViewController.eventType = .one_off
         newTrackerViewController.delegate = dataProvider
         newTrackerViewController.modalPresentationStyle = .pageSheet
-        present(newTrackerViewController, animated: false, completion: nil)
+        present(newTrackerViewController, animated: true, completion: nil)
     }
     
 }
 
 //MARK: - DataProviderDelegate
-extension TrackersViewController: DataProviderDelegate {
+extension TrackersViewController: TrackersViewModelDelegate {
     
     func didUpdate(_ update: IndexUpdate) {
         trackerCollectionView.performBatchUpdates({

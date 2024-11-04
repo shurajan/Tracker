@@ -20,13 +20,13 @@ struct IndexUpdate {
     let movedItems: [(from: IndexPath, to: IndexPath)]
 }
 
-protocol DataProviderDelegate: AnyObject {
+protocol TrackersViewModelDelegate: AnyObject {
     func didUpdate(_ update: IndexUpdate)
     func reloadData()
     func updatePlaceholderVisibility(isHidden: Bool)
 }
 
-protocol TrackersViewDataProviderProtocol {
+protocol TrackersViewModelProtocol {
     var currentDate: Date { get set }
     func numberOfSections() -> Int
     func titleForSection(_ section: Int) -> String?

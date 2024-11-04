@@ -22,7 +22,7 @@ enum EventType: Int {
 }
 
 final class NewTrackerViewController: LightStatusBarViewController {
-    var delegate: TrackersViewDataProviderProtocol?
+    var delegate: TrackersViewModelProtocol?
     
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -269,6 +269,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
         try? delegate.addTracker(tracker: tracker, category: TrackerCategory(title: "Базовая"))
         dismiss(animated: true, completion: nil)
     }
+    
 }
 
 //MARK: - UITableViewDelegate
@@ -294,7 +295,7 @@ extension NewTrackerViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 75 // Высота каждой ячейки
+        return 75
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
@@ -362,11 +363,6 @@ extension NewTrackerViewController: UITextFieldDelegate{
         guard let stringRange = Range(range, in: currentText) else { return false }
         let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
         let length = (updatedText as NSString).length
-        if length > 0 {
-            createButton.backgroundColor = .ysBlack
-        } else {
-            createButton.backgroundColor = .ysGray
-        }
         return length <= Constants.trackerNameMaxLength
     }
     

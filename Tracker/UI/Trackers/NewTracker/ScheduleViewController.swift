@@ -4,6 +4,7 @@
 //
 //  Created by Alexander Bralnin on 15.10.2024.
 //
+
 import UIKit
 
 final class ScheduleViewController: LightStatusBarViewController {
@@ -122,6 +123,7 @@ extension ScheduleViewController: UITableViewDelegate, UITableViewDataSource {
         cell.textLabel?.text = day.description
         
         let switchView = UISwitch()
+        switchView.onTintColor = .ysBlue
         switchView.isOn = selectedDays.contains(day)
         switchView.tag = indexPath.row + 1
         switchView.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)

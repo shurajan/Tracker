@@ -5,11 +5,9 @@
 //  Created by Alexander Bralnin on 21.10.2024.
 //
 
-// ColorCollectionViewCell.swift
-
 import UIKit
 
-class ColorCollectionViewCell: UICollectionViewCell {
+final class ColorCollectionViewCell: UICollectionViewCell {
     
     private lazy var colorBox: UIView = {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
@@ -28,6 +26,13 @@ class ColorCollectionViewCell: UICollectionViewCell {
         setupLayout()
     }
     
+    func configure(with color: UIColor, isSelected: Bool) {
+        colorBox.backgroundColor = color
+        let borderColor = color.withAlphaComponent(0.3)
+        contentView.layer.borderWidth = isSelected ? 3 : 0
+        contentView.layer.borderColor = isSelected ? borderColor.cgColor : nil
+    }
+    
     private func setupLayout() {
         contentView.layer.cornerRadius = 8
         contentView.clipsToBounds = true
@@ -41,10 +46,4 @@ class ColorCollectionViewCell: UICollectionViewCell {
         ])
     }
     
-    func configure(with color: UIColor, isSelected: Bool) {
-        colorBox.backgroundColor = color
-        let borderColor = color.withAlphaComponent(0.3)
-        contentView.layer.borderWidth = isSelected ? 3 : 0
-        contentView.layer.borderColor = isSelected ? borderColor.cgColor : nil
-    }
 }

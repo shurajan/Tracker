@@ -8,7 +8,7 @@
 import UIKit
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
-    private var delegate: TrackersViewDataProviderProtocol?
+    private var delegate: TrackersViewModelProtocol?
     
     private var tracker: Tracker?
     private var count: Int = 0
@@ -57,7 +57,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }()
     
     
-    func configure(with tracker: Tracker, dataProvider delegate: TrackersViewDataProviderProtocol) {
+    func configure(with tracker: Tracker, dataProvider delegate: TrackersViewModelProtocol) {
         self.delegate = delegate
         self.tracker = tracker
     

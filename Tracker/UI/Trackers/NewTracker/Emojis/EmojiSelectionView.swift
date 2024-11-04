@@ -5,14 +5,9 @@
 //  Created by Alexander Bralnin on 21.10.2024.
 //
 
-
-// EmojiSelectionView.swift
-
-// EmojiSelectionView.swift
-
 import UIKit
 
-class EmojiSelectionView: UIView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+final class EmojiSelectionView: UIView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     weak var delegate: NewTrackerDelegateProtocol?
     
     private var selectedEmojiIndex: IndexPath?
@@ -23,7 +18,6 @@ class EmojiSelectionView: UIView, UICollectionViewDelegate, UICollectionViewData
                                                           cellSpacing: 5)
 
     
-    // Заголовок для секции с эмодзи
     private lazy var emojiLabel: UILabel = {
         let label = UILabel()
         label.text = "Emoji"
@@ -32,7 +26,6 @@ class EmojiSelectionView: UIView, UICollectionViewDelegate, UICollectionViewData
         return label
     }()
     
-    // UICollectionView для эмодзи
     private lazy var emojiCollectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         collectionView.backgroundColor = .ysWhite
@@ -82,7 +75,8 @@ class EmojiSelectionView: UIView, UICollectionViewDelegate, UICollectionViewData
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "EmojiCell", for: indexPath) as? EmojiCollectionViewCell else {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "EmojiCell",
+                                                            for: indexPath) as? EmojiCollectionViewCell else {
             return UICollectionViewCell()
         }
         
@@ -95,22 +89,31 @@ class EmojiSelectionView: UIView, UICollectionViewDelegate, UICollectionViewData
     
     // MARK: - UICollectionViewDelegateFlowLayout
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
+        
         let availableWidth = collectionView.frame.width - params.paddingWidth
         let cellWidth =  availableWidth / CGFloat(params.cellCount)
         return CGSize(width: cellWidth,
                       height: cellWidth)
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        insetForSectionAt section: Int) -> UIEdgeInsets {
         UIEdgeInsets(top: 24, left: params.leftInset, bottom: 24, right: params.rightInset)
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat{
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        minimumLineSpacingForSectionAt section: Int) -> CGFloat{
         params.cellSpacing
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         params.cellSpacing
     }
     
@@ -118,7 +121,8 @@ class EmojiSelectionView: UIView, UICollectionViewDelegate, UICollectionViewData
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         // Снимаем выделение с предыдущей выбранной ячейки, если она есть
-        if let previousIndex = selectedEmojiIndex, let previousCell = collectionView.cellForItem(at: previousIndex) as? EmojiCollectionViewCell {
+        if let previousIndex = selectedEmojiIndex,
+           let previousCell = collectionView.cellForItem(at: previousIndex) as? EmojiCollectionViewCell {
             previousCell.configure(with: Emoji.allCases[previousIndex.item].rawValue, isSelected: false)
         }
         

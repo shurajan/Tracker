@@ -5,11 +5,9 @@
 //  Created by Alexander Bralnin on 21.10.2024.
 //
 
-// EmojiCollectionViewCell.swift
-
 import UIKit
 
-class EmojiCollectionViewCell: UICollectionViewCell {
+final class EmojiCollectionViewCell: UICollectionViewCell {
     
     private let emojiLabel: UILabel = {
         let label = UILabel()
@@ -29,6 +27,11 @@ class EmojiCollectionViewCell: UICollectionViewCell {
         setupLayout()
     }
     
+    func configure(with emoji: String, isSelected: Bool) {
+        emojiLabel.text = emoji
+        contentView.backgroundColor = isSelected ? .ysLightGray : .clear
+    }
+    
     private func setupLayout() {
         contentView.addSubview(emojiLabel)
         contentView.layer.cornerRadius = 16
@@ -38,10 +41,5 @@ class EmojiCollectionViewCell: UICollectionViewCell {
             emojiLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             emojiLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
-    }
-    
-    func configure(with emoji: String, isSelected: Bool) {
-        emojiLabel.text = emoji
-        contentView.backgroundColor = isSelected ? .ysBackground : .clear
     }
 }
