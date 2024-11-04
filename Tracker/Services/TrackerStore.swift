@@ -7,6 +7,15 @@
 
 import CoreData
 
+struct IndexUpdate {
+    let insertedSections: IndexSet
+    let deletedSections: IndexSet
+    let insertedItems: [Int: IndexSet]
+    let deletedItems: [Int: IndexSet]
+    let updatedItems: [Int: IndexSet]
+    let movedItems: [(from: IndexPath, to: IndexPath)]
+}
+
 enum TrackerDecodingError: Error {
     case decodingErrorInvalidValue
 }
@@ -14,14 +23,14 @@ enum TrackerDecodingError: Error {
 final class TrackerStore: BasicStore {
     var onDataUpdate: ((_ update: IndexUpdate)->Void)?
     
-    private(set) var currentDate: Date = Date()
-    
     private var trackerCategoryStore = TrackerCategoryStore()
     
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "tracker_category.title", ascending: false)]
-        fetchRequest.predicate = setupPredicate(date: currentDate)
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "tracker_category.title", ascending: false),
+                                        NSSortDescriptor(key: "creationDate", ascending: true)]
+        
+        fetchRequest.predicate = setupPredicate(date: Date().startOfDay())
         
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
                                                                   managedObjectContext: managedObjectContext,
@@ -39,6 +48,54 @@ final class TrackerStore: BasicStore {
     private var updatedItems = [Int: IndexSet]()
     private var movedItems = [(from: IndexPath, to: IndexPath)]()
             
+    
+    //MARK: - Public Functions
+    func fetchTrackers(for date: Date) -> [TrackerCategory] {
+        updateFetchRequest(date: date.startOfDay())
+        
+        guard let sections = fetchedResultsController.sections else { return [] }
+        
+        var trackerCategories: [TrackerCategory] = []
+        
+        for section in sections {
+            guard let objects = section.objects as? [TrackerCoreData] else { continue }
+            
+            let trackers: [Tracker] = objects.compactMap { try? from($0) }
+            let trackerCategory = TrackerCategory(title: section.name, trackers: trackers)
+            trackerCategories.append(trackerCategory)
+        }
+        
+        return trackerCategories
+    }
+    
+    
+    func addTracker(tracker : Tracker, category : String) {
+        let trackerCoreData = TrackerCoreData(context: self.managedObjectContext)
+        trackerCoreData.id = tracker.id
+        trackerCoreData.name = tracker.name
+        trackerCoreData.colorHex = tracker.color.rawValue
+        trackerCoreData.emoji = tracker.emoji.rawValue
+        trackerCoreData.date = tracker.date.startOfDay()
+        trackerCoreData.creationDate = Date()
+        if let schedule = tracker.schedule?.rawValue{
+            trackerCoreData.schedule = schedule
+        }
+        
+        do{
+            try trackerCategoryStore.addTrackerCategory(category: category)
+            let trackerCategoryCoreData = findTrackerCategory(by: category)
+            trackerCoreData.tracker_category = trackerCategoryCoreData
+        } catch {
+            Log.error(error: error, message: "failed to save tracker")
+        }
+        
+        do {
+            try save()
+        } catch {
+            Log.error(error: error, message: "failed to save tracker in storage")
+        }
+    }
+    
     //MARK: - Private Functions
     private func setupPredicate(date: Date) -> NSPredicate {
         let calendar = Calendar.current
@@ -58,14 +115,14 @@ final class TrackerStore: BasicStore {
     }
     
     
-    private func updateFetchRequest() {
+    private func updateFetchRequest(date: Date) {
         let fetchRequest = fetchedResultsController.fetchRequest
-        fetchRequest.predicate = setupPredicate(date: currentDate)
+        fetchRequest.predicate = setupPredicate(date: date)
         
         do {
             try fetchedResultsController.performFetch()
         } catch {
-            Log.error(error: error, message: "Failed to fetch filtered results")
+            Log.error(error: error, message: "failed to fetch filtered results")
         }
     }
     
@@ -89,17 +146,7 @@ final class TrackerStore: BasicStore {
                        schedule: WeekDays(rawValue: trackerCoreData.schedule)
         )
     }
-    
-    private func findCoreData(by id: UUID) throws -> TrackerCoreData? {
-        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
         
-        if let fetchedTracker = try? managedObjectContext.fetch(fetchRequest).first {
-            return fetchedTracker
-        }
-        return nil
-    }
-    
     private func findTrackerCategory(by title: String) -> TrackerCategoryCoreData? {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "title == %@", title)
@@ -113,6 +160,7 @@ final class TrackerStore: BasicStore {
     
 }
 
+//MARK: - NSFetchedResultsControllerDelegate
 extension TrackerStore: NSFetchedResultsControllerDelegate {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         reset()
@@ -190,63 +238,4 @@ extension TrackerStore: NSFetchedResultsControllerDelegate {
         updatedItems.removeAll()
         movedItems.removeAll()
     }
-}
-
-extension TrackerStore: TrackersViewModelProtocol {
-    func setCurrentDate(new date: Date, completion:()->Void) {
-        self.currentDate = date
-        updateFetchRequest()
-        completion()
-    }
-    
-    func addTracker(tracker : Tracker, category : TrackerCategory) {
-        
-        let trackerCoreData = TrackerCoreData(context: self.managedObjectContext)
-        trackerCoreData.id = tracker.id
-        trackerCoreData.name = tracker.name
-        trackerCoreData.colorHex = tracker.color.rawValue
-        trackerCoreData.emoji = tracker.emoji.rawValue
-        trackerCoreData.date = tracker.date.startOfDay()
-        if let schedule = tracker.schedule?.rawValue{
-            trackerCoreData.schedule = schedule
-        }
-        
-        do{
-            try trackerCategoryStore.addTrackerCategory(category: category)
-            let trackerCategoryCoreData = findTrackerCategory(by: category.title)
-            trackerCoreData.tracker_category = trackerCategoryCoreData
-        } catch {
-            Log.error(error: error, message: "failed to save tracker")
-        }
-        
-        do {
-            try save()
-        } catch {
-            Log.error(error: error, message: "failed to save tracker in storage")
-        }
-    }
-    
-    func findTracker(at indexPath: IndexPath) -> Tracker? {
-        let record = fetchedResultsController.object(at: indexPath)
-        return try? from(record)
-    }
-    
-    func hasItems() -> Bool {
-        let sections = self.fetchedResultsController.sections ?? []
-        return sections.contains { $0.numberOfObjects > 0 }
-    }
-    
-    func numberOfSections() -> Int {
-        return fetchedResultsController.sections?.count ?? 0
-    }
-    
-    func titleForSection(_ section: Int) -> String? {
-        guard let sections = fetchedResultsController.sections else { return nil }
-        return sections[section].name
-    }
-    
-    func numberOfRowsInSection(_ section: Int) -> Int {
-        fetchedResultsController.sections?[section].numberOfObjects ?? 0
-    }
-    
 }

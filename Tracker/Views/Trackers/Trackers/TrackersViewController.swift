@@ -15,13 +15,15 @@ protocol TrackersViewProtocol: AnyObject {
 
 final class TrackersViewController: LightStatusBarViewController {
     private var trackerStore: TrackerStore?
+    private var trackersViewModel: TrackersViewModelProtocol?
     private var trackerRecordStore: TrackerRecordStore?
     private let params: GeometricParams = GeometricParams(cellCount: 2,
                                                           leftInset: 16,
                                                           rightInset: 16,
                                                           cellSpacing: 10)
-    private var selectedDate = Date().startOfDay()
     
+    private var selectedDate = Date().startOfDay()
+        
     //MARK: - UI components
     private lazy var plusButton: UIButton = {
         let button = UIButton()
@@ -92,8 +94,8 @@ final class TrackersViewController: LightStatusBarViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupLayout()
+        datePicker.date = Date().startOfDay()
         setupStore()
-        datePicker.date = selectedDate
     }
     
     //MARK: - View Layout methods
@@ -145,18 +147,36 @@ final class TrackersViewController: LightStatusBarViewController {
             questionLabel.bottomAnchor.constraint(equalTo: placeHolderView.bottomAnchor)
         ])
     }
-    
+        
     private func setupStore(){
         self.trackerStore = TrackerStore()
         self.trackerRecordStore = TrackerRecordStore()
         trackerStore?.onDataUpdate = updateCollectionView
         
-        let isHidden = trackerStore?.hasItems() ?? true
-        self.trackerCollectionView.isHidden = !isHidden
-        self.placeHolderView.isHidden = isHidden
+        guard let trackerStore else {return}
+        
+        trackersViewModel = TrackersViewModel(trackerStore: trackerStore)
+        trackersViewModel?.fetchTrackers(for: selectedDate) { [weak self] in
+            guard let self else {return }
+            if let trackersViewModel = self.trackersViewModel {
+                let isHidden = trackersViewModel.numberOfSections() > 0
+                self.trackerCollectionView.isHidden = !isHidden
+                self.placeHolderView.isHidden = isHidden
+            }
+        }
+        
     }
     
     private func updateCollectionView(_ update: IndexUpdate) {
+        trackersViewModel?.fetchTrackers(for: selectedDate) {[weak self] in
+            guard let self else {return }
+            if let trackersViewModel = self.trackersViewModel {
+                let isHidden = trackersViewModel.numberOfSections() > 0
+                self.trackerCollectionView.isHidden = !isHidden
+                self.placeHolderView.isHidden = isHidden
+            }
+        }
+        
         trackerCollectionView.performBatchUpdates({
             if !update.deletedSections.isEmpty {
                 trackerCollectionView.deleteSections(update.deletedSections)
@@ -185,12 +205,6 @@ final class TrackersViewController: LightStatusBarViewController {
                 trackerCollectionView.moveItem(at: move.from, to: move.to)
             }
         }, completion: nil)
-        
-        if let trackerStore {
-            let isHidden = trackerStore.hasItems()
-            self.trackerCollectionView.isHidden = !isHidden
-            self.placeHolderView.isHidden = isHidden
-        }
     }
     
     //MARK: - IB Outlet
@@ -205,19 +219,18 @@ final class TrackersViewController: LightStatusBarViewController {
     @IBAction
     private func datePickerValueChanged(_ sender: UIDatePicker) {
         selectedDate = sender.date.startOfDay()
-        guard let trackerStore else {return}
-            
-        trackerStore.setCurrentDate(new: selectedDate){ [weak self]  in
+        
+        trackersViewModel?.fetchTrackers(for: selectedDate){  [weak self]  in
             guard let self,
-                  let trackerStore = self.trackerStore
-            else {return}
-            
+                  let numberOfSections = trackersViewModel?.numberOfSections()
+            else {return
+            }
             self.trackerCollectionView.reloadData()
-            let isHidden = trackerStore.hasItems()
+            let isHidden = numberOfSections > 0
             self.trackerCollectionView.isHidden = !isHidden
             self.placeHolderView.isHidden = isHidden
         }
-        
+    
         dismiss(animated: true)
     }
 }
@@ -227,23 +240,22 @@ final class TrackersViewController: LightStatusBarViewController {
 extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return trackerStore?.numberOfRowsInSection(section) ?? 0
+        return trackersViewModel?.numberOfRowsInSection(section) ?? 0
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return trackerStore?.numberOfSections() ?? 0
+        return trackersViewModel?.numberOfSections() ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as? TrackerCollectionViewCell,
-              let trackerStore,
-              let tracker = trackerStore.findTracker(at: indexPath),
+              let tracker = trackersViewModel?.object(at: indexPath),
               let trackerRecordStore
         else {
             return UICollectionViewCell()
         }
         
-        cell.configure(tracker: tracker, date: selectedDate, dataProvider: trackerRecordStore)
+        cell.configure(tracker: tracker, date: datePicker.date.startOfDay(), dataProvider: trackerRecordStore)
         return cell
     }
     
@@ -254,7 +266,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
                 withReuseIdentifier: "header",
                 for: indexPath
             ) as? UICollectionReusableView,
-                  let dataProvider = trackerStore,
+                  let dataProvider = trackersViewModel,
                   let sectionTitle = dataProvider.titleForSection(indexPath.section) else {
                 return UICollectionReusableView()
             }
@@ -313,6 +325,7 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 extension TrackersViewController: TrackersViewProtocol {
     func showNewHabitViewController() {
         let newTrackerViewController = NewTrackerViewController()
+        newTrackerViewController.selectedDate = selectedDate
         newTrackerViewController.eventType = .habit
         newTrackerViewController.delegate = trackerStore
         newTrackerViewController.modalPresentationStyle = .pageSheet
@@ -321,6 +334,7 @@ extension TrackersViewController: TrackersViewProtocol {
     
     func showIrregularEventController() {
         let newTrackerViewController = NewTrackerViewController()
+        newTrackerViewController.selectedDate = selectedDate
         newTrackerViewController.eventType = .one_off
         newTrackerViewController.delegate = trackerStore
         newTrackerViewController.modalPresentationStyle = .pageSheet

@@ -13,25 +13,15 @@ enum TrackerCategoryStoreError: Error {
 
 final class TrackerCategoryStore: BasicStore {
     
-    func addTrackerCategory(category : TrackerCategory) throws {
-        if let existingCategory = find(by: category.title) {
+    func addTrackerCategory(category : String) throws {
+        if find(by: category) != nil {
             return
         }
         let trackerCategoryCoreData = TrackerCategoryCoreData(context: self.managedObjectContext)
-        trackerCategoryCoreData.title = category.title
-        
+        trackerCategoryCoreData.title = category
     }
         
-    func find(by title: String) -> TrackerCategory? {
-        
-        if let categoryCoreData = findCoreData(by: title){
-            return TrackerCategory(title: categoryCoreData.title ?? "")
-        }
-        
-        return nil
-    }
-    
-    private func findCoreData(by title: String) -> TrackerCategoryCoreData? {
+    private func find(by title: String) -> TrackerCategoryCoreData? {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "title == %@", title)
         

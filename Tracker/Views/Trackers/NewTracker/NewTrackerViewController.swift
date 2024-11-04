@@ -21,8 +21,13 @@ enum EventType: Int {
     }
 }
 
+enum NewTrackerError: Error {
+    case trackerCreationError
+}
+
 final class NewTrackerViewController: LightStatusBarViewController {
-    var delegate: TrackersViewModelProtocol?
+    var delegate: TrackerStore?
+    var selectedDate: Date?
     
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -248,10 +253,14 @@ final class NewTrackerViewController: LightStatusBarViewController {
     private func createButtonTapped() {
         guard let name = trackerNameTextField.text,
               !name.isEmpty,
+              let selectedDate,
               let delegate,
               let selectedEmojiIndex,
               let selectedColorIndex
-        else {return}
+        else {
+            Log.error(error: NewTrackerError.trackerCreationError, message: "failed to create tracker")
+            return
+        }
         
         let color = TrackerColor.allCases[selectedColorIndex.item]
         
@@ -263,10 +272,10 @@ final class NewTrackerViewController: LightStatusBarViewController {
                               name: name,
                               color: color,
                               emoji: emoji,
-                              date: delegate.currentDate,
+                              date: selectedDate,
                               schedule: schedule)
         
-        try? delegate.addTracker(tracker: tracker, category: TrackerCategory(title: "Базовая"))
+        delegate.addTracker(tracker: tracker, category: "Базовая")
         dismiss(animated: true, completion: nil)
     }
     

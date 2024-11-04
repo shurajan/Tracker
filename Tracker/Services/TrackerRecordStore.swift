@@ -7,6 +7,13 @@
 
 import CoreData
 
+
+protocol TrackerRecordDataProviderProtocol {
+    func manageTrackerRecord(trackerRecord :TrackerRecord)
+    func count(trackerRecord: TrackerRecord) -> Int
+    func exist(trackerRecord: TrackerRecord) -> Bool
+}
+
 enum TrackerRecordStoreError: Error {
     case createTrackerRecordError
 }
