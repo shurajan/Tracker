@@ -22,7 +22,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let tabBarController = MainTabBarController()
         tabBarController.addTabItems()
         
-        window?.rootViewController = tabBarController
+        let pageViewController = PageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
+        
+        window?.rootViewController = pageViewController
         window?.makeKeyAndVisible()
     }
 
