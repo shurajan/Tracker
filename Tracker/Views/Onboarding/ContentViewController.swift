@@ -86,7 +86,7 @@ class ContentViewController: UIViewController {
             startButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             startButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             startButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            startButton.bottomAnchor.constraint(equalTo: view.bottomAnchor,constant:  -50),
+            startButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant:  -50),
             startButton.heightAnchor.constraint(equalToConstant: 60),
             
             pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor),
