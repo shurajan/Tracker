@@ -103,6 +103,9 @@ class ContentViewController: UIViewController {
         if let window = UIApplication.shared.windows.first {
             window.rootViewController = tabBarController
             window.makeKeyAndVisible()
+            UserDefaults.standard.isOnboarded = true
+        } else {
+            Log.warn(message: "Failed to load Trackers")
         }
     }
 }
