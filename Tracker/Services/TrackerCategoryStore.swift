@@ -70,7 +70,7 @@ final class TrackerCategoryStore: BasicStore {
             throw TrackerCategoryStoreError.decodeCategoryError
         }
         
-        return TrackerCategory(title: title, trackers: [])
+        return TrackerCategory(title: title)
     }
     
 }

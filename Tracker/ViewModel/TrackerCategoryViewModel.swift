@@ -7,6 +7,7 @@
 
 
 final class TrackerCategoryViewModel {
+    var trackerCategoriesBinding: Binding<[TrackerCategory]>?
     
     private(set) var trackerCategories: [TrackerCategory] = [] {
         didSet {
@@ -15,7 +16,6 @@ final class TrackerCategoryViewModel {
     }
     private let trackerCategoryStore = TrackerCategoryStore()
     
-    var trackerCategoriesBinding: Binding<[TrackerCategory]>?
     
     init() throws {
         trackerCategoryStore.delegate = self

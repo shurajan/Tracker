@@ -32,21 +32,18 @@ final class TrackersViewModel: TrackersViewModelProtocol {
     }
     
     func titleForSection(_ section: Int) -> String? {
-        guard section >= 0 && section < trackerCategories.count else { return nil }
-        return trackerCategories[section].title
+        return trackerCategories[safe: section]?.title
     }
     
     func numberOfRowsInSection(_ section: Int) -> Int {
-        guard section >= 0 && section < trackerCategories.count else { return 0 }
-        return trackerCategories[section].trackers.count
+        return trackerCategories[safe: section]?.trackers?.count ?? 0
     }
     
     func object(at indexPath: IndexPath) -> Tracker? {
         let section = indexPath.section
         let row = indexPath.row
-        guard section >= 0 && section < trackerCategories.count else { return nil }
-        let trackers = trackerCategories[section].trackers
-        guard row >= 0 && row < trackers.count else { return nil }
-        return trackers[row]
+        
+        return trackerCategories[safe: section]?.trackers?[safe: row]
+        
     }
 }
