@@ -25,6 +25,7 @@ final class TrackerCategoryStore: BasicStore {
                                                                   managedObjectContext: managedObjectContext,
                                                                   sectionNameKeyPath: nil,
                                                                   cacheName: nil)
+        fetchedResultsController.delegate = self
         try? fetchedResultsController.performFetch()
         return fetchedResultsController
     }()
@@ -37,14 +38,10 @@ final class TrackerCategoryStore: BasicStore {
         }
         let trackerCategoryCoreData = TrackerCategoryCoreData(context: self.managedObjectContext)
         trackerCategoryCoreData.title = category
-        
-        if let delegate {
-            delegate.storeDidUpdate()
-        }
+        try save()
     }
     
     func fetchTrackerCategories() throws -> [TrackerCategory] {
-        
             guard
                 let objects = self.fetchedResultsController.fetchedObjects,
                 let trackerCategories = try? objects.map({try self.trackerCategory(from: $0)})
@@ -73,4 +70,10 @@ final class TrackerCategoryStore: BasicStore {
         return TrackerCategory(title: title)
     }
     
+}
+
+extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        delegate?.storeDidUpdate()
+    }
 }

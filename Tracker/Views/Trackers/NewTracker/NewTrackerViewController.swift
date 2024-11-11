@@ -289,17 +289,16 @@ extension NewTrackerViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         
         if indexPath.row == 0 {
-            //TODO: - реализовать экран создания категории
-            // Переход на экран выбора категории
-            //let categoryViewController = CategoryViewController()
-            //navigationController?.pushViewController(categoryViewController, animated: true)
+            let trackerCategoriesViewController = CategoriesViewController()
+            trackerCategoriesViewController.delegate = self
+            trackerCategoriesViewController.modalPresentationStyle = .pageSheet
+            present(trackerCategoriesViewController, animated: true, completion: nil)
         } else {
             let scheduleViewController = ScheduleViewController()
             scheduleViewController.selectedDays = selectedDays
             scheduleViewController.delegate = self
             scheduleViewController.modalPresentationStyle = .pageSheet
             present(scheduleViewController, animated: true, completion: nil)
-            
         }
     }
     

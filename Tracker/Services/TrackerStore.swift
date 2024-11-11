@@ -21,7 +21,7 @@ enum TrackerDecodingError: Error {
 }
 
 final class TrackerStore: BasicStore {
-    var onDataUpdate: ((_ update: IndexUpdate)->Void)?
+    var onDataUpdate: Binding<IndexUpdate>?
     
     private var trackerCategoryStore = TrackerCategoryStore()
     
@@ -223,7 +223,7 @@ extension TrackerStore: NSFetchedResultsControllerDelegate {
             movedItems: movedItems
         )
         
-        if let onDataUpdate = onDataUpdate {
+        if let onDataUpdate {
             onDataUpdate(update)
         }
         

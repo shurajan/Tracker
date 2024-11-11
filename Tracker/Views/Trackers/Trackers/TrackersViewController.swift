@@ -223,8 +223,7 @@ final class TrackersViewController: LightStatusBarViewController {
         trackersViewModel?.fetchTrackers(for: selectedDate){  [weak self]  in
             guard let self,
                   let numberOfSections = trackersViewModel?.numberOfSections()
-            else {return
-            }
+            else {return}
             self.trackerCollectionView.reloadData()
             let isHidden = numberOfSections > 0
             self.trackerCollectionView.isHidden = !isHidden

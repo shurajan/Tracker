@@ -23,7 +23,11 @@ final class TrackerCategoryViewModel {
     }
         
     func addTrackerCategory(category: String) {
-        try? trackerCategoryStore.addTrackerCategory(category: category)
+        do {
+            try trackerCategoryStore.addTrackerCategory(category: category)
+        } catch {
+            Log.error(error: error, message: "failed to store category")
+        }
     }
     
     private func fetchTrackerCategories() {
