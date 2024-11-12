@@ -26,7 +26,7 @@ enum NewTrackerError: Error {
 }
 
 final class NewTrackerViewController: LightStatusBarViewController {
-    var delegate: TrackerStore?
+    var delegate: TrackersViewModelProtocol?
     var selectedDate: Date?
     
     private lazy var scrollView: UIScrollView = {
@@ -153,6 +153,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
     private var selectedDays: WeekDays = WeekDays()
     private var selectedEmojiIndex: IndexPath?
     private var selectedColorIndex: IndexPath?
+    private var selectedCategory: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -222,8 +223,9 @@ final class NewTrackerViewController: LightStatusBarViewController {
         let isEmojiSelected = selectedEmojiIndex != nil
         let isColorSelected = selectedColorIndex != nil
         let isScheduled = eventType == .one_off ? true : !selectedDays.isEmpty
+        let isCategorySelected = selectedCategory != nil
         
-        let result = isNameFilled && isEmojiSelected && isColorSelected && isScheduled
+        let result = isNameFilled && isEmojiSelected && isColorSelected && isScheduled && isCategorySelected
         
         return result
     }
@@ -256,7 +258,8 @@ final class NewTrackerViewController: LightStatusBarViewController {
               let selectedDate,
               let delegate,
               let selectedEmojiIndex,
-              let selectedColorIndex
+              let selectedColorIndex,
+              let selectedCategory
         else {
             Log.error(error: NewTrackerError.trackerCreationError, message: "failed to create tracker")
             return
@@ -275,7 +278,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
                               date: selectedDate,
                               schedule: schedule)
         
-        delegate.addTracker(tracker: tracker, category: "Базовая")
+        delegate.addTracker(tracker: tracker, category: selectedCategory)
         dismiss(animated: true, completion: nil)
     }
     
@@ -290,6 +293,7 @@ extension NewTrackerViewController: UITableViewDelegate {
         
         if indexPath.row == 0 {
             let trackerCategoriesViewController = CategoriesViewController()
+            trackerCategoriesViewController.selectedCategory = self.selectedCategory
             trackerCategoriesViewController.delegate = self
             trackerCategoriesViewController.modalPresentationStyle = .pageSheet
             present(trackerCategoriesViewController, animated: true, completion: nil)
@@ -359,6 +363,12 @@ extension NewTrackerViewController: NewTrackerDelegateProtocol {
     
     func didSelectColor(_ indexPath: IndexPath) {
         self.selectedColorIndex = indexPath
+        updateCreateButtonState(isActive: validateTracker())
+    }
+    
+    func didSelectCategory(category: String) {
+        self.selectedCategory = category
+        categoryCell.detailTextLabel?.text = category
         updateCreateButtonState(isActive: validateTracker())
     }
 }

@@ -28,6 +28,7 @@ class NewCategoryViewController: LightStatusBarViewController {
         textField.layer.masksToBounds = true
         textField.textAlignment = .center
         textField.delegate = self
+        textField.addTarget(self, action: #selector(categoryTextFieldChanged), for: .editingChanged)
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
@@ -36,7 +37,8 @@ class NewCategoryViewController: LightStatusBarViewController {
         let button = UIButton(type: .system)
         button.setTitle("Готово", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        button.backgroundColor = UIColor.gray
+        button.backgroundColor = .ysGray
+        button.isEnabled = false
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -73,6 +75,20 @@ class NewCategoryViewController: LightStatusBarViewController {
     }
     
     @IBAction
+    private func categoryTextFieldChanged(_ textField: UITextField){
+        let isEmpty = textField.text?.isEmpty ?? true
+       
+        if isEmpty {
+            createButton.isEnabled = false
+            createButton.backgroundColor = .ysGray
+            return
+        }
+        
+        createButton.isEnabled = true
+        createButton.backgroundColor = .ysBlack
+    }
+    
+    @IBAction
     func createButtonTapped(){
         guard let category = categoryTextField.text,
               let delegate
@@ -81,19 +97,12 @@ class NewCategoryViewController: LightStatusBarViewController {
         delegate.didTapCreateButton(category: category)
         dismiss(animated: true, completion: nil)
     }
+    
+    
 }
 
 // MARK: - UITextViewDelegate
 extension NewCategoryViewController: UITextFieldDelegate{
-    
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        let currentText = textField.text ?? ""
-        guard let stringRange = Range(range, in: currentText) else { return false }
-        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
-        let length = (updatedText as NSString).length
-        return length <= Constants.trackerNameMaxLength
-    }
-    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true

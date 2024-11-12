@@ -13,7 +13,7 @@ protocol NewCategoryDelegateProtocol: AnyObject {
 
 final class CategoriesViewController: LightStatusBarViewController {
     
-    var selectedDays = WeekDays()
+    var selectedCategory: String?
     
     weak var delegate: NewTrackerDelegateProtocol?
     
@@ -31,7 +31,7 @@ final class CategoriesViewController: LightStatusBarViewController {
     private lazy var tableView: UITableView = {
         let table = UITableView()
         table.backgroundColor = .ysWhite
-        table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        table.register(CategoryTableViewCell.self, forCellReuseIdentifier: "cell")
         table.layer.cornerRadius = 16
         table.isScrollEnabled = true
         table.delegate = self
@@ -136,8 +136,15 @@ extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = viewModel?.trackerCategories[safe: indexPath.row]?.title ?? ""
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? CategoryTableViewCell
+        else {
+            return UITableViewCell()
+        }
+        
+        let title = viewModel?.trackerCategories[safe: indexPath.row]?.title ?? ""
+        
+        cell.configure(text: title,
+                       isSelected: title == selectedCategory)
         cell.backgroundColor = .ysBackground
         cell.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         
@@ -150,6 +157,11 @@ extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        if let category = viewModel?.trackerCategories[indexPath.row].title {
+            self.selectedCategory = category
+            delegate?.didSelectCategory(category: category)
+        }
+        dismiss(animated: true)
     }
 }
 

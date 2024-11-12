@@ -14,9 +14,9 @@ final class TrackerCategoryViewModel {
             trackerCategoriesBinding?(trackerCategories)
         }
     }
+    
     private let trackerCategoryStore = TrackerCategoryStore()
-    
-    
+
     init() throws {
         trackerCategoryStore.delegate = self
         fetchTrackerCategories()
@@ -34,7 +34,7 @@ final class TrackerCategoryViewModel {
         do {
             self.trackerCategories = try trackerCategoryStore.fetchTrackerCategories()
         } catch {
-            print("failed to get categories from store")
+            Log.error(error: error, message: "failed to get categories from store")
         }
     }
 }
