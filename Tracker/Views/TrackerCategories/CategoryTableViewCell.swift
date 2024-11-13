@@ -10,7 +10,7 @@ class CategoryTableViewCell: UITableViewCell {
     
     let trackerLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 16)
+        label.font = Fonts.titleMediumFont
         label.textColor = .black
         label.translatesAutoresizingMaskIntoConstraints = false
         return label

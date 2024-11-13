@@ -13,7 +13,7 @@ class NewCategoryViewController: LightStatusBarViewController {
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Новая категория"
-        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.font = Fonts.titleMediumFont
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -22,9 +22,9 @@ class NewCategoryViewController: LightStatusBarViewController {
     private lazy var categoryTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Введите название категории"
-        textField.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        textField.font = Fonts.textFieldFont
         textField.backgroundColor = .ysBackground
-        textField.layer.cornerRadius = 16
+        textField.layer.cornerRadius = Constants.radius
         textField.layer.masksToBounds = true
         textField.textAlignment = .center
         textField.delegate = self
@@ -36,11 +36,11 @@ class NewCategoryViewController: LightStatusBarViewController {
     private lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Готово", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = Fonts.titleMediumFont
         button.backgroundColor = .ysGray
         button.isEnabled = false
         button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 16
+        button.layer.cornerRadius = Constants.radius
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
         return button

@@ -21,7 +21,7 @@ final class EmojiSelectionView: UIView, UICollectionViewDelegate, UICollectionVi
     private lazy var emojiLabel: UILabel = {
         let label = UILabel()
         label.text = "Emoji"
-        label.font = UIFont.boldSystemFont(ofSize: 19)
+        label.font = Fonts.sectionHeaderFont
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -102,7 +102,7 @@ final class EmojiSelectionView: UIView, UICollectionViewDelegate, UICollectionVi
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         insetForSectionAt section: Int) -> UIEdgeInsets {
-        UIEdgeInsets(top: 24, left: params.leftInset, bottom: 24, right: params.rightInset)
+        UIEdgeInsets(top: Insets.top, left: params.leftInset, bottom: Insets.bottom, right: params.rightInset)
     }
     
     func collectionView(_ collectionView: UICollectionView,

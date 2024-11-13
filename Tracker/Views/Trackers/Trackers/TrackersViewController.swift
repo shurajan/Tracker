@@ -17,8 +17,8 @@ final class TrackersViewController: LightStatusBarViewController {
     private var viewModel: TrackersViewModelProtocol?
     private var trackerRecordStore: TrackerRecordStore?
     private let params: GeometricParams = GeometricParams(cellCount: 2,
-                                                          leftInset: 16,
-                                                          rightInset: 16,
+                                                          leftInset: Insets.leading,
+                                                          rightInset: Insets.leading,
                                                           cellSpacing: 10)
     
     private var selectedDate = Date().startOfDay()
@@ -36,7 +36,7 @@ final class TrackersViewController: LightStatusBarViewController {
     private lazy var datePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.backgroundColor = UIColor.ysBackground
-        picker.layer.cornerRadius = 8
+        picker.layer.cornerRadius = Constants.smallRadius
         picker.datePickerMode = .date
         picker.preferredDatePickerStyle = .compact
         picker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
@@ -88,7 +88,7 @@ final class TrackersViewController: LightStatusBarViewController {
         
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationBar.largeTitleTextAttributes = [
-            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 34, weight: .bold)
+            NSAttributedString.Key.font: Fonts.titleLargeFont
         ]
         
         view.backgroundColor = UIColor.ysWhite
@@ -115,8 +115,8 @@ final class TrackersViewController: LightStatusBarViewController {
             
             placeHolderView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             placeHolderView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            placeHolderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            placeHolderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            placeHolderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Insets.leading),
+            placeHolderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: Insets.trailing),
         ])
     }
     
@@ -198,14 +198,14 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
             label.text = sectionTitle
             label.textAlignment = .left
             label.textColor = .ysBlack
-            label.font = UIFont.boldSystemFont(ofSize: 19)
+            label.font = Fonts.sectionHeaderFont
             
             headerView.subviews.forEach { $0.removeFromSuperview() }
             headerView.addSubview(label)
             
             NSLayoutConstraint.activate([
                 label.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 28),
-                label.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 24),
+                label.topAnchor.constraint(equalTo: headerView.topAnchor, constant: Insets.top),
             ])
             
             return headerView

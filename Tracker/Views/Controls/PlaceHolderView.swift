@@ -19,7 +19,7 @@ final class PlaceHolderView: UIView {
     private let questionLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        label.font = Fonts.labelFont
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -54,8 +54,8 @@ final class PlaceHolderView: UIView {
             
             questionLabel.topAnchor.constraint(equalTo: dizzyImageView.bottomAnchor, constant: 8),
             questionLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-            questionLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            questionLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            questionLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Insets.leading),
+            questionLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: Insets.trailing),
             questionLabel.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }

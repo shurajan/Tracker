@@ -12,7 +12,7 @@ final class EmojiCollectionViewCell: UICollectionViewCell {
     private let emojiLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 32)
+        label.font = Fonts.emojiFont
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -34,7 +34,7 @@ final class EmojiCollectionViewCell: UICollectionViewCell {
     
     private func setupLayout() {
         contentView.addSubview(emojiLabel)
-        contentView.layer.cornerRadius = 16
+        contentView.layer.cornerRadius = Constants.radius
         contentView.clipsToBounds = true
         
         NSLayoutConstraint.activate([

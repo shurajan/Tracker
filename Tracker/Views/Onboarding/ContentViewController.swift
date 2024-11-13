@@ -22,7 +22,7 @@ class ContentViewController: UIViewController {
     
     private lazy var label: UILabel = {
         let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 32)
+        label.font = Fonts.titleLargeFont
         label.textColor = .black
         label.numberOfLines = 0
         label.textAlignment = .center
@@ -33,10 +33,10 @@ class ContentViewController: UIViewController {
     private lazy var startButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Вот это технологии!", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = Fonts.titleMediumFont
         button.setTitleColor(.ysWhite, for: .normal)
         button.backgroundColor = .ysBlack
-        button.layer.cornerRadius = 16
+        button.layer.cornerRadius = Constants.radius
         button.addTarget(self, action: #selector(startButtonTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -80,8 +80,8 @@ class ContentViewController: UIViewController {
             label.widthAnchor.constraint(equalToConstant: 76),
             label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             label.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 64),
-            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Insets.leading),
+            label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: Insets.trailing),
             
             startButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             startButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
