@@ -51,26 +51,11 @@ final class TrackersViewController: LightStatusBarViewController {
         let searchController = UISearchController(searchResultsController: nil)
         return searchController
     }()
-    
-    private let dizzyImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(named: "Dizzy"))
-        imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
-    }()
-    
-    private let questionLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Что будем отслеживать?"
-        label.textAlignment = .center
-        label.font = UIFont.boldSystemFont(ofSize: 12.0)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private let placeHolderView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .clear
+        
+    private let placeHolderView: PlaceHolderView = {
+        let view = PlaceHolderView()
+        view.setText(text: "Что будем отслеживать?")
+        view.isHidden = true
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -112,10 +97,7 @@ final class TrackersViewController: LightStatusBarViewController {
         view.addSubview(plusButton)
         view.addSubview(trackerCollectionView)
         view.addSubview(placeHolderView)
-        
-        placeHolderView.addSubview(dizzyImageView)
-        placeHolderView.addSubview(questionLabel)
-        
+                
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: plusButton)
         navigationItem.searchController = searchController
@@ -135,15 +117,6 @@ final class TrackersViewController: LightStatusBarViewController {
             placeHolderView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             placeHolderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             placeHolderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            
-            dizzyImageView.centerXAnchor.constraint(equalTo: placeHolderView.centerXAnchor),
-            dizzyImageView.topAnchor.constraint(equalTo: placeHolderView.topAnchor),
-            dizzyImageView.widthAnchor.constraint(equalToConstant: 80),
-            dizzyImageView.heightAnchor.constraint(equalToConstant: 80),
-            
-            questionLabel.topAnchor.constraint(equalTo: dizzyImageView.bottomAnchor, constant: 8),
-            questionLabel.centerXAnchor.constraint(equalTo: placeHolderView.centerXAnchor),
-            questionLabel.bottomAnchor.constraint(equalTo: placeHolderView.bottomAnchor)
         ])
     }
     

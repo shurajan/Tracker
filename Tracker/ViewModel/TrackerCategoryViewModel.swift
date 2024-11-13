@@ -19,7 +19,6 @@ final class TrackerCategoryViewModel {
 
     init() throws {
         trackerCategoryStore.delegate = self
-        fetchTrackerCategories()
     }
         
     func addTrackerCategory(category: String) {
@@ -30,7 +29,7 @@ final class TrackerCategoryViewModel {
         }
     }
     
-    private func fetchTrackerCategories() {
+    func fetchTrackerCategories() {
         do {
             self.trackerCategories = try trackerCategoryStore.fetchTrackerCategories()
         } catch {

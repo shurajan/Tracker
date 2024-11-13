@@ -53,6 +53,14 @@ final class CategoriesViewController: LightStatusBarViewController {
         return button
     }()
     
+    private let placeHolderView: PlaceHolderView = {
+        let view = PlaceHolderView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.setText(text: "Привычки и события можно \nобъединить по смыслу")
+        view.isHidden = true
+        return view
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -65,32 +73,41 @@ final class CategoriesViewController: LightStatusBarViewController {
             Log.error(error: error, message: "failed to create TrackerCategoryViewModel")
         }
         
-        viewModel?.trackerCategoriesBinding = { [weak self] _ in
-            guard let self = self else { return }
-            Log.info(message: "created new category")
-            self.tableView.reloadData()
-        }
+        viewModel?.trackerCategoriesBinding = updateTableView
+        viewModel?.fetchTrackerCategories()
     }
     
-    // Разметка экрана
+    private func updateTableView(categories: [TrackerCategory]) {
+        tableView.reloadData()
+        let isHidden = categories.isEmpty
+        tableView.isHidden = isHidden
+        placeHolderView.isHidden = !isHidden
+    }
+    
     private func setupLayout() {
         view.addSubview(titleLabel)
         view.addSubview(tableView)
         view.addSubview(addNewCategory)
+        view.addSubview(placeHolderView)
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
-            tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 30),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            tableView.heightAnchor.constraint(equalToConstant: CGFloat(WeekDays.count*75)),
-            
             addNewCategory.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             addNewCategory.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             addNewCategory.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            addNewCategory.heightAnchor.constraint(equalToConstant: 60)
+            addNewCategory.heightAnchor.constraint(equalToConstant: 60),
+            
+            placeHolderView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            placeHolderView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            placeHolderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            placeHolderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            
+            tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 30),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            tableView.bottomAnchor.constraint(equalTo: addNewCategory.topAnchor, constant: -24)
         ])
     }
     
