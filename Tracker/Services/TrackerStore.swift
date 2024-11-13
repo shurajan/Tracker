@@ -7,21 +7,12 @@
 
 import CoreData
 
-struct IndexUpdate {
-    let insertedSections: IndexSet
-    let deletedSections: IndexSet
-    let insertedItems: [Int: IndexSet]
-    let deletedItems: [Int: IndexSet]
-    let updatedItems: [Int: IndexSet]
-    let movedItems: [(from: IndexPath, to: IndexPath)]
-}
-
 enum TrackerDecodingError: Error {
     case decodingErrorInvalidValue
 }
 
 final class TrackerStore: BasicStore {
-    var onDataUpdate: ((_ update: IndexUpdate)->Void)?
+    var delegate: StoreDelegate?
     
     private var trackerCategoryStore = TrackerCategoryStore()
     
@@ -41,13 +32,6 @@ final class TrackerStore: BasicStore {
         return fetchedResultsController
     }()
     
-    private var insertedSections = IndexSet()
-    private var deletedSections = IndexSet()
-    private var insertedItems = [Int: IndexSet]()
-    private var deletedItems = [Int: IndexSet]()
-    private var updatedItems = [Int: IndexSet]()
-    private var movedItems = [(from: IndexPath, to: IndexPath)]()
-            
     
     //MARK: - Public Functions
     func fetchTrackers(for date: Date) -> [TrackerCategory] {
@@ -128,11 +112,11 @@ final class TrackerStore: BasicStore {
     
     private func from(_ trackerCoreData: TrackerCoreData) throws -> Tracker {
         guard let id = trackerCoreData.id,
-           let name = trackerCoreData.name,
-           let colorHex = trackerCoreData.colorHex,
-           let color = TrackerColor(rawValue: colorHex),
-           let emojiString = trackerCoreData.emoji,
-           let emoji = Emoji(rawValue: emojiString),
+              let name = trackerCoreData.name,
+              let colorHex = trackerCoreData.colorHex,
+              let color = TrackerColor(rawValue: colorHex),
+              let emojiString = trackerCoreData.emoji,
+              let emoji = Emoji(rawValue: emojiString),
               let date = trackerCoreData.date
         else {
             throw TrackerDecodingError.decodingErrorInvalidValue
@@ -146,7 +130,7 @@ final class TrackerStore: BasicStore {
                        schedule: WeekDays(rawValue: trackerCoreData.schedule)
         )
     }
-        
+    
     private func findTrackerCategory(by title: String) -> TrackerCategoryCoreData? {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "title == %@", title)
@@ -162,80 +146,7 @@ final class TrackerStore: BasicStore {
 
 //MARK: - NSFetchedResultsControllerDelegate
 extension TrackerStore: NSFetchedResultsControllerDelegate {
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        reset()
-    }
-    
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
-                    didChange sectionInfo: NSFetchedResultsSectionInfo,
-                    atSectionIndex sectionIndex: Int,
-                    for type: NSFetchedResultsChangeType) {
-        switch type {
-        case .insert:
-            insertedSections.insert(sectionIndex)
-        case .delete:
-            deletedSections.insert(sectionIndex)
-        default:
-            break
-        }
-    }
-    
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
-                    didChange anObject: Any,
-                    at indexPath: IndexPath?,
-                    for type: NSFetchedResultsChangeType,
-                    newIndexPath: IndexPath?) {
-        switch type {
-        case .insert:
-            if let newIndexPath = newIndexPath {
-                var indexSet = insertedItems[newIndexPath.section] ?? IndexSet()
-                indexSet.insert(newIndexPath.item)
-                insertedItems[newIndexPath.section] = indexSet
-            }
-        case .delete:
-            if let indexPath = indexPath {
-                var indexSet = deletedItems[indexPath.section] ?? IndexSet()
-                indexSet.insert(indexPath.item)
-                deletedItems[indexPath.section] = indexSet
-            }
-        case .update:
-            if let indexPath = indexPath {
-                var indexSet = updatedItems[indexPath.section] ?? IndexSet()
-                indexSet.insert(indexPath.item)
-                updatedItems[indexPath.section] = indexSet
-            }
-        case .move:
-            if let fromIndexPath = indexPath, let toIndexPath = newIndexPath {
-                movedItems.append((from: fromIndexPath, to: toIndexPath))
-            }
-        @unknown default:
-            fatalError("Unexpected NSFetchedResultsChangeType")
-        }
-    }
-    
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        let update = IndexUpdate(
-            insertedSections: insertedSections,
-            deletedSections: deletedSections,
-            insertedItems: insertedItems,
-            deletedItems: deletedItems,
-            updatedItems: updatedItems,
-            movedItems: movedItems
-        )
-        
-        if let onDataUpdate = onDataUpdate {
-            onDataUpdate(update)
-        }
-        
-        reset()
-    }
-    
-    private func reset(){
-        insertedSections.removeAll()
-        deletedSections.removeAll()
-        insertedItems.removeAll()
-        deletedItems.removeAll()
-        updatedItems.removeAll()
-        movedItems.removeAll()
+        delegate?.storeDidUpdate()
     }
 }

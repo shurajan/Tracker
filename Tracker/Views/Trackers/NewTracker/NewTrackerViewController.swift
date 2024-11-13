@@ -26,7 +26,7 @@ enum NewTrackerError: Error {
 }
 
 final class NewTrackerViewController: LightStatusBarViewController {
-    var delegate: TrackerStore?
+    var delegate: TrackersViewModelProtocol?
     var selectedDate: Date?
     
     private lazy var scrollView: UIScrollView = {
@@ -47,7 +47,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.text = eventType.description
-        label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        label.font = Fonts.titleMediumFont
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -56,7 +56,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
     private lazy var trackerNameTextField: PaddedTextField = {
         let textField = PaddedTextField()
         textField.placeholder = "Введите название трекера"
-        textField.layer.cornerRadius = 16
+        textField.layer.cornerRadius = Constants.radius
         textField.delegate = self
         textField.backgroundColor = .ysBackground
         textField.translatesAutoresizingMaskIntoConstraints = false
@@ -68,8 +68,8 @@ final class NewTrackerViewController: LightStatusBarViewController {
         let table = UITableView()
         table.backgroundColor = .ysWhite
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        table.layer.cornerRadius = 16
-        table.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        table.layer.cornerRadius = Constants.radius
+        table.separatorInset = Insets.separatorInset
         table.isScrollEnabled = false
         table.delegate = self
         table.dataSource = self
@@ -93,8 +93,8 @@ final class NewTrackerViewController: LightStatusBarViewController {
         let button = UIButton(type: .system)
         button.setTitle("Отменить", for: .normal)
         button.setTitleColor(.red, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        button.layer.cornerRadius = 16
+        button.titleLabel?.font = Fonts.titleMediumFont
+        button.layer.cornerRadius = Constants.radius
         button.layer.borderWidth = 1
         button.translatesAutoresizingMaskIntoConstraints = false
         button.layer.borderColor = UIColor.ysRed.cgColor
@@ -106,9 +106,9 @@ final class NewTrackerViewController: LightStatusBarViewController {
         let button = UIButton(type: .system)
         button.setTitle("Создать", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = Fonts.titleMediumFont
         button.backgroundColor = .ysGray
-        button.layer.cornerRadius = 16
+        button.layer.cornerRadius = Constants.radius
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
         return button
@@ -127,9 +127,9 @@ final class NewTrackerViewController: LightStatusBarViewController {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
         cell.textLabel?.text = "Категория"
         cell.accessoryType = .disclosureIndicator
-        cell.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        cell.layoutMargins = Insets.cellInsets
         cell.backgroundColor = .ysBackground
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 17)
+        cell.textLabel?.font = Fonts.textFieldFont
         cell.detailTextLabel?.textColor = .ysGray
         cell.textLabel?.textColor = .ysBlack
         
@@ -140,9 +140,9 @@ final class NewTrackerViewController: LightStatusBarViewController {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
         cell.textLabel?.text = "Расписание"
         cell.accessoryType = .disclosureIndicator
-        cell.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        cell.layoutMargins = Insets.cellInsets
         cell.backgroundColor = .ysBackground
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 17)
+        cell.textLabel?.font = Fonts.textFieldFont
         cell.detailTextLabel?.textColor = .ysGray
         cell.textLabel?.textColor = .ysBlack
         
@@ -153,6 +153,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
     private var selectedDays: WeekDays = WeekDays()
     private var selectedEmojiIndex: IndexPath?
     private var selectedColorIndex: IndexPath?
+    private var selectedCategory: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -194,8 +195,8 @@ final class NewTrackerViewController: LightStatusBarViewController {
             trackerNameTextField.heightAnchor.constraint(equalToConstant: 75),
             
             tableView.topAnchor.constraint(equalTo: trackerNameTextField.bottomAnchor, constant: 24),
-            tableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            tableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            tableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Insets.leading),
+            tableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: Insets.trailing),
             tableView.heightAnchor.constraint(equalToConstant: CGFloat(eventType.rawValue * 75)),
             
             emojiSelectionView.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 20),
@@ -222,8 +223,9 @@ final class NewTrackerViewController: LightStatusBarViewController {
         let isEmojiSelected = selectedEmojiIndex != nil
         let isColorSelected = selectedColorIndex != nil
         let isScheduled = eventType == .one_off ? true : !selectedDays.isEmpty
+        let isCategorySelected = selectedCategory != nil
         
-        let result = isNameFilled && isEmojiSelected && isColorSelected && isScheduled
+        let result = isNameFilled && isEmojiSelected && isColorSelected && isScheduled && isCategorySelected
         
         return result
     }
@@ -256,7 +258,8 @@ final class NewTrackerViewController: LightStatusBarViewController {
               let selectedDate,
               let delegate,
               let selectedEmojiIndex,
-              let selectedColorIndex
+              let selectedColorIndex,
+              let selectedCategory
         else {
             Log.error(error: NewTrackerError.trackerCreationError, message: "failed to create tracker")
             return
@@ -275,7 +278,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
                               date: selectedDate,
                               schedule: schedule)
         
-        delegate.addTracker(tracker: tracker, category: "Базовая")
+        delegate.addTracker(tracker: tracker, category: selectedCategory)
         dismiss(animated: true, completion: nil)
     }
     
@@ -289,17 +292,17 @@ extension NewTrackerViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         
         if indexPath.row == 0 {
-            //TODO: - реализовать экран создания категории
-            // Переход на экран выбора категории
-            //let categoryViewController = CategoryViewController()
-            //navigationController?.pushViewController(categoryViewController, animated: true)
+            let trackerCategoriesViewController = CategoriesViewController()
+            trackerCategoriesViewController.selectedCategory = self.selectedCategory
+            trackerCategoriesViewController.delegate = self
+            trackerCategoriesViewController.modalPresentationStyle = .pageSheet
+            present(trackerCategoriesViewController, animated: true, completion: nil)
         } else {
             let scheduleViewController = ScheduleViewController()
             scheduleViewController.selectedDays = selectedDays
             scheduleViewController.delegate = self
             scheduleViewController.modalPresentationStyle = .pageSheet
             present(scheduleViewController, animated: true, completion: nil)
-            
         }
     }
     
@@ -312,7 +315,7 @@ extension NewTrackerViewController: UITableViewDelegate {
         if indexPath.row == eventType.rawValue - 1 {
             cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: tableView.bounds.width)
         } else {
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+            cell.separatorInset = Insets.separatorInset
         }
     }
 }
@@ -360,6 +363,12 @@ extension NewTrackerViewController: NewTrackerDelegateProtocol {
     
     func didSelectColor(_ indexPath: IndexPath) {
         self.selectedColorIndex = indexPath
+        updateCreateButtonState(isActive: validateTracker())
+    }
+    
+    func didSelectCategory(category: String) {
+        self.selectedCategory = category
+        categoryCell.detailTextLabel?.text = category
         updateCreateButtonState(isActive: validateTracker())
     }
 }

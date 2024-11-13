@@ -16,7 +16,7 @@ final class ScheduleViewController: LightStatusBarViewController {
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Расписание"
-        label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        label.font = Fonts.titleMediumFont
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -26,7 +26,7 @@ final class ScheduleViewController: LightStatusBarViewController {
         let table = UITableView()
         table.backgroundColor = .ysWhite
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        table.layer.cornerRadius = 16
+        table.layer.cornerRadius = Constants.radius
         table.isScrollEnabled = false
         table.delegate = self
         table.dataSource = self
@@ -38,10 +38,10 @@ final class ScheduleViewController: LightStatusBarViewController {
     private lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Готово", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = Fonts.titleMediumFont
         button.setTitleColor(.ysWhite, for: .normal)
         button.backgroundColor = .ysBlack
-        button.layer.cornerRadius = 16
+        button.layer.cornerRadius = Constants.radius
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(doneButtonTapped), for: .touchUpInside)
         return button
@@ -63,16 +63,16 @@ final class ScheduleViewController: LightStatusBarViewController {
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-        
-            tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 30),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            tableView.heightAnchor.constraint(equalToConstant: CGFloat(WeekDays.count*75)),
-        
+                
             doneButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             doneButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             doneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            doneButton.heightAnchor.constraint(equalToConstant: 60)
+            doneButton.heightAnchor.constraint(equalToConstant: 60),
+            
+            tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 30),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Insets.leading),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: Insets.trailing),
+            tableView.heightAnchor.constraint(equalToConstant: CGFloat(WeekDays.count*75))
         ])
     }
     
@@ -112,7 +112,7 @@ extension ScheduleViewController: UITableViewDelegate, UITableViewDataSource {
         if indexPath.row == WeekDays.count - 1 {
             cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: tableView.bounds.width)
         } else {
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+            cell.separatorInset = Insets.separatorInset
         }
     }
     
@@ -130,7 +130,7 @@ extension ScheduleViewController: UITableViewDelegate, UITableViewDataSource {
         cell.accessoryView = switchView
         
         cell.backgroundColor = .ysBackground
-        cell.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        cell.layoutMargins = Insets.cellInsets
         
         return cell
     }

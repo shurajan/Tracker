@@ -11,4 +11,5 @@ protocol NewTrackerDelegateProtocol: AnyObject {
     func didSelectDays(_ selectedDays: WeekDays)
     func didSelectEmoji(_ indexPath: IndexPath)
     func didSelectColor(_ indexPath: IndexPath)
+    func didSelectCategory(category: String)
 }

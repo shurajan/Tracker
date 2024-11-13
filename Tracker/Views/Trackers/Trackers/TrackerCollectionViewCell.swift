@@ -17,7 +17,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     private lazy var emojiLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 16)
+        label.font = Fonts.titleMediumFont
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -25,7 +25,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     private lazy var nameLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        label.font = Fonts.labelFont
         label.textColor = .ysWhite
         label.numberOfLines = 2
         label.textAlignment = .left
@@ -35,7 +35,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     private lazy var daysLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        label.font = Fonts.labelFont
         label.textColor = .ysBlack
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -51,7 +51,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     private lazy var cardView: UIView = {
         let view = UIView()
-        view.layer.cornerRadius = 16
+        view.layer.cornerRadius = Constants.radius
         view.clipsToBounds = true
         view.translatesAutoresizingMaskIntoConstraints = false
         return view

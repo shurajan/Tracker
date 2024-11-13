@@ -14,16 +14,15 @@ protocol TrackersViewProtocol: AnyObject {
 
 
 final class TrackersViewController: LightStatusBarViewController {
-    private var trackerStore: TrackerStore?
-    private var trackersViewModel: TrackersViewModelProtocol?
+    private var viewModel: TrackersViewModelProtocol?
     private var trackerRecordStore: TrackerRecordStore?
     private let params: GeometricParams = GeometricParams(cellCount: 2,
-                                                          leftInset: 16,
-                                                          rightInset: 16,
+                                                          leftInset: Insets.leading,
+                                                          rightInset: Insets.leading,
                                                           cellSpacing: 10)
     
     private var selectedDate = Date().startOfDay()
-        
+    
     //MARK: - UI components
     private lazy var plusButton: UIButton = {
         let button = UIButton()
@@ -37,7 +36,7 @@ final class TrackersViewController: LightStatusBarViewController {
     private lazy var datePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.backgroundColor = UIColor.ysBackground
-        picker.layer.cornerRadius = 8
+        picker.layer.cornerRadius = Constants.smallRadius
         picker.datePickerMode = .date
         picker.preferredDatePickerStyle = .compact
         picker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
@@ -52,26 +51,11 @@ final class TrackersViewController: LightStatusBarViewController {
         let searchController = UISearchController(searchResultsController: nil)
         return searchController
     }()
-    
-    private let dizzyImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(named: "Dizzy"))
-        imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
-    }()
-    
-    private let questionLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Что будем отслеживать?"
-        label.textAlignment = .center
-        label.font = UIFont.boldSystemFont(ofSize: 12.0)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private let placeHolderView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .clear
+        
+    private let placeHolderView: PlaceHolderView = {
+        let view = PlaceHolderView()
+        view.setText(text: "Что будем отслеживать?")
+        view.isHidden = true
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -94,8 +78,8 @@ final class TrackersViewController: LightStatusBarViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupLayout()
+        initiateStore()
         datePicker.date = Date().startOfDay()
-        setupStore()
     }
     
     //MARK: - View Layout methods
@@ -104,7 +88,7 @@ final class TrackersViewController: LightStatusBarViewController {
         
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationBar.largeTitleTextAttributes = [
-            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 34, weight: .bold)
+            NSAttributedString.Key.font: Fonts.titleLargeFont
         ]
         
         view.backgroundColor = UIColor.ysWhite
@@ -113,10 +97,7 @@ final class TrackersViewController: LightStatusBarViewController {
         view.addSubview(plusButton)
         view.addSubview(trackerCollectionView)
         view.addSubview(placeHolderView)
-        
-        placeHolderView.addSubview(dizzyImageView)
-        placeHolderView.addSubview(questionLabel)
-        
+                
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: plusButton)
         navigationItem.searchController = searchController
@@ -134,77 +115,26 @@ final class TrackersViewController: LightStatusBarViewController {
             
             placeHolderView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             placeHolderView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            placeHolderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            placeHolderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            
-            dizzyImageView.centerXAnchor.constraint(equalTo: placeHolderView.centerXAnchor),
-            dizzyImageView.topAnchor.constraint(equalTo: placeHolderView.topAnchor),
-            dizzyImageView.widthAnchor.constraint(equalToConstant: 80),
-            dizzyImageView.heightAnchor.constraint(equalToConstant: 80),
-            
-            questionLabel.topAnchor.constraint(equalTo: dizzyImageView.bottomAnchor, constant: 8),
-            questionLabel.centerXAnchor.constraint(equalTo: placeHolderView.centerXAnchor),
-            questionLabel.bottomAnchor.constraint(equalTo: placeHolderView.bottomAnchor)
+            placeHolderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Insets.leading),
+            placeHolderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: Insets.trailing),
         ])
     }
-        
-    private func setupStore(){
-        self.trackerStore = TrackerStore()
+    
+    private func initiateStore(){
         self.trackerRecordStore = TrackerRecordStore()
-        trackerStore?.onDataUpdate = updateCollectionView
-        
-        guard let trackerStore else {return}
-        
-        trackersViewModel = TrackersViewModel(trackerStore: trackerStore)
-        trackersViewModel?.fetchTrackers(for: selectedDate) { [weak self] in
-            guard let self else {return }
-            if let trackersViewModel = self.trackersViewModel {
-                let isHidden = trackersViewModel.numberOfSections() > 0
-                self.trackerCollectionView.isHidden = !isHidden
-                self.placeHolderView.isHidden = isHidden
-            }
-        }
-        
+        viewModel = TrackersViewModel()
+        viewModel?.trackersBinding = updateCollectionView
+        viewModel?.date = selectedDate
+        viewModel?.fetchTrackers()
     }
     
-    private func updateCollectionView(_ update: IndexUpdate) {
-        trackersViewModel?.fetchTrackers(for: selectedDate) {[weak self] in
-            guard let self else {return }
-            if let trackersViewModel = self.trackersViewModel {
-                let isHidden = trackersViewModel.numberOfSections() > 0
-                self.trackerCollectionView.isHidden = !isHidden
-                self.placeHolderView.isHidden = isHidden
-            }
-        }
-        
-        trackerCollectionView.performBatchUpdates({
-            if !update.deletedSections.isEmpty {
-                trackerCollectionView.deleteSections(update.deletedSections)
-            }
-            
-            if !update.insertedSections.isEmpty {
-                trackerCollectionView.insertSections(update.insertedSections)
-            }
-            
-            for (section, items) in update.insertedItems {
-                let indexPaths = items.map { IndexPath(item: $0, section: section) }
-                trackerCollectionView.insertItems(at: indexPaths)
-            }
-            
-            for (section, items) in update.deletedItems {
-                let indexPaths = items.map { IndexPath(item: $0, section: section) }
-                trackerCollectionView.deleteItems(at: indexPaths)
-            }
-            
-            for (section, items) in update.updatedItems {
-                let indexPaths = items.map { IndexPath(item: $0, section: section) }
-                trackerCollectionView.reloadItems(at: indexPaths)
-            }
-            
-            for move in update.movedItems {
-                trackerCollectionView.moveItem(at: move.from, to: move.to)
-            }
-        }, completion: nil)
+    
+    private func updateCollectionView(categories: [TrackerCategory]) {
+        trackerCollectionView.reloadData()
+        let numberOfSections = categories.count
+        let isHidden = numberOfSections > 0
+        trackerCollectionView.isHidden = !isHidden
+        placeHolderView.isHidden = isHidden
     }
     
     //MARK: - IB Outlet
@@ -219,18 +149,8 @@ final class TrackersViewController: LightStatusBarViewController {
     @IBAction
     private func datePickerValueChanged(_ sender: UIDatePicker) {
         selectedDate = sender.date.startOfDay()
-        
-        trackersViewModel?.fetchTrackers(for: selectedDate){  [weak self]  in
-            guard let self,
-                  let numberOfSections = trackersViewModel?.numberOfSections()
-            else {return
-            }
-            self.trackerCollectionView.reloadData()
-            let isHidden = numberOfSections > 0
-            self.trackerCollectionView.isHidden = !isHidden
-            self.placeHolderView.isHidden = isHidden
-        }
-    
+        viewModel?.date = selectedDate
+        viewModel?.fetchTrackers()
         dismiss(animated: true)
     }
 }
@@ -240,16 +160,16 @@ final class TrackersViewController: LightStatusBarViewController {
 extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return trackersViewModel?.numberOfRowsInSection(section) ?? 0
+        return viewModel?.numberOfRowsInSection(section) ?? 0
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return trackersViewModel?.numberOfSections() ?? 0
+        return viewModel?.numberOfSections() ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as? TrackerCollectionViewCell,
-              let tracker = trackersViewModel?.object(at: indexPath),
+              let tracker = viewModel?.object(at: indexPath),
               let trackerRecordStore
         else {
             return UICollectionViewCell()
@@ -259,33 +179,33 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         return cell
     }
     
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+    func collectionView(_ collectionView: UICollectionView,
+                        viewForSupplementaryElementOfKind kind: String,
+                        at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionHeader {
             guard let headerView = collectionView.dequeueReusableSupplementaryView(
                 ofKind: kind,
                 withReuseIdentifier: "header",
                 for: indexPath
             ) as? UICollectionReusableView,
-                  let dataProvider = trackersViewModel,
+                  let dataProvider = viewModel,
                   let sectionTitle = dataProvider.titleForSection(indexPath.section) else {
                 return UICollectionReusableView()
             }
-            
-            headerView.translatesAutoresizingMaskIntoConstraints = false
+                        
             let label = UILabel(frame: headerView.bounds)
             label.translatesAutoresizingMaskIntoConstraints = false
             label.text = sectionTitle
             label.textAlignment = .left
             label.textColor = .ysBlack
-            label.font = UIFont.boldSystemFont(ofSize: 19)
+            label.font = Fonts.sectionHeaderFont
             
             headerView.subviews.forEach { $0.removeFromSuperview() }
             headerView.addSubview(label)
             
             NSLayoutConstraint.activate([
-                headerView.heightAnchor.constraint(equalToConstant: 54),
                 label.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 28),
-                label.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 24),
+                label.topAnchor.constraint(equalTo: headerView.topAnchor, constant: Insets.top),
             ])
             
             return headerView
@@ -293,7 +213,6 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         return UICollectionReusableView()
     }
 }
-
 //MARK: - UICollectionViewDelegateFlowLayout
 extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     
@@ -327,7 +246,7 @@ extension TrackersViewController: TrackersViewProtocol {
         let newTrackerViewController = NewTrackerViewController()
         newTrackerViewController.selectedDate = selectedDate
         newTrackerViewController.eventType = .habit
-        newTrackerViewController.delegate = trackerStore
+        newTrackerViewController.delegate = viewModel
         newTrackerViewController.modalPresentationStyle = .pageSheet
         present(newTrackerViewController, animated: true, completion: nil)
     }
@@ -336,7 +255,7 @@ extension TrackersViewController: TrackersViewProtocol {
         let newTrackerViewController = NewTrackerViewController()
         newTrackerViewController.selectedDate = selectedDate
         newTrackerViewController.eventType = .one_off
-        newTrackerViewController.delegate = trackerStore
+        newTrackerViewController.delegate = viewModel
         newTrackerViewController.modalPresentationStyle = .pageSheet
         present(newTrackerViewController, animated: true, completion: nil)
     }

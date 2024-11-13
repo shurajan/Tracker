@@ -7,7 +7,10 @@
 import Foundation
 
 protocol TrackersViewModelProtocol {
-    func fetchTrackers(for date: Date,completion:()->Void)
+    var date: Date? { get set }
+    var trackersBinding: Binding<[TrackerCategory]>? {get set}
+    func addTracker(tracker : Tracker, category : String)
+    func fetchTrackers()
     func numberOfSections() -> Int
     func titleForSection(_ section: Int) -> String?
     func numberOfRowsInSection(_ section: Int) -> Int
@@ -15,16 +18,32 @@ protocol TrackersViewModelProtocol {
 }
 
 final class TrackersViewModel: TrackersViewModelProtocol {
-    private let trackerStore: TrackerStore
-    private var trackerCategories: [TrackerCategory] = []
     
-    init(trackerStore: TrackerStore) {
-        self.trackerStore = trackerStore
+    var date: Date?
+    
+    var trackersBinding: Binding<[TrackerCategory]>?
+    
+    private let trackerStore: TrackerStore = TrackerStore()
+    
+    private(set) var trackerCategories: [TrackerCategory] = [] {
+        didSet {
+            trackersBinding?(trackerCategories)
+        }
     }
     
-    func fetchTrackers(for date: Date, completion:()->Void) {
-        trackerCategories = trackerStore.fetchTrackers(for: date)
-        completion()
+    init() {
+        trackerStore.delegate = self
+        fetchTrackers()
+    }
+    
+    func addTracker(tracker : Tracker, category : String) {
+        trackerStore.addTracker(tracker: tracker, category: category)
+    }
+    
+    func fetchTrackers() {
+        if let date {
+            trackerCategories = trackerStore.fetchTrackers(for: date)
+        }
     }
     
     func numberOfSections() -> Int {
@@ -32,21 +51,26 @@ final class TrackersViewModel: TrackersViewModelProtocol {
     }
     
     func titleForSection(_ section: Int) -> String? {
-        guard section >= 0 && section < trackerCategories.count else { return nil }
-        return trackerCategories[section].title
+        return trackerCategories[safe: section]?.title
     }
     
     func numberOfRowsInSection(_ section: Int) -> Int {
-        guard section >= 0 && section < trackerCategories.count else { return 0 }
-        return trackerCategories[section].trackers.count
+        return trackerCategories[safe: section]?.trackers?.count ?? 0
     }
     
     func object(at indexPath: IndexPath) -> Tracker? {
         let section = indexPath.section
         let row = indexPath.row
-        guard section >= 0 && section < trackerCategories.count else { return nil }
-        let trackers = trackerCategories[section].trackers
-        guard row >= 0 && row < trackers.count else { return nil }
-        return trackers[row]
+        
+        return trackerCategories[safe: section]?.trackers?[safe: row]
+        
     }
+}
+
+extension TrackersViewModel: StoreDelegate {
+    func storeDidUpdate() {
+        fetchTrackers()
+    }
+    
+    
 }
