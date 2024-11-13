@@ -20,7 +20,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: scene)
         
         
-        if UserDefaults.standard.isOnboarded {
+        if UserSettingsManager.shared.isOnboarded {
             let tabBarController = MainTabBarController()
             tabBarController.addTabItems()
             window?.rootViewController = tabBarController

@@ -19,6 +19,15 @@ final class CategoriesViewController: LightStatusBarViewController {
     
     private var viewModel: TrackerCategoryViewModel?
     
+    init(viewModel: TrackerCategoryViewModel = TrackerCategoryViewModel()) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Категория"
@@ -67,12 +76,7 @@ final class CategoriesViewController: LightStatusBarViewController {
         view.backgroundColor = .ysWhite
         setupLayout()
         
-        do {
-            viewModel = try TrackerCategoryViewModel()
-        } catch {
-            Log.error(error: error, message: "failed to create TrackerCategoryViewModel")
-        }
-        
+        //viewModel = TrackerCategoryViewModel()
         viewModel?.trackerCategoriesBinding = updateTableView
         viewModel?.fetchTrackerCategories()
     }

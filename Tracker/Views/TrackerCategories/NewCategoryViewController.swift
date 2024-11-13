@@ -7,7 +7,7 @@
 
 import UIKit
 
-class NewCategoryViewController: LightStatusBarViewController {
+final class NewCategoryViewController: LightStatusBarViewController {
     weak var delegate: NewCategoryDelegateProtocol?
     
     private lazy var titleLabel: UILabel = {

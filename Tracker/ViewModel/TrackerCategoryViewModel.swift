@@ -17,7 +17,7 @@ final class TrackerCategoryViewModel {
     
     private let trackerCategoryStore = TrackerCategoryStore()
 
-    init() throws {
+    init() {
         trackerCategoryStore.delegate = self
     }
         

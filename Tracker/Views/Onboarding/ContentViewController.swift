@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ContentViewController: UIViewController {
+final class ContentViewController: UIViewController {
     
     private var backgroundImageName: String = ""
     private var labelText: String = ""
@@ -101,7 +101,7 @@ class ContentViewController: UIViewController {
         tabBarController.addTabItems()
         
         if let window = UIApplication.shared.windows.first {
-            UserDefaults.standard.isOnboarded = true
+            UserSettingsManager.shared.isOnboarded = true
             window.rootViewController = tabBarController
             window.makeKeyAndVisible()
         } else {
