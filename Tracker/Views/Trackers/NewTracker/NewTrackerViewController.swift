@@ -14,9 +14,9 @@ enum EventType: Int {
     var description: String {
         switch self {
         case .habit:
-            return "Новая привычка"
+            return LocalizedStrings.NewTracker.habitTitle
         case .one_off:
-            return "Нерегулярное событие"
+            return LocalizedStrings.NewTracker.oneOffTitle
         }
     }
 }
@@ -55,7 +55,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
     
     private lazy var trackerNameTextField: PaddedTextField = {
         let textField = PaddedTextField()
-        textField.placeholder = "Введите название трекера"
+        textField.placeholder = LocalizedStrings.NewTracker.placeholderName
         textField.layer.cornerRadius = Constants.radius
         textField.delegate = self
         textField.backgroundColor = .ysBackground
@@ -91,7 +91,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
     
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle(LocalizedStrings.NewTracker.cancelButton, for: .normal)
         button.setTitleColor(.red, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
         button.layer.cornerRadius = Constants.radius
@@ -104,7 +104,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
     
     private lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Создать", for: .normal)
+        button.setTitle(LocalizedStrings.NewTracker.createButton, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
         button.backgroundColor = .ysGray
@@ -125,7 +125,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
     
     private let categoryCell: UITableViewCell = {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
-        cell.textLabel?.text = "Категория"
+        cell.textLabel?.text = LocalizedStrings.NewTracker.categoryTitle
         cell.accessoryType = .disclosureIndicator
         cell.layoutMargins = Insets.cellInsets
         cell.backgroundColor = .ysBackground
@@ -138,7 +138,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
     
     private let scheduleCell: UITableViewCell = {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
-        cell.textLabel?.text = "Расписание"
+        cell.textLabel?.text = LocalizedStrings.NewTracker.scheduleTitle
         cell.accessoryType = .disclosureIndicator
         cell.layoutMargins = Insets.cellInsets
         cell.backgroundColor = .ysBackground

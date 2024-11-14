@@ -11,8 +11,7 @@ protocol NewCategoryDelegateProtocol: AnyObject {
     func didTapCreateButton(category: String)
 }
 
-final class CategoriesViewController: LightStatusBarViewController {
-    
+final class CategoriesViewController: LightStatusBarViewController {    
     var selectedCategory: String?
     
     weak var delegate: NewTrackerDelegateProtocol?
@@ -30,7 +29,7 @@ final class CategoriesViewController: LightStatusBarViewController {
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Категория"
+        label.text = LocalizedStrings.Categories.title
         label.font = Fonts.titleMediumFont
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -52,7 +51,7 @@ final class CategoriesViewController: LightStatusBarViewController {
     
     private lazy var addNewCategory: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Добавить категорию", for: .normal)
+        button.setTitle(LocalizedStrings.Categories.addButton, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
         button.setTitleColor(.ysWhite, for: .normal)
         button.backgroundColor = .ysBlack
@@ -65,7 +64,7 @@ final class CategoriesViewController: LightStatusBarViewController {
     private let placeHolderView: PlaceHolderView = {
         let view = PlaceHolderView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.setText(text: "Привычки и события можно \nобъединить по смыслу")
+        view.setText(text: LocalizedStrings.Categories.placeholderText)
         view.isHidden = true
         return view
     }()

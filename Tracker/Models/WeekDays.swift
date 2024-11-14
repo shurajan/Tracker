@@ -9,20 +9,20 @@ import UIKit
 struct WeekDays: OptionSet {
     let rawValue: Int32
     
-    static let Понедельник = WeekDays(rawValue: 1 << 0)
-    static let Вторник = WeekDays(rawValue: 1 << 1)
-    static let Среда = WeekDays(rawValue: 1 << 2)
-    static let Четверг = WeekDays(rawValue: 1 << 3)
-    static let Пятница = WeekDays(rawValue: 1 << 4)
-    static let Суббота = WeekDays(rawValue: 1 << 5)
-    static let Воскресенье = WeekDays(rawValue: 1 << 6)
+    static let Monday = WeekDays(rawValue: 1 << 0)
+    static let Tuesday = WeekDays(rawValue: 1 << 1)
+    static let Wednesday = WeekDays(rawValue: 1 << 2)
+    static let Thursday = WeekDays(rawValue: 1 << 3)
+    static let Friday = WeekDays(rawValue: 1 << 4)
+    static let Saturday = WeekDays(rawValue: 1 << 5)
+    static let Sunday = WeekDays(rawValue: 1 << 6)
     
-    static let Daily: WeekDays = [.Понедельник, .Вторник, .Среда, .Четверг, .Пятница, .Суббота, .Воскресенье]
+    static let Daily: WeekDays = [.Monday, .Tuesday, .Wednesday, .Thursday, .Friday, .Saturday, .Sunday]
     
     static var count: Int {
         return 7
     }
-
+    
     static func from(_ intValue: Int32) -> WeekDays? {
         guard intValue >= 0 && intValue < count else { return nil }
         return WeekDays(rawValue: 1 << intValue)
@@ -30,47 +30,46 @@ struct WeekDays: OptionSet {
     
     static func fromGregorianStyle(_ intValue: Int) -> WeekDays? {
         guard intValue >= 1 && intValue <= 7 else { return nil }
-        return intValue == 1 ? .Воскресенье : WeekDays(rawValue: 1 << (intValue - 2))
+        return intValue == 1 ? .Sunday : WeekDays(rawValue: 1 << (intValue - 2))
     }
     
     var description: String {
         switch self {
-        case .Понедельник:
-            return "Понедельник"
-        case .Вторник:
-            return "Вторник"
-        case .Среда:
-            return "Среда"
-        case .Четверг:
-            return "Четверг"
-        case .Пятница:
-            return "Пятница"
-        case .Суббота:
-            return "Суббота"
-        case .Воскресенье:
-            return "Воскресенье"
+        case .Monday:
+            return LocalizedStrings.WeekDays.monday
+        case .Tuesday:
+            return LocalizedStrings.WeekDays.tuesday
+        case .Wednesday:
+            return LocalizedStrings.WeekDays.wednesday
+        case .Thursday:
+            return LocalizedStrings.WeekDays.thursday
+        case .Friday:
+            return LocalizedStrings.WeekDays.friday
+        case .Saturday:
+            return LocalizedStrings.WeekDays.saturday
+        case .Sunday:
+            return LocalizedStrings.WeekDays.sunday
         default:
-            return "Неизвестный день"
+            return "Unknown Day"
         }
     }
     
-    // Краткое описание дня недели
     var shortDescription: String {
         switch self {
-        case .Понедельник:
-            return "Пн"
-        case .Вторник:
-            return "Вт"
-        case .Среда:
-            return "Ср"
-        case .Четверг:
-            return "Чт"
-        case .Пятница:
-            return "Пт"
-        case .Суббота:
-            return "Сб"
-        case .Воскресенье:
-            return "Вс"
+        case .Monday:
+            return LocalizedStrings.WeekDays.shortMonday
+        case .Tuesday:
+            return LocalizedStrings.WeekDays.shortTuesday
+        case .Wednesday:
+            return LocalizedStrings.WeekDays.shortWednesday
+        case .Thursday:
+            return LocalizedStrings.WeekDays.shortThursday
+        case .Friday:
+            return LocalizedStrings.WeekDays.shortFriday
+        case .Saturday:
+            return LocalizedStrings.WeekDays.shortSaturday
+        case .Sunday:
+            return LocalizedStrings.WeekDays.shortSunday
         default:
             return "?"
         }

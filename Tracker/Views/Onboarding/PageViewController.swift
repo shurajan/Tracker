@@ -23,11 +23,11 @@ final class PageViewController: UIPageViewController {
     private func createPages() -> [ContentViewController] {
         let firstPage = ContentViewController()
         firstPage.configure(backgroundImageName: "1",
-                            labelText: "Отслеживайте только то, что хотите")
+                            labelText: LocalizedStrings.Onboarding.firstTitle)
         
         let secondPage = ContentViewController()
         secondPage.configure(backgroundImageName: "2",
-                             labelText: "Даже если это не литры воды и йога")
+                             labelText: LocalizedStrings.Onboarding.secondTitle)
         
         return [firstPage, secondPage]
     }

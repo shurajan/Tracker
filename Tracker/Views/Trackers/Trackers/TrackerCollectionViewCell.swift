@@ -132,22 +132,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         plusButton.imageView?.contentMode = .scaleAspectFit
         plusButton.imageEdgeInsets = .zero
     }
-    
-    private func formatDaysText(_ count: Int) -> String {
-        let lastDigit = count % 10
-        let lastTwoDigits = count % 100
         
-        if lastTwoDigits >= 11 && lastTwoDigits <= 19 {
-            return "\(count) дней"
-        } else if lastDigit == 1 {
-            return "\(count) день"
-        } else if lastDigit >= 2 && lastDigit <= 4 {
-            return "\(count) дня"
-        } else {
-            return "\(count) дней"
-        }
-    }
-    
     private func updateStatisticsAndShow(trackerRecord: TrackerRecord) {
         guard
             let dataProvider,
@@ -159,7 +144,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         count = dataProvider.count(trackerRecord: trackerRecord)
         
         setupPlusButton(isDone: isDone, color: tracker.color.uiColor)
-        daysLabel.text = formatDaysText(count)
+        daysLabel.text = LocalizedStrings.TrackerCell.formatDaysText(days: count)
     }
     
     @IBAction
@@ -171,7 +156,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         else { return }
         
         let trackerRecord = TrackerRecord(trackerId: tracker.id, date: date)
-        try? dataProvider.manageTrackerRecord(trackerRecord: trackerRecord)
+        dataProvider.manageTrackerRecord(trackerRecord: trackerRecord)
         
         updateStatisticsAndShow(trackerRecord: trackerRecord)
     }

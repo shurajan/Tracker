@@ -9,10 +9,10 @@ import UIKit
 
 final class NewCategoryViewController: LightStatusBarViewController {
     weak var delegate: NewCategoryDelegateProtocol?
-    
+        
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Новая категория"
+        label.text = LocalizedStrings.NewCategory.title
         label.font = Fonts.titleMediumFont
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -21,7 +21,7 @@ final class NewCategoryViewController: LightStatusBarViewController {
     
     private lazy var categoryTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название категории"
+        textField.placeholder = LocalizedStrings.NewCategory.placeholder
         textField.font = Fonts.textFieldFont
         textField.backgroundColor = .ysBackground
         textField.layer.cornerRadius = Constants.radius
@@ -35,7 +35,7 @@ final class NewCategoryViewController: LightStatusBarViewController {
     
     private lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(LocalizedStrings.NewCategory.doneButton, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
         button.backgroundColor = .ysGray
         button.isEnabled = false

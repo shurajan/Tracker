@@ -1,0 +1,62 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Alexander Bralnin on 14.11.2024.
+  
+*/
+
+// MARK: - Onboarding View Controllers
+"onboarding.first.title" = "Отслеживайте только то, что хотите";
+"onboarding.second.title" = "Даже если это не литры воды и йога";
+"onboarding.button.text" = "Вот это технологии!";
+
+//MARK: - Trackers View Controller
+"trackers.title" = "Трекеры";
+"trackers.placeholder.text" = "Что будем отслеживать?";
+
+//MARK: - Schedule View Controller
+"schedule.title" = "Расписание";
+"schedule.button.text" = "Готово";
+
+//MARK: - Tracker Type Selector
+"tracker_creation.title" = "Создание трекера";
+"tracker_creation.button.habit" = "Привычка";
+"tracker_creation.button.irregular_event" = "Нерегулярное событие";
+
+//MARK: - New Tracker View Controller
+"new_tracker.event_type.habit" = "Новая привычка";
+"new_tracker.event_type.one_off" = "Нерегулярное событие";
+"new_tracker.placeholder.name" = "Введите название трекера";
+"new_tracker.button.cancel" = "Отменить";
+"new_tracker.button.create" = "Создать";
+"new_tracker.title.category" = "Категория";
+"new_tracker.title.schedule" = "Расписание";
+"new_tracker.color.text" = "Цвет";
+
+//MARK: - Categories
+"categories.title" = "Категория";
+"categories.button.add" = "Добавить категорию";
+"categories.placeholder.text" = "Привычки и события можно \nобъединить по смыслу";
+
+//MARK: - New Category View Controller
+"new_category.title" = "Новая категория";
+"new_category.placeholder" = "Введите название категории";
+"new_category.button.done" = "Готово";
+
+//MARK: - WeekDays
+"weekdays.monday" = "Понедельник";
+"weekdays.tuesday" = "Вторник";
+"weekdays.wednesday" = "Среда";
+"weekdays.thursday" = "Четверг";
+"weekdays.friday" = "Пятница";
+"weekdays.saturday" = "Суббота";
+"weekdays.sunday" = "Воскресенье";
+
+"weekdays.short.monday" = "Пн";
+"weekdays.short.tuesday" = "Вт";
+"weekdays.short.wednesday" = "Ср";
+"weekdays.short.thursday" = "Чт";
+"weekdays.short.friday" = "Пт";
+"weekdays.short.saturday" = "Сб";
+"weekdays.short.sunday" = "Вс";

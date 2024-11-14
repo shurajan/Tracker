@@ -10,11 +10,9 @@ import UIKit
 final class TrackerTypeSelectorViewController: LightStatusBarViewController {
     var delegate: TrackersViewProtocol?
     
-    private var constraints = [NSLayoutConstraint]()
-    
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Создание трекера"
+        label.text = LocalizedStrings.TrackerCreation.title
         label.font = Fonts.titleMediumFont
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -23,7 +21,7 @@ final class TrackerTypeSelectorViewController: LightStatusBarViewController {
     
     private lazy var habitButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Привычка", for: .normal)
+        button.setTitle(LocalizedStrings.TrackerCreation.habitButton, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
         button.setTitleColor(.ysWhite, for: .normal)
         button.backgroundColor = .ysBlack
@@ -35,7 +33,7 @@ final class TrackerTypeSelectorViewController: LightStatusBarViewController {
     
     private lazy var irregularEventButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Нерегулярные событие", for: .normal)
+        button.setTitle(LocalizedStrings.TrackerCreation.irregularEventButton, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
         button.setTitleColor(.ysWhite, for: .normal)
         button.backgroundColor = .ysBlack

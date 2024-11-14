@@ -40,9 +40,8 @@ final class TrackersViewController: LightStatusBarViewController {
         picker.datePickerMode = .date
         picker.preferredDatePickerStyle = .compact
         picker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
-        picker.locale = Locale(identifier: "ru_RU")
+        picker.locale = Locale.current
         picker.accessibilityIdentifier = "datePicker"
-        
         picker.translatesAutoresizingMaskIntoConstraints = false
         return picker
     }()
@@ -54,7 +53,7 @@ final class TrackersViewController: LightStatusBarViewController {
         
     private let placeHolderView: PlaceHolderView = {
         let view = PlaceHolderView()
-        view.setText(text: "Что будем отслеживать?")
+        view.setText(text: LocalizedStrings.Trackers.placeholderText)
         view.isHidden = true
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -84,7 +83,7 @@ final class TrackersViewController: LightStatusBarViewController {
     
     //MARK: - View Layout methods
     private func setupLayout(){
-        self.title = "Трекеры"
+        self.title = LocalizedStrings.Trackers.title
         
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationBar.largeTitleTextAttributes = [

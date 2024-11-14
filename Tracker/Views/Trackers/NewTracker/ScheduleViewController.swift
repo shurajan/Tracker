@@ -8,14 +8,13 @@
 import UIKit
 
 final class ScheduleViewController: LightStatusBarViewController {
-    
     var selectedDays = WeekDays()
     
     weak var delegate: NewTrackerDelegateProtocol?
 
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Расписание"
+        label.text = LocalizedStrings.Schedule.title
         label.font = Fonts.titleMediumFont
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -37,7 +36,7 @@ final class ScheduleViewController: LightStatusBarViewController {
 
     private lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(LocalizedStrings.Schedule.buttonText, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
         button.setTitleColor(.ysWhite, for: .normal)
         button.backgroundColor = .ysBlack

@@ -32,7 +32,7 @@ final class ContentViewController: UIViewController {
     
     private lazy var startButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Вот это технологии!", for: .normal)
+        button.setTitle(LocalizedStrings.Onboarding.buttonText, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
         button.setTitleColor(.ysWhite, for: .normal)
         button.backgroundColor = .ysBlack
@@ -105,7 +105,7 @@ final class ContentViewController: UIViewController {
             window.rootViewController = tabBarController
             window.makeKeyAndVisible()
         } else {
-            Log.warn(message: "Failed to load Trackers")
+            Log.warn(message: "failed to load Trackers")
         }
     }
 }

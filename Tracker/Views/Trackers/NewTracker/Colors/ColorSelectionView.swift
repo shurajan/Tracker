@@ -19,7 +19,7 @@ final class ColorSelectionView: UIView, UICollectionViewDelegate, UICollectionVi
 
     private lazy var colorLabel: UILabel = {
         let label = UILabel()
-        label.text = "Цвет"
+        label.text = LocalizedStrings.NewTracker.colorText
         label.font = Fonts.sectionHeaderFont
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
