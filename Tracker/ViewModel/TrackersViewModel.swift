@@ -26,13 +26,13 @@ final class TrackersViewModel: TrackersViewModelProtocol {
     
     private let trackerStore: TrackerStore = TrackerStore()
     
-    private var allCategories: [TrackerCategory] = []
+    private var categories: [TrackerCategory] = []
     
     private var searchText: String = ""
     
-    private(set) var filteredCategories: [TrackerCategory] = [] {
+    private(set) var visibleCategories: [TrackerCategory] = [] {
         didSet {
-            trackersBinding?(filteredCategories)
+            trackersBinding?(visibleCategories)
         }
     }
     
@@ -47,41 +47,41 @@ final class TrackersViewModel: TrackersViewModelProtocol {
     
     func fetchTrackers() {
         if let date {
-            allCategories = trackerStore.fetchTrackers(for: date)
+            categories = trackerStore.fetchTrackers(for: date)
             filterItems(by: self.searchText)
         }
     }
     
     func numberOfSections() -> Int {
-        return filteredCategories.count
+        return visibleCategories.count
     }
     
     func titleForSection(_ section: Int) -> String? {
-        return filteredCategories[safe: section]?.title
+        return visibleCategories[safe: section]?.title
     }
     
     func numberOfRowsInSection(_ section: Int) -> Int {
-        return filteredCategories[safe: section]?.trackers?.count ?? 0
+        return visibleCategories[safe: section]?.trackers?.count ?? 0
     }
     
     func item(at indexPath: IndexPath) -> Tracker? {
         let section = indexPath.section
         let row = indexPath.row
         
-        return filteredCategories[safe: section]?.trackers?[safe: row]
+        return visibleCategories[safe: section]?.trackers?[safe: row]
     }
     
     func filterItems(by searchText: String) {
         self.searchText = searchText
         
         if searchText.isEmpty {
-            self.filteredCategories = self.allCategories
+            self.visibleCategories = self.categories
         } else {
-            self.filteredCategories = []
-            for category in allCategories {
+            self.visibleCategories = []
+            for category in categories {
                 let filteredItems = category.trackers?.filter { $0.name.lowercased().contains(searchText.lowercased()) }
                 if !(filteredItems?.isEmpty ?? false) {
-                    self.filteredCategories.append(TrackerCategory(title: category.title, trackers: filteredItems))
+                    self.visibleCategories.append(TrackerCategory(title: category.title, trackers: filteredItems))
                 }
             }
         }
