@@ -22,6 +22,7 @@ final class TrackersViewController: LightStatusBarViewController {
                                                           cellSpacing: 10)
     
     private var selectedDate = Date().startOfDay()
+    private var isSearchModeOn = false
     
     //MARK: - UI components
     private lazy var plusButton: UIButton = {
@@ -48,6 +49,9 @@ final class TrackersViewController: LightStatusBarViewController {
     
     private lazy var searchController: UISearchController = {
         let searchController = UISearchController(searchResultsController: nil)
+        searchController.searchBar.delegate = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.hidesNavigationBarDuringPresentation = false
         return searchController
     }()
         
@@ -59,6 +63,15 @@ final class TrackersViewController: LightStatusBarViewController {
         return view
     }()
     
+    
+    private let searchPlaceHolderView: PlaceHolderView = {
+        let view = PlaceHolderView()
+        view.setText(text: LocalizedStrings.Trackers.searchPlaceHolderText)
+        view.setImage(name: "Empty")
+        view.isHidden = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     
     private lazy var trackerCollectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
@@ -84,11 +97,13 @@ final class TrackersViewController: LightStatusBarViewController {
     //MARK: - View Layout methods
     private func setupLayout(){
         self.title = LocalizedStrings.Trackers.title
+        definesPresentationContext = true
         
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationBar.largeTitleTextAttributes = [
             NSAttributedString.Key.font: Fonts.titleLargeFont
         ]
+        navigationItem.largeTitleDisplayMode = .always
         
         view.backgroundColor = UIColor.ysWhite
         
@@ -96,6 +111,7 @@ final class TrackersViewController: LightStatusBarViewController {
         view.addSubview(plusButton)
         view.addSubview(trackerCollectionView)
         view.addSubview(placeHolderView)
+        view.addSubview(searchPlaceHolderView)
                 
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: plusButton)
@@ -116,6 +132,11 @@ final class TrackersViewController: LightStatusBarViewController {
             placeHolderView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             placeHolderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Insets.leading),
             placeHolderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: Insets.trailing),
+            
+            searchPlaceHolderView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            searchPlaceHolderView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            searchPlaceHolderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Insets.leading),
+            searchPlaceHolderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: Insets.trailing),
         ])
     }
     
@@ -133,7 +154,14 @@ final class TrackersViewController: LightStatusBarViewController {
         let numberOfSections = categories.count
         let isHidden = numberOfSections > 0
         trackerCollectionView.isHidden = !isHidden
-        placeHolderView.isHidden = isHidden
+        
+        if isSearchModeOn {
+            placeHolderView.isHidden = true
+            searchPlaceHolderView.isHidden = isHidden
+        } else {
+            placeHolderView.isHidden = isHidden
+            searchPlaceHolderView.isHidden = true
+        }
     }
     
     //MARK: - IB Outlet
@@ -168,7 +196,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as? TrackerCollectionViewCell,
-              let tracker = viewModel?.object(at: indexPath),
+              let tracker = viewModel?.item(at: indexPath),
               let trackerRecordStore
         else {
             return UICollectionViewCell()
@@ -259,4 +287,19 @@ extension TrackersViewController: TrackersViewProtocol {
         present(newTrackerViewController, animated: true, completion: nil)
     }
     
+}
+
+extension TrackersViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        isSearchModeOn = true
+        let trimmedText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        viewModel?.filterItems(by: trimmedText)
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        isSearchModeOn = false
+        searchBar.text = ""
+        viewModel?.filterItems(by: "")
+        searchBar.resignFirstResponder()
+    }
 }

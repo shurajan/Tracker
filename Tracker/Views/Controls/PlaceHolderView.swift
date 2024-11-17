@@ -9,14 +9,16 @@ import UIKit
 
 final class PlaceHolderView: UIView {
     
-    private let dizzyImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(named: "Dizzy"))
+    private let defaultImage = UIImage(named: "Dizzy")
+    
+    private lazy var imageView: UIImageView = {
+        let imageView = UIImageView(image: defaultImage)
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
     
-    private let questionLabel: UILabel = {
+    private lazy var label: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
         label.font = Fonts.labelFont
@@ -35,28 +37,32 @@ final class PlaceHolderView: UIView {
         setupLayout()
     }
     
+    func setImage(name: String) {
+        imageView.image = UIImage(named: name)
+    }
+    
     func setText(text: String) {
-        questionLabel.text = text
+        label.text = text
     }
     
     private func setupLayout() {
         backgroundColor = .clear
         translatesAutoresizingMaskIntoConstraints = false
         
-        addSubview(dizzyImageView)
-        addSubview(questionLabel)
+        addSubview(imageView)
+        addSubview(label)
         
         NSLayoutConstraint.activate([
-            dizzyImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            dizzyImageView.topAnchor.constraint(equalTo: topAnchor),
-            dizzyImageView.widthAnchor.constraint(equalToConstant: 80),
-            dizzyImageView.heightAnchor.constraint(equalToConstant: 80),
+            imageView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            imageView.topAnchor.constraint(equalTo: topAnchor),
+            imageView.widthAnchor.constraint(equalToConstant: 80),
+            imageView.heightAnchor.constraint(equalToConstant: 80),
             
-            questionLabel.topAnchor.constraint(equalTo: dizzyImageView.bottomAnchor, constant: 8),
-            questionLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-            questionLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Insets.leading),
-            questionLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: Insets.trailing),
-            questionLabel.bottomAnchor.constraint(equalTo: bottomAnchor)
+            label.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 8),
+            label.centerXAnchor.constraint(equalTo: centerXAnchor),
+            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Insets.leading),
+            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: Insets.trailing),
+            label.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
 }

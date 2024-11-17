@@ -13,6 +13,7 @@
 // MARK: - Trackers View Controller
 "trackers.title" = "Trackers";
 "trackers.placeholder.text" = "What shall we track?";
+"tracker.search_placeholder.text" = "Nothing found";
 
 // MARK: - Schedule View Controller
 "schedule.title" = "Schedule";

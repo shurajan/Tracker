@@ -14,7 +14,8 @@ protocol TrackersViewModelProtocol {
     func numberOfSections() -> Int
     func titleForSection(_ section: Int) -> String?
     func numberOfRowsInSection(_ section: Int) -> Int
-    func object(at indexPath: IndexPath) -> Tracker?
+    func item(at indexPath: IndexPath) -> Tracker?
+    func filterItems (by searchText: String)
 }
 
 final class TrackersViewModel: TrackersViewModelProtocol {
@@ -25,9 +26,13 @@ final class TrackersViewModel: TrackersViewModelProtocol {
     
     private let trackerStore: TrackerStore = TrackerStore()
     
-    private(set) var trackerCategories: [TrackerCategory] = [] {
+    private var allCategories: [TrackerCategory] = []
+    
+    private var searchText: String = ""
+    
+    private(set) var filteredCategories: [TrackerCategory] = [] {
         didSet {
-            trackersBinding?(trackerCategories)
+            trackersBinding?(filteredCategories)
         }
     }
     
@@ -42,28 +47,44 @@ final class TrackersViewModel: TrackersViewModelProtocol {
     
     func fetchTrackers() {
         if let date {
-            trackerCategories = trackerStore.fetchTrackers(for: date)
+            allCategories = trackerStore.fetchTrackers(for: date)
+            filterItems(by: self.searchText)
         }
     }
     
     func numberOfSections() -> Int {
-        return trackerCategories.count
+        return filteredCategories.count
     }
     
     func titleForSection(_ section: Int) -> String? {
-        return trackerCategories[safe: section]?.title
+        return filteredCategories[safe: section]?.title
     }
     
     func numberOfRowsInSection(_ section: Int) -> Int {
-        return trackerCategories[safe: section]?.trackers?.count ?? 0
+        return filteredCategories[safe: section]?.trackers?.count ?? 0
     }
     
-    func object(at indexPath: IndexPath) -> Tracker? {
+    func item(at indexPath: IndexPath) -> Tracker? {
         let section = indexPath.section
         let row = indexPath.row
         
-        return trackerCategories[safe: section]?.trackers?[safe: row]
+        return filteredCategories[safe: section]?.trackers?[safe: row]
+    }
+    
+    func filterItems(by searchText: String) {
+        self.searchText = searchText
         
+        if searchText.isEmpty {
+            self.filteredCategories = self.allCategories
+        } else {
+            self.filteredCategories = []
+            for category in allCategories {
+                let filteredItems = category.trackers?.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+                if !(filteredItems?.isEmpty ?? false) {
+                    self.filteredCategories.append(TrackerCategory(title: category.title, trackers: filteredItems))
+                }
+            }
+        }
     }
 }
 
