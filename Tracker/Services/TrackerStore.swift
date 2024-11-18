@@ -64,6 +64,7 @@ final class TrackerStore: BasicStore {
         if let schedule = tracker.schedule?.rawValue{
             trackerCoreData.schedule = schedule
         }
+        trackerCoreData.isPinned = tracker.isPinned
         
         do{
             try trackerCategoryStore.addTrackerCategory(category: category)
@@ -122,12 +123,14 @@ final class TrackerStore: BasicStore {
             throw TrackerDecodingError.decodingErrorInvalidValue
         }
         
+        let isPinned = trackerCoreData.isPinned
         return Tracker(id: id,
                        name: name,
                        color: color,
                        emoji: emoji,
                        date: date,
-                       schedule: WeekDays(rawValue: trackerCoreData.schedule)
+                       schedule: WeekDays(rawValue: trackerCoreData.schedule),
+                       isPinned: isPinned
         )
     }
     

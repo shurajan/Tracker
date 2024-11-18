@@ -17,6 +17,13 @@ enum LocalizedStrings {
         static let title = NSLocalizedString("trackers.title", comment: "Title for the trackers screen")
         static let placeholderText = NSLocalizedString("trackers.placeholder.text", comment: "Text for the placeholder")
         static let searchPlaceHolderText = NSLocalizedString("tracker.search_placeholder.text", comment: "Text for the search placeholder")
+       
+        enum ContextMenu {
+            static let pin = NSLocalizedString("tracker.context_menu.pin", comment: "Pin the tracker")
+            static let unpin = NSLocalizedString("tracker.context_menu.unpin", comment: "Unpin the tracker")
+            static let edit = NSLocalizedString("tracker.context_menu.edit", comment: "Edit the tracker")
+            static let delete = NSLocalizedString("tracker.context_menu.delete", comment: "Delete the tracker")
+        }
     }
     
     enum TrackerCell {
@@ -78,5 +85,6 @@ enum LocalizedStrings {
         static let shortFriday = NSLocalizedString("weekdays.short.friday", comment: "Short form for Friday")
         static let shortSaturday = NSLocalizedString("weekdays.short.saturday", comment: "Short form for Saturday")
         static let shortSunday = NSLocalizedString("weekdays.short.sunday", comment: "Short form for Sunday")
+        static let allDays = NSLocalizedString("weekdays.short.all", comment: "Short form for All")
     }
 }

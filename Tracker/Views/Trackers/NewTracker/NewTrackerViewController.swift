@@ -276,7 +276,8 @@ final class NewTrackerViewController: LightStatusBarViewController {
                               color: color,
                               emoji: emoji,
                               date: selectedDate,
-                              schedule: schedule)
+                              schedule: schedule,
+                              isPinned: false)
         
         delegate.addTracker(tracker: tracker, category: selectedCategory)
         dismiss(animated: true, completion: nil)
@@ -345,13 +346,20 @@ extension NewTrackerViewController: NewTrackerDelegateProtocol {
         self.selectedDays = selectedDays
         
         var detail = ""
-        for day in selectedDays {
-            if detail != "" {
-                detail = detail + ", " + day.shortDescription
-            } else {
-                detail = day.shortDescription
+        
+        if selectedDays != WeekDays.Daily {
+            
+            for day in selectedDays {
+                if detail != "" {
+                    detail = detail + ", " + day.shortDescription
+                } else {
+                    detail = day.shortDescription
+                }
             }
+        } else {
+            detail = selectedDays.shortDescription
         }
+        
         scheduleCell.detailTextLabel?.text = detail
         updateCreateButtonState(isActive: validateTracker())
     }

@@ -15,23 +15,9 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private var count: Int = 0
     private var isDone: Bool = false
     
-    private lazy var emojiLabel: UILabel = {
-        let label = UILabel()
-        label.font = Fonts.titleMediumFont
-        label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private lazy var nameLabel: UILabel = {
-        let label = UILabel()
-        label.font = Fonts.labelFont
-        label.textColor = .ysWhite
-        label.numberOfLines = 2
-        label.textAlignment = .left
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+    var mainView: UIView {
+        return cardView
+    }
     
     private lazy var daysLabel: UILabel = {
         let label = UILabel()
@@ -49,22 +35,17 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return button
     }()
     
-    private lazy var cardView: UIView = {
-        let view = UIView()
-        view.layer.cornerRadius = Constants.radius
-        view.clipsToBounds = true
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
+    private lazy var cardView: TrackerCardView = {
+        return TrackerCardView()
     }()
-    
     
     func configure(tracker: Tracker, date: Date , dataProvider: TrackerRecordDataProviderProtocol) {
         self.dataProvider = dataProvider
         self.date = date
         self.tracker = tracker
         
-        emojiLabel.text = tracker.emoji.rawValue
-        nameLabel.text = tracker.name
+        cardView.emojiLabel.text = tracker.emoji.rawValue
+        cardView.nameLabel.text = tracker.name
         cardView.backgroundColor = tracker.color.uiColor
         
         let trackerRecord = TrackerRecord(trackerId: tracker.id, date: date)
@@ -80,28 +61,39 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override var isHighlighted: Bool {
+        didSet {
+            updateAppearance(isHighlighted: isHighlighted)
+        }
+    }
+    
+    override var isSelected: Bool {
+        didSet {
+            updateAppearance(isHighlighted: isSelected)
+        }
+    }
+    
+    private func updateAppearance(isHighlighted: Bool) {
+        let blurAlpha: CGFloat = isHighlighted ? 0.5 : 1.0
+        
+        UIView.animate(withDuration: 0.3) {
+            self.cardView.emojiLabel.alpha = blurAlpha
+            self.cardView.nameLabel.alpha = blurAlpha
+            self.daysLabel.alpha = blurAlpha
+            self.plusButton.alpha = blurAlpha
+        }
+    }
+    
     private func setupLayout() {
         contentView.addSubview(cardView)
-        cardView.addSubview(emojiLabel)
-        cardView.addSubview(nameLabel)
         contentView.addSubview(daysLabel)
         contentView.addSubview(plusButton)
         
         NSLayoutConstraint.activate([
-            
             cardView.topAnchor.constraint(equalTo: contentView.topAnchor),
             cardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             cardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             cardView.heightAnchor.constraint(equalToConstant: 90),
-            
-            emojiLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
-            emojiLabel.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 12),
-            emojiLabel.widthAnchor.constraint(equalToConstant: 24),
-            emojiLabel.heightAnchor.constraint(equalToConstant: 24),
-            
-            nameLabel.leadingAnchor.constraint(equalTo: emojiLabel.leadingAnchor),
-            nameLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -12),
-            nameLabel.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -12),
             
             plusButton.topAnchor.constraint(equalTo: cardView.bottomAnchor, constant: 8),
             plusButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
@@ -110,12 +102,12 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             
             daysLabel.centerYAnchor.constraint(equalTo: plusButton.centerYAnchor),
             daysLabel.topAnchor.constraint(equalTo: cardView.bottomAnchor, constant: 16),
-            daysLabel.leadingAnchor.constraint(equalTo: emojiLabel.leadingAnchor),
+            daysLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
         ])
     }
     
     private func setupPlusButton(isDone: Bool, color: UIColor) {
-        if let date  {
+        if let date {
             let isActive = date < Date()
             plusButton.alpha = isActive ? 0.7 : 1
             plusButton.isEnabled = isActive
@@ -132,7 +124,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         plusButton.imageView?.contentMode = .scaleAspectFit
         plusButton.imageEdgeInsets = .zero
     }
-        
+    
     private func updateStatisticsAndShow(trackerRecord: TrackerRecord) {
         guard
             let dataProvider,
@@ -161,4 +153,3 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         updateStatisticsAndShow(trackerRecord: trackerRecord)
     }
 }
-

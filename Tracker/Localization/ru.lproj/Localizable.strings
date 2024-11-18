@@ -15,6 +15,10 @@
 "trackers.title" = "Трекеры";
 "trackers.placeholder.text" = "Что будем отслеживать?";
 "tracker.search_placeholder.text" = "Ничего не найдено";
+"tracker.context_menu.pin" = "Закрепить";
+"tracker.context_menu.unpin" = "Открепить";
+"tracker.context_menu.edit" = "Редактировать";
+"tracker.context_menu.edit" = "Удалить";
 
 //MARK: - Schedule View Controller
 "schedule.title" = "Расписание";
@@ -61,3 +65,4 @@
 "weekdays.short.friday" = "Пт";
 "weekdays.short.saturday" = "Сб";
 "weekdays.short.sunday" = "Вс";
+"weekdays.short.all" = "Каждый день";

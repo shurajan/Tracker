@@ -49,6 +49,8 @@ struct WeekDays: OptionSet {
             return LocalizedStrings.WeekDays.saturday
         case .Sunday:
             return LocalizedStrings.WeekDays.sunday
+        case .Daily:
+            return LocalizedStrings.WeekDays.allDays
         default:
             return "Unknown Day"
         }
@@ -70,6 +72,8 @@ struct WeekDays: OptionSet {
             return LocalizedStrings.WeekDays.shortSaturday
         case .Sunday:
             return LocalizedStrings.WeekDays.shortSunday
+        case .Daily:
+            return LocalizedStrings.WeekDays.allDays
         default:
             return "?"
         }

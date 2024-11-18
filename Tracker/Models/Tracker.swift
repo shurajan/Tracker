@@ -14,6 +14,7 @@ struct Tracker: Equatable {
     let emoji: Emoji
     let date: Date
     let schedule: WeekDays?
+    let isPinned: Bool
     
     
     static func == (lhs: Tracker, rhs: Tracker) -> Bool {

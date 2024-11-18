@@ -14,6 +14,10 @@
 "trackers.title" = "Trackers";
 "trackers.placeholder.text" = "What shall we track?";
 "tracker.search_placeholder.text" = "Nothing found";
+"tracker.context_menu.pin" = "Pin";
+"tracker.context_menu.unpin" = "Unpin";
+"tracker.context_menu.edit" = "Edit";
+"tracker.context_menu.delete" = "Delete";
 
 // MARK: - Schedule View Controller
 "schedule.title" = "Schedule";
@@ -60,3 +64,4 @@
 "weekdays.short.friday" = "Fri";
 "weekdays.short.saturday" = "Sat";
 "weekdays.short.sunday" = "Sun";
+"weekdays.short.all" = "Everyday";
