@@ -18,6 +18,7 @@ protocol TrackersViewModelProtocol {
     func titleForSection(_ section: Int) -> String?
     func numberOfRowsInSection(_ section: Int) -> Int
     func item(at indexPath: IndexPath) -> Tracker?
+    func categoryForItem(at indexPath: IndexPath) -> String?
     func filterItems (by searchText: String)
 }
 
@@ -83,6 +84,11 @@ final class TrackersViewModel: TrackersViewModelProtocol {
         let row = indexPath.row
         
         return visibleCategories[safe: section]?.trackers?[safe: row]
+    }
+    
+    func categoryForItem(at indexPath: IndexPath) -> String? {
+        let section = indexPath.section
+        return visibleCategories[safe: section]?.title
     }
     
     func filterItems(by searchText: String) {

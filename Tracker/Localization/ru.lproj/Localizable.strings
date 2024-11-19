@@ -14,11 +14,11 @@
 //MARK: - Trackers View Controller
 "trackers.title" = "Трекеры";
 "trackers.placeholder.text" = "Что будем отслеживать?";
-"tracker.search_placeholder.text" = "Ничего не найдено";
-"tracker.context_menu.pin" = "Закрепить";
-"tracker.context_menu.unpin" = "Открепить";
-"tracker.context_menu.edit" = "Редактировать";
-"tracker.context_menu.edit" = "Удалить";
+"trackers.search_placeholder.text" = "Ничего не найдено";
+"trackers.context_menu.pin" = "Закрепить";
+"trackers.context_menu.unpin" = "Открепить";
+"trackers.context_menu.edit" = "Редактировать";
+"trackers.context_menu.edit" = "Удалить";
 
 //MARK: - Schedule View Controller
 "schedule.title" = "Расписание";
@@ -30,14 +30,16 @@
 "tracker_creation.button.irregular_event" = "Нерегулярное событие";
 
 //MARK: - New Tracker View Controller
-"new_tracker.event_type.habit" = "Новая привычка";
-"new_tracker.event_type.one_off" = "Нерегулярное событие";
-"new_tracker.placeholder.name" = "Введите название трекера";
-"new_tracker.button.cancel" = "Отменить";
-"new_tracker.button.create" = "Создать";
-"new_tracker.title.category" = "Категория";
-"new_tracker.title.schedule" = "Расписание";
-"new_tracker.color.text" = "Цвет";
+"tracker.event_type.habit" = "Новая привычка";
+"tracker.event_type.one_off" = "Нерегулярное событие";
+"tracker.event_type.update_habit" = "Редактирование привычки";
+"tracker.event_type.update_one_off" = "Редактирование события";
+"tracker.placeholder.name" = "Введите название трекера";
+"tracker.button.cancel" = "Отменить";
+"tracker.button.create" = "Создать";
+"tracker.title.category" = "Категория";
+"tracker.title.schedule" = "Расписание";
+"tracker.color.text" = "Цвет";
 
 //MARK: - Categories
 "categories.title" = "Категория";

@@ -8,7 +8,7 @@ import UIKit
 
 protocol TrackersViewProtocol: AnyObject {
     func showNewHabitViewController()
-    func showIrregularEventController()
+    func showNewIrregularEventController()
 }
 
 
@@ -22,10 +22,10 @@ extension TrackersViewController: TrackersViewProtocol {
         present(newTrackerViewController, animated: true, completion: nil)
     }
     
-    func showIrregularEventController() {
+    func showNewIrregularEventController() {
         let newTrackerViewController = TrackerViewController()
         newTrackerViewController.selectedDate = selectedDate
-        newTrackerViewController.eventType = .one_off
+        newTrackerViewController.eventType = .oneOff
         newTrackerViewController.delegate = viewModel
         newTrackerViewController.modalPresentationStyle = .pageSheet
         present(newTrackerViewController, animated: true, completion: nil)

@@ -19,10 +19,10 @@ enum LocalizedStrings {
         static let searchPlaceHolderText = NSLocalizedString("tracker.search_placeholder.text", comment: "Text for the search placeholder")
        
         enum ContextMenu {
-            static let pin = NSLocalizedString("tracker.context_menu.pin", comment: "Pin the tracker")
-            static let unpin = NSLocalizedString("tracker.context_menu.unpin", comment: "Unpin the tracker")
-            static let edit = NSLocalizedString("tracker.context_menu.edit", comment: "Edit the tracker")
-            static let delete = NSLocalizedString("tracker.context_menu.delete", comment: "Delete the tracker")
+            static let pin = NSLocalizedString("trackers.context_menu.pin", comment: "Pin the tracker")
+            static let unpin = NSLocalizedString("trackers.context_menu.unpin", comment: "Unpin the tracker")
+            static let edit = NSLocalizedString("trackers.context_menu.edit", comment: "Edit the tracker")
+            static let delete = NSLocalizedString("trackers.context_menu.delete", comment: "Delete the tracker")
         }
     }
     
@@ -46,15 +46,17 @@ enum LocalizedStrings {
         static let irregularEventButton = NSLocalizedString("tracker_creation.button.irregular_event", comment: "Text for the irregular event creation button")
     }
     
-    enum NewTracker {
-        static let habitTitle = NSLocalizedString("new_tracker.event_type.habit", comment: "Title for a new habit tracker")
-        static let oneOffTitle = NSLocalizedString("new_tracker.event_type.one_off", comment: "Title for an irregular event tracker")
-        static let placeholderName = NSLocalizedString("new_tracker.placeholder.name", comment: "Placeholder for tracker name input field")
-        static let cancelButton = NSLocalizedString("new_tracker.button.cancel", comment: "Cancel button text")
-        static let createButton = NSLocalizedString("new_tracker.button.create", comment: "Create button text")
-        static let categoryTitle = NSLocalizedString("new_tracker.title.category", comment: "Title for category cell")
-        static let scheduleTitle = NSLocalizedString("new_tracker.title.schedule", comment: "Title for schedule cell")
-        static let colorText = NSLocalizedString("new_tracker.color.text", comment: "Title for color selection collection view")
+    enum Tracker {
+        static let habitTitle = NSLocalizedString("tracker.event_type.habit", comment: "Title for a new habit tracker")
+        static let oneOffTitle = NSLocalizedString("tracker.event_type.one_off", comment: "Title for an irregular event tracker")
+        static let habitUpdateTitle = NSLocalizedString("tracker.event_type.update_habit", comment: "Title for a new habit update tracker")
+        static let oneOffUpdateTitle = NSLocalizedString("tracker.event_type.update_one_off", comment: "Title for a new habit update tracker")
+        static let placeholderName = NSLocalizedString("tracker.placeholder.name", comment: "Placeholder for tracker name input field")
+        static let cancelButton = NSLocalizedString("tracker.button.cancel", comment: "Cancel button text")
+        static let createButton = NSLocalizedString("tracker.button.create", comment: "Create button text")
+        static let categoryTitle = NSLocalizedString("tracker.title.category", comment: "Title for category cell")
+        static let scheduleTitle = NSLocalizedString("tracker.title.schedule", comment: "Title for schedule cell")
+        static let colorText = NSLocalizedString("tracker.color.text", comment: "Title for color selection collection view")
     }
     
     enum Categories {

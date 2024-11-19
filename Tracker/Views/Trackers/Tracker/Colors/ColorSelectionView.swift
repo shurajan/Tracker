@@ -19,7 +19,7 @@ final class ColorSelectionView: UIView, UICollectionViewDelegate, UICollectionVi
 
     private lazy var colorLabel: UILabel = {
         let label = UILabel()
-        label.text = LocalizedStrings.NewTracker.colorText
+        label.text = LocalizedStrings.Tracker.colorText
         label.font = Fonts.sectionHeaderFont
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -45,6 +45,20 @@ final class ColorSelectionView: UIView, UICollectionViewDelegate, UICollectionVi
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupViews()
+    }
+    
+    func selectColor(at indexPath: IndexPath?) {
+        if let previousIndex = selectedColorIndex,
+           let previousCell = colorCollectionView.cellForItem(at: previousIndex) as? ColorCollectionViewCell {
+            previousCell.configure(with: TrackerColor.allCases[previousIndex.item].uiColor, isSelected: false)
+        }
+        
+        selectedColorIndex = indexPath
+        
+        if let indexPath = indexPath,
+           let currentCell = colorCollectionView.cellForItem(at: indexPath) as? ColorCollectionViewCell {
+            currentCell.configure(with: TrackerColor.allCases[indexPath.item].uiColor, isSelected: true)
+        }
     }
     
     private func setupViews() {

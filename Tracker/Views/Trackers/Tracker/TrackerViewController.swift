@@ -8,18 +8,37 @@
 import UIKit
 
 enum EventType: Int {
-    case one_off = 1
-    case habit = 2
+    case oneOff
+    case habit
+    case updateOneOff
+    case updateHabit
     
     var description: String {
         switch self {
         case .habit:
-            return LocalizedStrings.NewTracker.habitTitle
-        case .one_off:
-            return LocalizedStrings.NewTracker.oneOffTitle
+            return LocalizedStrings.Tracker.habitTitle
+        case .oneOff:
+            return LocalizedStrings.Tracker.oneOffTitle
+        case .updateOneOff:
+            return LocalizedStrings.Tracker.oneOffUpdateTitle
+        case .updateHabit:
+            return LocalizedStrings.Tracker.habitUpdateTitle
         }
     }
+    
+    var isOneOff: Bool {
+        return self == .oneOff || self == .updateOneOff
+    }
+    
+    var isHabit: Bool {
+        return self == .habit || self == .updateHabit
+    }
+    
+    var numberOfCells: Int {
+        return isOneOff ? 1 : 2
+    }
 }
+
 
 enum TrackerError: Error {
     case trackerCreationError
@@ -55,7 +74,7 @@ final class TrackerViewController: LightStatusBarViewController {
     
     private lazy var trackerNameTextField: PaddedTextField = {
         let textField = PaddedTextField()
-        textField.placeholder = LocalizedStrings.NewTracker.placeholderName
+        textField.placeholder = LocalizedStrings.Tracker.placeholderName
         textField.layer.cornerRadius = Constants.radius
         textField.delegate = self
         textField.backgroundColor = .ysBackground
@@ -91,7 +110,7 @@ final class TrackerViewController: LightStatusBarViewController {
     
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle(LocalizedStrings.NewTracker.cancelButton, for: .normal)
+        button.setTitle(LocalizedStrings.Tracker.cancelButton, for: .normal)
         button.setTitleColor(.red, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
         button.layer.cornerRadius = Constants.radius
@@ -102,20 +121,20 @@ final class TrackerViewController: LightStatusBarViewController {
         return button
     }()
     
-    private lazy var createButton: UIButton = {
+    private lazy var saveButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle(LocalizedStrings.NewTracker.createButton, for: .normal)
+        button.setTitle(LocalizedStrings.Tracker.createButton, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
         button.backgroundColor = .ysGray
         button.layer.cornerRadius = Constants.radius
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
         return button
     }()
     
     private lazy var buttonsStackView: UIStackView = {
-        let hStackView = UIStackView(arrangedSubviews: [cancelButton, createButton])
+        let hStackView = UIStackView(arrangedSubviews: [cancelButton, saveButton])
         hStackView.axis = .horizontal
         hStackView.distribution = .fillEqually
         hStackView.spacing = 8
@@ -125,7 +144,7 @@ final class TrackerViewController: LightStatusBarViewController {
     
     private let categoryCell: UITableViewCell = {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
-        cell.textLabel?.text = LocalizedStrings.NewTracker.categoryTitle
+        cell.textLabel?.text = LocalizedStrings.Tracker.categoryTitle
         cell.accessoryType = .disclosureIndicator
         cell.layoutMargins = Insets.cellInsets
         cell.backgroundColor = .ysBackground
@@ -138,7 +157,7 @@ final class TrackerViewController: LightStatusBarViewController {
     
     private let scheduleCell: UITableViewCell = {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
-        cell.textLabel?.text = LocalizedStrings.NewTracker.scheduleTitle
+        cell.textLabel?.text = LocalizedStrings.Tracker.scheduleTitle
         cell.accessoryType = .disclosureIndicator
         cell.layoutMargins = Insets.cellInsets
         cell.backgroundColor = .ysBackground
@@ -149,7 +168,8 @@ final class TrackerViewController: LightStatusBarViewController {
         return cell
     }()
     
-    var eventType: EventType = .one_off
+    var eventType: EventType = .oneOff
+    
     private var selectedDays: WeekDays = WeekDays()
     private var selectedEmojiIndex: IndexPath?
     private var selectedColorIndex: IndexPath?
@@ -160,6 +180,20 @@ final class TrackerViewController: LightStatusBarViewController {
         emojiSelectionView.delegate = self
         colorSelectionView.delegate = self
         setupLayout()
+    }
+    
+    //MARK: - Public Methods
+    func configure(with tracker: Tracker, category: String) {
+        trackerNameTextField.text = tracker.name
+        selectedCategory = category
+        categoryCell.detailTextLabel?.text = category
+        selectedDays = tracker.schedule ?? WeekDays()
+        scheduleCell.detailTextLabel?.text = tracker.schedule?.shortDescription ?? nil
+        selectedEmojiIndex = Emoji.allCases.firstIndex(of: tracker.emoji).map { IndexPath(item: $0, section: 0) }
+        selectedColorIndex = TrackerColor.allCases.firstIndex(of: tracker.color).map { IndexPath(item: $0, section: 0) }
+        emojiSelectionView.selectEmoji(at: selectedEmojiIndex)
+        colorSelectionView.selectColor(at: selectedColorIndex)
+        updateCreateButtonState(isActive: validateTracker())
     }
     
     private func setupLayout(){
@@ -197,7 +231,7 @@ final class TrackerViewController: LightStatusBarViewController {
             tableView.topAnchor.constraint(equalTo: trackerNameTextField.bottomAnchor, constant: 24),
             tableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Insets.leading),
             tableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: Insets.trailing),
-            tableView.heightAnchor.constraint(equalToConstant: CGFloat(eventType.rawValue * 75)),
+            tableView.heightAnchor.constraint(equalToConstant: CGFloat(eventType.numberOfCells * 75)),
             
             emojiSelectionView.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 20),
             emojiSelectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
@@ -222,7 +256,7 @@ final class TrackerViewController: LightStatusBarViewController {
         let isNameFilled = !(trackerNameTextField.text?.isEmpty ?? true)
         let isEmojiSelected = selectedEmojiIndex != nil
         let isColorSelected = selectedColorIndex != nil
-        let isScheduled = eventType == .one_off ? true : !selectedDays.isEmpty
+        let isScheduled = eventType.isOneOff  ? true : !selectedDays.isEmpty
         let isCategorySelected = selectedCategory != nil
         
         let result = isNameFilled && isEmojiSelected && isColorSelected && isScheduled && isCategorySelected
@@ -232,11 +266,11 @@ final class TrackerViewController: LightStatusBarViewController {
     
     private func updateCreateButtonState(isActive: Bool) {
         if isActive {
-            createButton.backgroundColor = .ysBlack
-            createButton.isEnabled = true
+            saveButton.backgroundColor = .ysBlack
+            saveButton.isEnabled = true
         } else {
-            createButton.backgroundColor = .ysGray
-            createButton.isEnabled = false
+            saveButton.backgroundColor = .ysGray
+            saveButton.isEnabled = false
         }
     }
     
@@ -252,7 +286,7 @@ final class TrackerViewController: LightStatusBarViewController {
     }
     
     @IBAction
-    private func createButtonTapped() {
+    private func saveButtonTapped() {
         guard let name = trackerNameTextField.text,
               !name.isEmpty,
               let selectedDate,
@@ -269,7 +303,7 @@ final class TrackerViewController: LightStatusBarViewController {
         
         let emoji = Emoji.allCases[selectedEmojiIndex.item]
         
-        let schedule = (eventType == .habit) ? self.selectedDays : nil
+        let schedule = eventType.isHabit  ? self.selectedDays : nil
         
         let tracker = Tracker(id: UUID(),
                               name: name,
@@ -280,6 +314,7 @@ final class TrackerViewController: LightStatusBarViewController {
                               isPinned: false)
         
         delegate.addTracker(tracker: tracker, category: selectedCategory)
+        delegate.updateTracker(tracker: tracker, newCategory: selectedCategory)
         dismiss(animated: true, completion: nil)
     }
     
@@ -313,7 +348,7 @@ extension TrackerViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         
-        if indexPath.row == eventType.rawValue - 1 {
+        if indexPath.row == eventType.numberOfCells - 1 {
             cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: tableView.bounds.width)
         } else {
             cell.separatorInset = Insets.separatorInset
@@ -328,7 +363,7 @@ extension TrackerViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return eventType.rawValue
+        return eventType.numberOfCells
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

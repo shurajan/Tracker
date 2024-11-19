@@ -89,7 +89,7 @@ final class TrackerTypeSelectorViewController: LightStatusBarViewController {
     private func irregularEventButtonTapped(_ sender: UIButton) {
         dismiss(animated: true) { [weak self] in
             guard let self else {return}
-            self.delegate?.showIrregularEventController()
+            self.delegate?.showNewIrregularEventController()
         }
     }
 }

@@ -48,6 +48,20 @@ final class EmojiSelectionView: UIView, UICollectionViewDelegate, UICollectionVi
         setupLayout()
     }
     
+    func selectEmoji(at indexPath: IndexPath?) {
+        if let previousIndex = selectedEmojiIndex,
+           let previousCell = emojiCollectionView.cellForItem(at: previousIndex) as? EmojiCollectionViewCell {
+            previousCell.configure(with: Emoji.allCases[previousIndex.item].rawValue, isSelected: false)
+        }
+        
+        selectedEmojiIndex = indexPath
+        
+        if let indexPath = indexPath,
+           let currentCell = emojiCollectionView.cellForItem(at: indexPath) as? EmojiCollectionViewCell {
+            currentCell.configure(with: Emoji.allCases[indexPath.item].rawValue, isSelected: true)
+        }
+    }
+    
     private func setupLayout() {
         addSubview(emojiLabel)
         addSubview(emojiCollectionView)

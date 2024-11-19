@@ -86,13 +86,24 @@ extension TrackersViewController {
         }
         viewModel?.togglePinned(trackerID: tracker.id)
     }
-    
-    private func unpinItem(at indexPath: IndexPath) {
-        print("Unpin item at \(indexPath.row)")
-    }
-    
+        
     private func editItem(at indexPath: IndexPath) {
-        print("Edit item at \(indexPath.row)")
+        guard let tracker = viewModel?.item(at: indexPath),
+              let category = viewModel?.categoryForItem(at: indexPath)
+        else {
+            Log.warn(message: "failed to find item at \(indexPath.row)")
+            return
+        }
+        
+        let schedule = tracker.schedule?.rawValue ?? 0
+        
+        let updateTrackerViewController = TrackerViewController()
+        updateTrackerViewController.selectedDate = selectedDate
+        updateTrackerViewController.eventType = (schedule > 0) ? .updateHabit : .updateOneOff
+        updateTrackerViewController.delegate = viewModel
+        updateTrackerViewController.modalPresentationStyle = .pageSheet
+        updateTrackerViewController.configure(with: tracker, category: category)
+        present(updateTrackerViewController, animated: true, completion: nil)
     }
     
     private func deleteItem(at indexPath: IndexPath) {
