@@ -4,7 +4,6 @@
 //
 //  Created by Alexander Bralnin on 24.10.2024.
 //
-
 import CoreData
 
 enum TrackerDecodingError: Error {
@@ -15,63 +14,52 @@ final class TrackerStore: BasicStore {
     var delegate: StoreDelegate?
     
     private var trackerCategoryStore = TrackerCategoryStore()
+    private var pinnedFetchedResultsController: NSFetchedResultsController<TrackerCoreData>?
+    private var dateFetchedResultsController: NSFetchedResultsController<TrackerCoreData>?
     
-    private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
-        let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "tracker_category.title", ascending: false),
-                                        NSSortDescriptor(key: "creationDate", ascending: true)]
-        
-        fetchRequest.predicate = setupPredicate(date: Date().startOfDay())
-        
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
-                                                                  managedObjectContext: managedObjectContext,
-                                                                  sectionNameKeyPath: "tracker_category.title",
-                                                                  cacheName: nil)
-        fetchedResultsController.delegate = self
-        try? fetchedResultsController.performFetch()
-        return fetchedResultsController
-    }()
+    // MARK: - Public Functions
     
-    
-    //MARK: - Public Functions
     func fetchTrackers(for date: Date) -> [TrackerCategory] {
         var trackerCategories: [TrackerCategory] = []
         
-        updateFetchRequestForPinned()
-        if let pinnedSections = fetchedResultsController.sections {
-            var pinnedTrackers: [Tracker] = []
-            
-            for section in pinnedSections {
-                guard let objects = section.objects as? [TrackerCoreData] else { continue }
+        pinnedFetchedResultsController = createFetchedResultsController(isPinned: true)
+        
+        if let pinnedController = pinnedFetchedResultsController {
+            if let pinnedSections = pinnedController.sections {
+                var pinnedTrackers: [Tracker] = []
                 
-                let trackers: [Tracker] = objects.compactMap { try? from($0) }
-                if !trackers.isEmpty {
-                    pinnedTrackers.append(contentsOf: trackers)
+                for section in pinnedSections {
+                    guard let objects = section.objects as? [TrackerCoreData] else { continue }
+                    let trackers: [Tracker] = objects.compactMap { try? from($0) }
+                    if !trackers.isEmpty {
+                        pinnedTrackers.append(contentsOf: trackers)
+                    }
                 }
-            }
-            
-            if !pinnedTrackers.isEmpty {
-                let pinnedCategory = TrackerCategory(title: "Pinned", trackers: pinnedTrackers)
-                trackerCategories.append(pinnedCategory)
+                
+                if !pinnedTrackers.isEmpty {
+                    let pinnedCategory = TrackerCategory(title: "Pinned", trackers: pinnedTrackers)
+                    trackerCategories.append(pinnedCategory)
+                }
             }
         }
         
-        updateFetchRequest(for: date.startOfDay())
-        if let sections = fetchedResultsController.sections {
-            for section in sections {
-                guard let objects = section.objects as? [TrackerCoreData] else { continue }
-                
-                let trackers: [Tracker] = objects.compactMap { try? from($0) }
-                let trackerCategory = TrackerCategory(title: section.name, trackers: trackers)
-                trackerCategories.append(trackerCategory)
+        dateFetchedResultsController = createFetchedResultsController(date: date.startOfDay(), isPinned: false)
+        
+        if let dateController = dateFetchedResultsController {
+            if let sections = dateController.sections {
+                for section in sections {
+                    guard let objects = section.objects as? [TrackerCoreData] else { continue }
+                    let trackers: [Tracker] = objects.compactMap { try? from($0) }
+                    let trackerCategory = TrackerCategory(title: section.name, trackers: trackers)
+                    trackerCategories.append(trackerCategory)
+                }
             }
         }
         
         return trackerCategories
     }
     
-    
-    func addTracker(tracker : Tracker, category : String) {
+    func addTracker(tracker: Tracker, category: String) {
         let trackerCoreData = TrackerCoreData(context: self.managedObjectContext)
         trackerCoreData.id = tracker.id
         trackerCoreData.name = tracker.name
@@ -79,12 +67,12 @@ final class TrackerStore: BasicStore {
         trackerCoreData.emoji = tracker.emoji.rawValue
         trackerCoreData.date = tracker.date.startOfDay()
         trackerCoreData.creationDate = Date()
-        if let schedule = tracker.schedule?.rawValue{
+        if let schedule = tracker.schedule?.rawValue {
             trackerCoreData.schedule = schedule
         }
         trackerCoreData.isPinned = tracker.isPinned
         
-        do{
+        do {
             try trackerCategoryStore.addTrackerCategory(category: category)
             trackerCoreData.tracker_category = findTrackerCategory(by: category)
         } catch {
@@ -137,10 +125,10 @@ final class TrackerStore: BasicStore {
                 managedObjectContext.delete(trackerCoreData)
                 try save()
             } else {
-                Log.warn(message: "Tracker with id \(id) not found")
+                Log.warn(message: "tracker with id \(id) not found")
             }
         } catch {
-            Log.error(error: error, message: "Failed to delete tracker with id \(id)")
+            Log.error(error: error, message: "failed to delete tracker with id \(id)")
         }
     }
     
@@ -160,7 +148,32 @@ final class TrackerStore: BasicStore {
         }
     }
     
-    //MARK: - Private Functions
+    // MARK: - Private Functions
+    private func createFetchedResultsController(date: Date? = nil, isPinned: Bool? = nil) -> NSFetchedResultsController<TrackerCoreData>? {
+        let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "tracker_category.title", ascending: false),
+            NSSortDescriptor(key: "creationDate", ascending: true)
+        ]
+        fetchRequest.predicate = setupPredicate(date: date, isPinned: isPinned)
+        
+        let fetchedResultsController = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: managedObjectContext,
+            sectionNameKeyPath: "tracker_category.title",
+            cacheName: nil
+        )
+        fetchedResultsController.delegate = self
+        
+        do {
+            try fetchedResultsController.performFetch()
+            return fetchedResultsController
+        } catch {
+            Log.error(error: error, message: "failed to perform fetch")
+            return nil
+        }
+    }
+    
     private func setupPredicate(date: Date? = nil, isPinned: Bool? = nil) -> NSPredicate {
         var subpredicates: [NSPredicate] = []
         
@@ -194,29 +207,6 @@ final class TrackerStore: BasicStore {
         }
     }
     
-    
-    private func updateFetchRequest(for date: Date) {
-        let fetchRequest = fetchedResultsController.fetchRequest
-        fetchRequest.predicate = setupPredicate(date: date, isPinned: false)
-        
-        do {
-            try fetchedResultsController.performFetch()
-        } catch {
-            Log.error(error: error, message: "failed to fetch filtered results")
-        }
-    }
-    
-    private func updateFetchRequestForPinned() {
-        let fetchRequest = fetchedResultsController.fetchRequest
-        fetchRequest.predicate = setupPredicate(isPinned: true)
-        
-        do {
-            try fetchedResultsController.performFetch()
-        } catch {
-            Log.error(error: error, message: "failed to fetch filtered results")
-        }
-    }
-    
     private func from(_ trackerCoreData: TrackerCoreData) throws -> Tracker {
         guard let id = trackerCoreData.id,
               let name = trackerCoreData.name,
@@ -230,13 +220,14 @@ final class TrackerStore: BasicStore {
         }
         
         let isPinned = trackerCoreData.isPinned
-        return Tracker(id: id,
-                       name: name,
-                       color: color,
-                       emoji: emoji,
-                       date: date,
-                       schedule: WeekDays(rawValue: trackerCoreData.schedule),
-                       isPinned: isPinned
+        return Tracker(
+            id: id,
+            name: name,
+            color: color,
+            emoji: emoji,
+            date: date,
+            schedule: WeekDays(rawValue: trackerCoreData.schedule),
+            isPinned: isPinned
         )
     }
     
@@ -248,12 +239,11 @@ final class TrackerStore: BasicStore {
             return fetchedCategory
         }
         return nil
-        
     }
-    
 }
 
-//MARK: - NSFetchedResultsControllerDelegate
+// MARK: - NSFetchedResultsControllerDelegate
+
 extension TrackerStore: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         delegate?.storeDidUpdate()
