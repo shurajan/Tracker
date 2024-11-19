@@ -21,11 +21,11 @@ enum EventType: Int {
     }
 }
 
-enum NewTrackerError: Error {
+enum TrackerError: Error {
     case trackerCreationError
 }
 
-final class NewTrackerViewController: LightStatusBarViewController {
+final class TrackerViewController: LightStatusBarViewController {
     var delegate: TrackersViewModelProtocol?
     var selectedDate: Date?
     
@@ -261,7 +261,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
               let selectedColorIndex,
               let selectedCategory
         else {
-            Log.error(error: NewTrackerError.trackerCreationError, message: "failed to create tracker")
+            Log.error(error: TrackerError.trackerCreationError, message: "failed to create tracker")
             return
         }
         
@@ -286,7 +286,7 @@ final class NewTrackerViewController: LightStatusBarViewController {
 }
 
 //MARK: - UITableViewDelegate
-extension NewTrackerViewController: UITableViewDelegate {
+extension TrackerViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
@@ -322,7 +322,7 @@ extension NewTrackerViewController: UITableViewDelegate {
 }
 
 //MARK: - UITableViewDataSource
-extension NewTrackerViewController: UITableViewDataSource {
+extension TrackerViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
@@ -341,7 +341,7 @@ extension NewTrackerViewController: UITableViewDataSource {
 }
 
 //MARK: - NewTrackerDelegateProtocol
-extension NewTrackerViewController: NewTrackerDelegateProtocol {
+extension TrackerViewController: TrackerDelegateProtocol {
     func didSelectDays(_ selectedDays: WeekDays) {
         self.selectedDays = selectedDays
         
@@ -382,7 +382,7 @@ extension NewTrackerViewController: NewTrackerDelegateProtocol {
 }
 
 // MARK: - UITextViewDelegate
-extension NewTrackerViewController: UITextFieldDelegate{
+extension TrackerViewController: UITextFieldDelegate{
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let currentText = textField.text ?? ""

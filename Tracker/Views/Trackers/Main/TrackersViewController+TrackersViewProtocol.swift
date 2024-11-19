@@ -14,7 +14,7 @@ protocol TrackersViewProtocol: AnyObject {
 
 extension TrackersViewController: TrackersViewProtocol {
     func showNewHabitViewController() {
-        let newTrackerViewController = NewTrackerViewController()
+        let newTrackerViewController = TrackerViewController()
         newTrackerViewController.selectedDate = selectedDate
         newTrackerViewController.eventType = .habit
         newTrackerViewController.delegate = viewModel
@@ -23,7 +23,7 @@ extension TrackersViewController: TrackersViewProtocol {
     }
     
     func showIrregularEventController() {
-        let newTrackerViewController = NewTrackerViewController()
+        let newTrackerViewController = TrackerViewController()
         newTrackerViewController.selectedDate = selectedDate
         newTrackerViewController.eventType = .one_off
         newTrackerViewController.delegate = viewModel

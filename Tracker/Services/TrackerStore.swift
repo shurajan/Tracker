@@ -14,6 +14,7 @@ final class TrackerStore: BasicStore {
     var delegate: StoreDelegate?
     
     private var trackerCategoryStore = TrackerCategoryStore()
+    private var trackerRecordStore = TrackerRecordStore()
     private var pinnedFetchedResultsController: NSFetchedResultsController<TrackerCoreData>?
     private var dateFetchedResultsController: NSFetchedResultsController<TrackerCoreData>?
     
@@ -122,6 +123,7 @@ final class TrackerStore: BasicStore {
         
         do {
             if let trackerCoreData = try managedObjectContext.fetch(fetchRequest).first {
+                trackerRecordStore.deleteById(by: id)
                 managedObjectContext.delete(trackerCoreData)
                 try save()
             } else {
@@ -243,7 +245,6 @@ final class TrackerStore: BasicStore {
 }
 
 // MARK: - NSFetchedResultsControllerDelegate
-
 extension TrackerStore: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         delegate?.storeDidUpdate()

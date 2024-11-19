@@ -8,7 +8,7 @@
 import UIKit
 
 final class ColorSelectionView: UIView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    weak var delegate: NewTrackerDelegateProtocol?
+    weak var delegate: TrackerDelegateProtocol?
     
     private var selectedColorIndex: IndexPath?
     

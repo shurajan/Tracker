@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol NewTrackerDelegateProtocol: AnyObject {
+protocol TrackerDelegateProtocol: AnyObject {
     func didSelectDays(_ selectedDays: WeekDays)
     func didSelectEmoji(_ indexPath: IndexPath)
     func didSelectColor(_ indexPath: IndexPath)

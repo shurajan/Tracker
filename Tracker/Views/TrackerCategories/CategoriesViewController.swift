@@ -14,7 +14,7 @@ protocol NewCategoryDelegateProtocol: AnyObject {
 final class CategoriesViewController: LightStatusBarViewController {    
     var selectedCategory: String?
     
-    weak var delegate: NewTrackerDelegateProtocol?
+    weak var delegate: TrackerDelegateProtocol?
     
     private var viewModel: TrackerCategoryViewModel?
     

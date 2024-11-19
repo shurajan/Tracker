@@ -10,7 +10,7 @@ import UIKit
 final class ScheduleViewController: LightStatusBarViewController {
     var selectedDays = WeekDays()
     
-    weak var delegate: NewTrackerDelegateProtocol?
+    weak var delegate: TrackerDelegateProtocol?
 
     private lazy var titleLabel: UILabel = {
         let label = UILabel()

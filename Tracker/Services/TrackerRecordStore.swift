@@ -10,6 +10,7 @@ import CoreData
 
 protocol TrackerRecordDataProviderProtocol {
     func manageTrackerRecord(trackerRecord :TrackerRecord)
+    func deleteById(by id: UUID)
     func count(trackerRecord: TrackerRecord) -> Int
     func exist(trackerRecord: TrackerRecord) -> Bool
 }
@@ -19,7 +20,6 @@ enum TrackerRecordStoreError: Error {
 }
 
 final class TrackerRecordStore: BasicStore {
-    private var trackerStore = TrackerStore()
         
     private func findCoreData(by id: UUID) -> [TrackerRecordCoreData] {
         let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
@@ -94,6 +94,26 @@ extension TrackerRecordStore: TrackerRecordDataProviderProtocol {
             try save()
         } catch {
             Log.error(error: error, message: "Can not save tracker record")
+        }
+    }
+    
+    func deleteById(by id: UUID) {
+        let records = findCoreData(by: id)
+        
+        guard !records.isEmpty else {
+            Log.info(message: "no records found for tracker_id \(id)")
+            return
+        }
+        
+        for record in records {
+            managedObjectContext.delete(record)
+        }
+        
+        do {
+            try save()
+            Log.info(message: "successfully deleted records for tracker_id \(id)")
+        } catch {
+            Log.error(error: error, message: "failed to delete records for tracker_id \(id)")
         }
     }
     
