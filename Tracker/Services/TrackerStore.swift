@@ -35,18 +35,36 @@ final class TrackerStore: BasicStore {
     
     //MARK: - Public Functions
     func fetchTrackers(for date: Date) -> [TrackerCategory] {
-        updateFetchRequest(date: date.startOfDay())
-        
-        guard let sections = fetchedResultsController.sections else { return [] }
-        
         var trackerCategories: [TrackerCategory] = []
         
-        for section in sections {
-            guard let objects = section.objects as? [TrackerCoreData] else { continue }
+        updateFetchRequestForPinned()
+        if let pinnedSections = fetchedResultsController.sections {
+            var pinnedTrackers: [Tracker] = []
             
-            let trackers: [Tracker] = objects.compactMap { try? from($0) }
-            let trackerCategory = TrackerCategory(title: section.name, trackers: trackers)
-            trackerCategories.append(trackerCategory)
+            for section in pinnedSections {
+                guard let objects = section.objects as? [TrackerCoreData] else { continue }
+                
+                let trackers: [Tracker] = objects.compactMap { try? from($0) }
+                if !trackers.isEmpty {
+                    pinnedTrackers.append(contentsOf: trackers)
+                }
+            }
+            
+            if !pinnedTrackers.isEmpty {
+                let pinnedCategory = TrackerCategory(title: "Pinned", trackers: pinnedTrackers)
+                trackerCategories.append(pinnedCategory)
+            }
+        }
+        
+        updateFetchRequest(for: date.startOfDay())
+        if let sections = fetchedResultsController.sections {
+            for section in sections {
+                guard let objects = section.objects as? [TrackerCoreData] else { continue }
+                
+                let trackers: [Tracker] = objects.compactMap { try? from($0) }
+                let trackerCategory = TrackerCategory(title: section.name, trackers: trackers)
+                trackerCategories.append(trackerCategory)
+            }
         }
         
         return trackerCategories
@@ -68,8 +86,7 @@ final class TrackerStore: BasicStore {
         
         do{
             try trackerCategoryStore.addTrackerCategory(category: category)
-            let trackerCategoryCoreData = findTrackerCategory(by: category)
-            trackerCoreData.tracker_category = trackerCategoryCoreData
+            trackerCoreData.tracker_category = findTrackerCategory(by: category)
         } catch {
             Log.error(error: error, message: "failed to save tracker")
         }
@@ -81,28 +98,117 @@ final class TrackerStore: BasicStore {
         }
     }
     
+    func updateTracker(with updatedTracker: Tracker, newCategory: String? = nil) {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", updatedTracker.id as CVarArg)
+        
+        do {
+            if let trackerCoreData = try managedObjectContext.fetch(fetchRequest).first {
+                trackerCoreData.name = updatedTracker.name
+                trackerCoreData.colorHex = updatedTracker.color.rawValue
+                trackerCoreData.emoji = updatedTracker.emoji.rawValue
+                trackerCoreData.date = updatedTracker.date.startOfDay()
+                trackerCoreData.isPinned = updatedTracker.isPinned
+                
+                if let schedule = updatedTracker.schedule?.rawValue {
+                    trackerCoreData.schedule = schedule
+                }
+                
+                if let newCategory = newCategory {
+                    try trackerCategoryStore.addTrackerCategory(category: newCategory)
+                    trackerCoreData.tracker_category = findTrackerCategory(by: newCategory)
+                }
+                
+                try save()
+            } else {
+                Log.warn(message: "tracker with id \(updatedTracker.id) not found")
+            }
+        } catch {
+            Log.error(error: error, message: "failed to update tracker with id \(updatedTracker.id)")
+        }
+    }
+    
+    func deleteTracker(by id: UUID) {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        
+        do {
+            if let trackerCoreData = try managedObjectContext.fetch(fetchRequest).first {
+                managedObjectContext.delete(trackerCoreData)
+                try save()
+            } else {
+                Log.warn(message: "Tracker with id \(id) not found")
+            }
+        } catch {
+            Log.error(error: error, message: "Failed to delete tracker with id \(id)")
+        }
+    }
+    
+    func togglePinned(for trackerID: UUID) {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", trackerID as CVarArg)
+        
+        do {
+            if let trackerCoreData = try managedObjectContext.fetch(fetchRequest).first {
+                trackerCoreData.isPinned.toggle()
+                try save()
+            } else {
+                Log.warn(message: "tracker with id \(trackerID) not found")
+            }
+        } catch {
+            Log.error(error: error, message: "failed to toggle isPinned for tracker with id \(trackerID)")
+        }
+    }
+    
     //MARK: - Private Functions
-    private func setupPredicate(date: Date) -> NSPredicate {
-        let calendar = Calendar.current
-        let currentWeekdayInt = calendar.component(.weekday, from: date)
-        let currentWeekday = WeekDays.fromGregorianStyle(currentWeekdayInt)?.rawValue ?? 0
-        let dateStart = date.startOfDay() as NSDate
+    private func setupPredicate(date: Date? = nil, isPinned: Bool? = nil) -> NSPredicate {
+        var subpredicates: [NSPredicate] = []
         
-        let datePredicate = NSPredicate(format: "date == %@", dateStart)
-        let scheduleZeroPredicate = NSPredicate(format: "schedule == 0 OR schedule == nil")
-        let dateAndNoSchedulePredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, scheduleZeroPredicate])
+        if let date = date {
+            let calendar = Calendar.current
+            let currentWeekdayInt = calendar.component(.weekday, from: date)
+            let currentWeekday = WeekDays.fromGregorianStyle(currentWeekdayInt)?.rawValue ?? 0
+            let dateStart = date.startOfDay() as NSDate
+            
+            let datePredicate = NSPredicate(format: "date == %@", dateStart)
+            let scheduleZeroPredicate = NSPredicate(format: "schedule == 0 OR schedule == nil")
+            
+            let dateAndNoSchedulePredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, scheduleZeroPredicate])
+            let scheduleContainsDayPredicate = NSPredicate(format: "(schedule & %d) != 0", currentWeekday)
+            
+            let orPredicate = NSCompoundPredicate(orPredicateWithSubpredicates: [dateAndNoSchedulePredicate, scheduleContainsDayPredicate])
+            subpredicates.append(orPredicate)
+        }
         
-        let scheduleContainsDayPredicate = NSPredicate(format: "(schedule & %d) != 0", currentWeekday)
+        if let isPinned = isPinned {
+            let isPinnedPredicate = NSPredicate(format: "isPinned == %@", NSNumber(value: isPinned))
+            subpredicates.append(isPinnedPredicate)
+        }
         
-        let finalPredicate = NSCompoundPredicate(orPredicateWithSubpredicates: [dateAndNoSchedulePredicate, scheduleContainsDayPredicate])
-        
-        return finalPredicate
+        if subpredicates.count > 1 {
+            return NSCompoundPredicate(andPredicateWithSubpredicates: subpredicates)
+        } else if let singlePredicate = subpredicates.first {
+            return singlePredicate
+        } else {
+            return NSPredicate(value: true)
+        }
     }
     
     
-    private func updateFetchRequest(date: Date) {
+    private func updateFetchRequest(for date: Date) {
         let fetchRequest = fetchedResultsController.fetchRequest
-        fetchRequest.predicate = setupPredicate(date: date)
+        fetchRequest.predicate = setupPredicate(date: date, isPinned: false)
+        
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            Log.error(error: error, message: "failed to fetch filtered results")
+        }
+    }
+    
+    private func updateFetchRequestForPinned() {
+        let fetchRequest = fetchedResultsController.fetchRequest
+        fetchRequest.predicate = setupPredicate(isPinned: true)
         
         do {
             try fetchedResultsController.performFetch()

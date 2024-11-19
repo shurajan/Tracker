@@ -156,7 +156,7 @@ final class TrackersViewController: LightStatusBarViewController {
             searchPlaceHolderView.isHidden = true
         }
     }
-    
+        
     //MARK: - IB Outlet
     @IBAction
     private func plusButtonTapped(_ sender: UIButton) {

@@ -10,6 +10,9 @@ protocol TrackersViewModelProtocol {
     var date: Date? { get set }
     var trackersBinding: Binding<[TrackerCategory]>? {get set}
     func addTracker(tracker : Tracker, category : String)
+    func updateTracker(tracker: Tracker, newCategory: String?)
+    func deleteTracker(trackerID: UUID)
+    func togglePinned(trackerID: UUID)
     func fetchTrackers()
     func numberOfSections() -> Int
     func titleForSection(_ section: Int) -> String?
@@ -19,7 +22,6 @@ protocol TrackersViewModelProtocol {
 }
 
 final class TrackersViewModel: TrackersViewModelProtocol {
-    
     var date: Date?
     
     var trackersBinding: Binding<[TrackerCategory]>?
@@ -43,6 +45,18 @@ final class TrackersViewModel: TrackersViewModelProtocol {
     
     func addTracker(tracker : Tracker, category : String) {
         trackerStore.addTracker(tracker: tracker, category: category)
+    }
+    
+    func updateTracker(tracker: Tracker, newCategory: String?) {
+        trackerStore.updateTracker(with: tracker, newCategory: newCategory)
+    }
+    
+    func deleteTracker(trackerID: UUID) {
+        trackerStore.deleteTracker(by: trackerID)
+    }
+    
+    func togglePinned(trackerID: UUID) {
+        trackerStore.togglePinned(for: trackerID)
     }
     
     func fetchTrackers() {

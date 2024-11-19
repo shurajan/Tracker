@@ -17,7 +17,7 @@ extension TrackersViewController {
             self.makeContextMenu(for: indexPath)
         }
     }
-        
+    
     func collectionView(
         _ collectionView: UICollectionView,
         previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration
@@ -51,14 +51,18 @@ extension TrackersViewController {
     }
     
     private func makeContextMenu(for indexPath: IndexPath) -> UIMenu {
-        let pinAction = UIAction(
-            title: LocalizedStrings.Trackers.ContextMenu.pin) { _ in
-                self.pinItem(at: indexPath)
-            }
+        guard let tracker = viewModel?.item(at: indexPath)
+        else {
+            Log.warn(message: "failed to find item at \(indexPath.row)")
+            return UIMenu()
+        }
         
-        let unpinAction = UIAction(
-            title: LocalizedStrings.Trackers.ContextMenu.unpin) { _ in
-                self.unpinItem(at: indexPath)
+        
+        let pinMessage = tracker.isPinned ? LocalizedStrings.Trackers.ContextMenu.unpin : LocalizedStrings.Trackers.ContextMenu.pin
+        
+        let pinAction = UIAction(
+            title: pinMessage) { _ in
+                self.pinItem(at: indexPath)
             }
         
         let editAction = UIAction(
@@ -71,11 +75,16 @@ extension TrackersViewController {
             self.deleteItem(at: indexPath)
         }
         
-        return UIMenu(title: "", children: [pinAction, unpinAction ,editAction, deleteAction])
+        return UIMenu(title: "", children: [pinAction, editAction, deleteAction])
     }
     
     private func pinItem(at indexPath: IndexPath) {
-        print("Pin item at \(indexPath.row)")
+        guard let tracker = viewModel?.item(at: indexPath)
+        else {
+            Log.warn(message: "failed to find item at \(indexPath.row)")
+            return
+        }
+        viewModel?.togglePinned(trackerID: tracker.id)
     }
     
     private func unpinItem(at indexPath: IndexPath) {
@@ -87,7 +96,36 @@ extension TrackersViewController {
     }
     
     private func deleteItem(at indexPath: IndexPath) {
-        print("Delete item at \(indexPath.row)")
+        guard let tracker = viewModel?.item(at: indexPath)
+        else {
+            Log.warn(message: "failed to find item at \(indexPath.row)")
+            return
+        }
+        
+        if let viewModel {
+            self.showDeleteAlert(for: tracker.id, onDelete: viewModel.deleteTracker)
+        }
+    }
+    
+    private func showDeleteAlert(for id: UUID, onDelete: @escaping (UUID) -> Void) {
+        let alertController = UIAlertController(
+            title: "Уверены что хотите удалить трекер?",
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+        
+        let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) { _ in
+            onDelete(id)
+        }
+        
+        let cancelAction = UIAlertAction(title: "Отменить", style: .cancel, handler: nil)
+        
+        alertController.addAction(deleteAction)
+        alertController.addAction(cancelAction)
+        
+        if let topViewController = UIApplication.shared.windows.first?.rootViewController {
+            topViewController.present(alertController, animated: true, completion: nil)
+        }
     }
     
 }
