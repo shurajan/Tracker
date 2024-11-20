@@ -34,6 +34,14 @@ enum EventType: Int {
         return self == .habit || self == .updateHabit
     }
     
+    var isNew: Bool {
+        return self == .oneOff || self == .habit
+    }
+    
+    var isUpdate: Bool {
+        return self == .updateOneOff || self == .updateHabit
+    }
+    
     var numberOfCells: Int {
         return isOneOff ? 1 : 2
     }
@@ -47,6 +55,7 @@ enum TrackerError: Error {
 final class TrackerViewController: LightStatusBarViewController {
     var delegate: TrackersViewModelProtocol?
     var selectedDate: Date?
+    private var currentTracker: Tracker?
     
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -123,7 +132,11 @@ final class TrackerViewController: LightStatusBarViewController {
     
     private lazy var saveButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle(LocalizedStrings.Tracker.createButton, for: .normal)
+        if eventType.isNew {
+            button.setTitle(LocalizedStrings.Tracker.createButton, for: .normal)
+        } else {
+            button.setTitle(LocalizedStrings.Tracker.saveButton, for: .normal)
+        }
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
         button.backgroundColor = .ysGray
@@ -184,6 +197,7 @@ final class TrackerViewController: LightStatusBarViewController {
     
     //MARK: - Public Methods
     func configure(with tracker: Tracker, category: String) {
+        currentTracker = tracker
         trackerNameTextField.text = tracker.name
         selectedCategory = category
         categoryCell.detailTextLabel?.text = category
@@ -193,7 +207,7 @@ final class TrackerViewController: LightStatusBarViewController {
         selectedColorIndex = TrackerColor.allCases.firstIndex(of: tracker.color).map { IndexPath(item: $0, section: 0) }
         emojiSelectionView.selectEmoji(at: selectedEmojiIndex)
         colorSelectionView.selectColor(at: selectedColorIndex)
-        updateCreateButtonState(isActive: validateTracker())
+        updateSaveButtonState(isActive: validateTracker())
     }
     
     private func setupLayout(){
@@ -249,7 +263,7 @@ final class TrackerViewController: LightStatusBarViewController {
             buttonsStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24),
             buttonsStackView.heightAnchor.constraint(equalToConstant: 60)
         ])
-        updateCreateButtonState(isActive: validateTracker())
+        updateSaveButtonState(isActive: validateTracker())
     }
     
     private func validateTracker() -> Bool {
@@ -264,7 +278,7 @@ final class TrackerViewController: LightStatusBarViewController {
         return result
     }
     
-    private func updateCreateButtonState(isActive: Bool) {
+    private func updateSaveButtonState(isActive: Bool) {
         if isActive {
             saveButton.backgroundColor = .ysBlack
             saveButton.isEnabled = true
@@ -277,7 +291,7 @@ final class TrackerViewController: LightStatusBarViewController {
     //MARK: - IB Outlet
     @IBAction
     private func trackerNameTextFieldChanged(_ textField: UITextField){
-        updateCreateButtonState(isActive: validateTracker())
+        updateSaveButtonState(isActive: validateTracker())
     }
     
     @IBAction
@@ -305,16 +319,34 @@ final class TrackerViewController: LightStatusBarViewController {
         
         let schedule = eventType.isHabit  ? self.selectedDays : nil
         
-        let tracker = Tracker(id: UUID(),
-                              name: name,
-                              color: color,
-                              emoji: emoji,
-                              date: selectedDate,
-                              schedule: schedule,
-                              isPinned: false)
-        
-        delegate.addTracker(tracker: tracker, category: selectedCategory)
-        delegate.updateTracker(tracker: tracker, newCategory: selectedCategory)
+        if eventType.isNew {
+            let tracker = Tracker(id: UUID(),
+                                  name: name,
+                                  color: color,
+                                  emoji: emoji,
+                                  date: selectedDate,
+                                  schedule: schedule,
+                                  isPinned: false)
+            delegate.addTracker(tracker: tracker, category: selectedCategory)
+            
+        } else {
+            guard let id = currentTracker?.id,
+                  let isPinned = currentTracker?.isPinned
+            else {
+                Log.warn(message: "failed to get Tracker data for update")
+                dismiss(animated: true, completion: nil)
+                return
+            }
+                    
+            let tracker = Tracker(id: id,
+                                  name: name,
+                                  color: color,
+                                  emoji: emoji,
+                                  date: selectedDate,
+                                  schedule: schedule,
+                                  isPinned: isPinned)
+            delegate.updateTracker(tracker: tracker, newCategory: selectedCategory)
+        }
         dismiss(animated: true, completion: nil)
     }
     
@@ -396,23 +428,23 @@ extension TrackerViewController: TrackerDelegateProtocol {
         }
         
         scheduleCell.detailTextLabel?.text = detail
-        updateCreateButtonState(isActive: validateTracker())
+        updateSaveButtonState(isActive: validateTracker())
     }
     
     func didSelectEmoji(_ indexPath: IndexPath) {
         self.selectedEmojiIndex = indexPath
-        updateCreateButtonState(isActive: validateTracker())
+        updateSaveButtonState(isActive: validateTracker())
     }
     
     func didSelectColor(_ indexPath: IndexPath) {
         self.selectedColorIndex = indexPath
-        updateCreateButtonState(isActive: validateTracker())
+        updateSaveButtonState(isActive: validateTracker())
     }
     
     func didSelectCategory(category: String) {
         self.selectedCategory = category
         categoryCell.detailTextLabel?.text = category
-        updateCreateButtonState(isActive: validateTracker())
+        updateSaveButtonState(isActive: validateTracker())
     }
 }
 

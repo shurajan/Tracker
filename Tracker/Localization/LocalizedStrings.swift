@@ -24,6 +24,12 @@ enum LocalizedStrings {
             static let edit = NSLocalizedString("trackers.context_menu.edit", comment: "Edit the tracker")
             static let delete = NSLocalizedString("trackers.context_menu.delete", comment: "Delete the tracker")
         }
+        
+        enum DeleteAlert {
+            static let title = NSLocalizedString("delete.alert.title", comment: "Title for the delete tracker alert")
+            static let actionDelete = NSLocalizedString("delete.alert.action.delete", comment: "Delete action button title")
+            static let actionCancel = NSLocalizedString("delete.alert.action.cancel", comment: "Cancel action button title")
+        }
     }
     
     enum TrackerCell {
@@ -54,6 +60,7 @@ enum LocalizedStrings {
         static let placeholderName = NSLocalizedString("tracker.placeholder.name", comment: "Placeholder for tracker name input field")
         static let cancelButton = NSLocalizedString("tracker.button.cancel", comment: "Cancel button text")
         static let createButton = NSLocalizedString("tracker.button.create", comment: "Create button text")
+        static let saveButton = NSLocalizedString("tracker.button.save", comment: "Save button text")
         static let categoryTitle = NSLocalizedString("tracker.title.category", comment: "Title for category cell")
         static let scheduleTitle = NSLocalizedString("tracker.title.schedule", comment: "Title for schedule cell")
         static let colorText = NSLocalizedString("tracker.color.text", comment: "Title for color selection collection view")

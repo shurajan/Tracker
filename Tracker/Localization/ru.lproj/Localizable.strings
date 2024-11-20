@@ -19,6 +19,9 @@
 "trackers.context_menu.unpin" = "Открепить";
 "trackers.context_menu.edit" = "Редактировать";
 "trackers.context_menu.edit" = "Удалить";
+"delete.alert.title" = "Уверены, что хотите удалить трекер?";
+"delete.alert.action.delete" = "Удалить";
+"delete.alert.action.cancel" = "Отменить";
 
 //MARK: - Schedule View Controller
 "schedule.title" = "Расписание";
@@ -37,6 +40,7 @@
 "tracker.placeholder.name" = "Введите название трекера";
 "tracker.button.cancel" = "Отменить";
 "tracker.button.create" = "Создать";
+"tracker.button.save" = "Сохранить";
 "tracker.title.category" = "Категория";
 "tracker.title.schedule" = "Расписание";
 "tracker.color.text" = "Цвет";

@@ -120,16 +120,23 @@ extension TrackersViewController {
     
     private func showDeleteAlert(for id: UUID, onDelete: @escaping (UUID) -> Void) {
         let alertController = UIAlertController(
-            title: "Уверены что хотите удалить трекер?",
+            title: LocalizedStrings.Trackers.DeleteAlert.title,
             message: nil,
             preferredStyle: .actionSheet
         )
         
-        let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) { _ in
+        let deleteAction = UIAlertAction(
+            title: LocalizedStrings.Trackers.DeleteAlert.actionDelete,
+            style: .destructive
+        ) { _ in
             onDelete(id)
         }
         
-        let cancelAction = UIAlertAction(title: "Отменить", style: .cancel, handler: nil)
+        let cancelAction = UIAlertAction(
+            title: LocalizedStrings.Trackers.DeleteAlert.actionCancel,
+            style: .cancel,
+            handler: nil
+        )
         
         alertController.addAction(deleteAction)
         alertController.addAction(cancelAction)

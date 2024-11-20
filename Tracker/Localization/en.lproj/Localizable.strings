@@ -18,6 +18,9 @@
 "trackers.context_menu.unpin" = "Unpin";
 "trackers.context_menu.edit" = "Edit";
 "trackers.context_menu.delete" = "Delete";
+"delete.alert.title" = "Are you sure you want to delete the tracker?";
+"delete.alert.action.delete" = "Delete";
+"delete.alert.action.cancel" = "Cancel";
 
 // MARK: - Schedule View Controller
 "schedule.title" = "Schedule";
@@ -36,6 +39,7 @@
 "tracker.placeholder.name" = "Enter tracker name";
 "tracker.button.cancel" = "Cancel";
 "tracker.button.create" = "Create";
+"tracker.button.save" = "Save";
 "tracker.title.category" = "Category";
 "tracker.title.schedule" = "Schedule";
 "tracker.color.text" = "Color";
