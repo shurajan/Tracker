@@ -88,7 +88,12 @@ final class TrackersViewModel: TrackersViewModelProtocol {
     
     func categoryForItem(at indexPath: IndexPath) -> String? {
         let section = indexPath.section
-        return visibleCategories[safe: section]?.title
+        let row = indexPath.row
+        
+        if let id = visibleCategories[safe: section]?.trackers?[safe: row]?.id {
+            return trackerStore.getTrackerCategoryTitle(by: id)
+        }
+        return nil
     }
     
     func filterItems(by searchText: String) {

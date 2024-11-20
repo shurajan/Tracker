@@ -150,6 +150,23 @@ final class TrackerStore: BasicStore {
         }
     }
     
+    func getTrackerCategoryTitle(by id: UUID)-> String? {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        
+        do {
+            if let trackerCoreData = try managedObjectContext.fetch(fetchRequest).first {
+                return trackerCoreData.tracker_category?.title
+            } else {
+                Log.warn(message: "tracker with id \(id) not found")
+            }
+        } catch {
+            Log.error(error: error, message: "failed to delete tracker with id \(id)")
+        }
+        
+        return nil
+    }
+    
     // MARK: - Private Functions
     private func createFetchedResultsController(date: Date? = nil, isPinned: Bool? = nil) -> NSFetchedResultsController<TrackerCoreData>? {
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
