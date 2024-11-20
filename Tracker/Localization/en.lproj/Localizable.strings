@@ -14,6 +14,7 @@
 "trackers.title" = "Trackers";
 "trackers.placeholder.text" = "What shall we track?";
 "trackers.search_placeholder.text" = "Nothing found";
+"trackers.filter_button.text" = "Filter";
 "trackers.context_menu.pin" = "Pin";
 "trackers.context_menu.unpin" = "Unpin";
 "trackers.context_menu.edit" = "Edit";

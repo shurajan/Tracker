@@ -51,7 +51,7 @@ extension TrackersViewController {
     }
     
     private func makeContextMenu(for indexPath: IndexPath) -> UIMenu {
-        guard let tracker = viewModel?.item(at: indexPath)
+        guard let tracker = collectionViewModel?.item(at: indexPath)
         else {
             Log.warn(message: "failed to find item at \(indexPath.row)")
             return UIMenu()
@@ -79,17 +79,17 @@ extension TrackersViewController {
     }
     
     private func pinItem(at indexPath: IndexPath) {
-        guard let tracker = viewModel?.item(at: indexPath)
+        guard let tracker = collectionViewModel?.item(at: indexPath)
         else {
             Log.warn(message: "failed to find item at \(indexPath.row)")
             return
         }
-        viewModel?.togglePinned(trackerID: tracker.id)
+        viewModel?.togglePinned(for: tracker.id)
     }
         
     private func editItem(at indexPath: IndexPath) {
-        guard let tracker = viewModel?.item(at: indexPath),
-              let category = viewModel?.categoryForItem(at: indexPath)
+        guard let tracker = collectionViewModel?.item(at: indexPath),
+              let category = collectionViewModel?.categoryForItem(at: indexPath)
         else {
             Log.warn(message: "failed to find item at \(indexPath.row)")
             return
@@ -104,12 +104,11 @@ extension TrackersViewController {
         updateTrackerViewController.delegate = viewModel
         updateTrackerViewController.modalPresentationStyle = .pageSheet
         updateTrackerViewController.configure(with: tracker, category: category, count: count)
-        trackerRecordStore?.count(by: tracker.id)
         present(updateTrackerViewController, animated: true, completion: nil)
     }
     
     private func deleteItem(at indexPath: IndexPath) {
-        guard let tracker = viewModel?.item(at: indexPath)
+        guard let tracker = collectionViewModel?.item(at: indexPath)
         else {
             Log.warn(message: "failed to find item at \(indexPath.row)")
             return

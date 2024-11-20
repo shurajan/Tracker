@@ -9,16 +9,13 @@ import Foundation
 protocol TrackersViewModelProtocol {
     var date: Date? { get set }
     var trackersBinding: Binding<[TrackerCategory]>? {get set}
+    var visibleCategories: [TrackerCategory] { get }
     func addTracker(tracker : Tracker, category : String)
     func updateTracker(tracker: Tracker, newCategory: String?)
-    func deleteTracker(trackerID: UUID)
-    func togglePinned(trackerID: UUID)
+    func deleteTracker(for id: UUID)
+    func togglePinned(for id: UUID)
     func fetchTrackers()
-    func numberOfSections() -> Int
-    func titleForSection(_ section: Int) -> String?
-    func numberOfRowsInSection(_ section: Int) -> Int
-    func item(at indexPath: IndexPath) -> Tracker?
-    func categoryForItem(at indexPath: IndexPath) -> String?
+    func category(for id: UUID) -> String?
     func filterItems (by searchText: String)
 }
 
@@ -52,12 +49,12 @@ final class TrackersViewModel: TrackersViewModelProtocol {
         trackerStore.updateTracker(with: tracker, newCategory: newCategory)
     }
     
-    func deleteTracker(trackerID: UUID) {
-        trackerStore.deleteTracker(by: trackerID)
+    func deleteTracker(for id: UUID) {
+        trackerStore.deleteTracker(by: id)
     }
     
-    func togglePinned(trackerID: UUID) {
-        trackerStore.togglePinned(for: trackerID)
+    func togglePinned(for id: UUID) {
+        trackerStore.togglePinned(for: id)
     }
     
     func fetchTrackers() {
@@ -67,33 +64,8 @@ final class TrackersViewModel: TrackersViewModelProtocol {
         }
     }
     
-    func numberOfSections() -> Int {
-        return visibleCategories.count
-    }
-    
-    func titleForSection(_ section: Int) -> String? {
-        return visibleCategories[safe: section]?.title
-    }
-    
-    func numberOfRowsInSection(_ section: Int) -> Int {
-        return visibleCategories[safe: section]?.trackers?.count ?? 0
-    }
-    
-    func item(at indexPath: IndexPath) -> Tracker? {
-        let section = indexPath.section
-        let row = indexPath.row
-        
-        return visibleCategories[safe: section]?.trackers?[safe: row]
-    }
-    
-    func categoryForItem(at indexPath: IndexPath) -> String? {
-        let section = indexPath.section
-        let row = indexPath.row
-        
-        if let id = visibleCategories[safe: section]?.trackers?[safe: row]?.id {
-            return trackerStore.getTrackerCategoryTitle(by: id)
-        }
-        return nil
+    func category(for id: UUID) -> String? {
+        return trackerStore.getTrackerCategoryTitle(by: id)
     }
     
     func filterItems(by searchText: String) {
@@ -111,6 +83,7 @@ final class TrackersViewModel: TrackersViewModelProtocol {
             }
         }
     }
+    
 }
 
 extension TrackersViewModel: StoreDelegate {

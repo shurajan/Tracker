@@ -8,6 +8,7 @@ import UIKit
 
 final class TrackersViewController: LightStatusBarViewController {
     private(set) var viewModel: TrackersViewModelProtocol?
+    private(set) var collectionViewModel: TrackerCollectionViewModelProtocol?
     private(set) var trackerRecordStore: TrackerRecordStore?
     private(set) var params: GeometricParams = GeometricParams(cellCount: 2,
                                                           leftInset: Insets.leading,
@@ -76,7 +77,19 @@ final class TrackersViewController: LightStatusBarViewController {
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: "header")
         collectionView.register(TrackerCollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+        collectionView.contentInsetAdjustmentBehavior = .always
         return collectionView
+    }()
+    
+    private lazy var filterButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle(LocalizedStrings.Trackers.filterButtonText, for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .ysBlue
+        button.titleLabel?.font = Fonts.textFieldFont
+        button.layer.cornerRadius = Constants.radius
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
     }()
     
     // MARK: - View Life Cycles
@@ -105,10 +118,13 @@ final class TrackersViewController: LightStatusBarViewController {
         view.addSubview(trackerCollectionView)
         view.addSubview(placeHolderView)
         view.addSubview(searchPlaceHolderView)
+        view.addSubview(filterButton)
                 
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: plusButton)
         navigationItem.searchController = searchController
+        
+        trackerCollectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 80, right: 0)
         
         NSLayoutConstraint.activate([
             plusButton.widthAnchor.constraint(equalToConstant: 42),
@@ -130,12 +146,18 @@ final class TrackersViewController: LightStatusBarViewController {
             searchPlaceHolderView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             searchPlaceHolderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Insets.leading),
             searchPlaceHolderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: Insets.trailing),
+            
+            filterButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            filterButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            filterButton.widthAnchor.constraint(equalToConstant: 114),
+            filterButton.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
     
     private func initiateStore(){
         self.trackerRecordStore = TrackerRecordStore()
         viewModel = TrackersViewModel()
+        collectionViewModel = TrackerCollectionViewModel(viewModel: viewModel)
         viewModel?.trackersBinding = updateCollectionView
         viewModel?.date = selectedDate
         viewModel?.fetchTrackers()
@@ -147,6 +169,7 @@ final class TrackersViewController: LightStatusBarViewController {
         let numberOfSections = categories.count
         let isHidden = numberOfSections > 0
         trackerCollectionView.isHidden = !isHidden
+        filterButton.isHidden = !isHidden
         
         if isSearchModeOn {
             placeHolderView.isHidden = true

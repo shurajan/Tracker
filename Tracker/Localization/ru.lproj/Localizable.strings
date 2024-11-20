@@ -15,6 +15,7 @@
 "trackers.title" = "Трекеры";
 "trackers.placeholder.text" = "Что будем отслеживать?";
 "trackers.search_placeholder.text" = "Ничего не найдено";
+"trackers.filter_button.text" = "Фильтр";
 "trackers.context_menu.pin" = "Закрепить";
 "trackers.context_menu.unpin" = "Открепить";
 "trackers.context_menu.edit" = "Редактировать";

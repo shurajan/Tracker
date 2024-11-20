@@ -17,7 +17,8 @@ enum LocalizedStrings {
         static let title = NSLocalizedString("trackers.title", comment: "Title for the trackers screen")
         static let placeholderText = NSLocalizedString("trackers.placeholder.text", comment: "Text for the placeholder")
         static let searchPlaceHolderText = NSLocalizedString("tracker.search_placeholder.text", comment: "Text for the search placeholder")
-       
+        static let filterButtonText = NSLocalizedString("trackers.filter_button.text", comment: "Text for the filter button")
+        
         enum ContextMenu {
             static let pin = NSLocalizedString("trackers.context_menu.pin", comment: "Pin the tracker")
             static let unpin = NSLocalizedString("trackers.context_menu.unpin", comment: "Unpin the tracker")

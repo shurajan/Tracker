@@ -9,16 +9,16 @@ import UIKit
 // MARK: - UICollectionViewDataSource
 extension TrackersViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel?.numberOfRowsInSection(section) ?? 0
+        return collectionViewModel?.numberOfRowsInSection(section) ?? 0
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return viewModel?.numberOfSections() ?? 0
+        return collectionViewModel?.numberOfSections() ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as? TrackerCollectionViewCell,
-              let tracker = viewModel?.item(at: indexPath),
+              let tracker = collectionViewModel?.item(at: indexPath),
               let trackerRecordStore
         else {
             return UICollectionViewCell()
@@ -32,6 +32,7 @@ extension TrackersViewController: UICollectionViewDataSource {
 
 // MARK: - UICollectionViewDelegate
 extension TrackersViewController: UICollectionViewDelegate {
+    
     func collectionView(
         _ collectionView: UICollectionView,
         viewForSupplementaryElementOfKind kind: String,
@@ -43,7 +44,7 @@ extension TrackersViewController: UICollectionViewDelegate {
                 withReuseIdentifier: "header",
                 for: indexPath
             ) as? UICollectionReusableView,
-                  let dataProvider = viewModel,
+                  let dataProvider = collectionViewModel,
                   let sectionTitle = dataProvider.titleForSection(indexPath.section) else {
                 return UICollectionReusableView()
             }
