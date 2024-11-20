@@ -31,14 +31,14 @@ final class TrackerStore: BasicStore {
                 
                 for section in pinnedSections {
                     guard let objects = section.objects as? [TrackerCoreData] else { continue }
-                    let trackers: [Tracker] = objects.compactMap { try? from($0) }
+                    let trackers: [Tracker] = objects.compactMap { try? from($0)}
                     if !trackers.isEmpty {
                         pinnedTrackers.append(contentsOf: trackers)
                     }
                 }
                 
                 if !pinnedTrackers.isEmpty {
-                    let pinnedCategory = TrackerCategory(title: "Pinned", trackers: pinnedTrackers)
+                    let pinnedCategory = TrackerCategory(title: LocalizedStrings.Trackers.pinnedCategoryText, trackers: pinnedTrackers)
                     trackerCategories.append(pinnedCategory)
                 }
             }
