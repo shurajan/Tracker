@@ -53,6 +53,10 @@ enum LocalizedStrings {
         static let irregularEventButton = NSLocalizedString("tracker_creation.button.irregular_event", comment: "Text for the irregular event creation button")
     }
     
+    enum Filter {
+        static let title = NSLocalizedString("filters.title", comment: "Title for filters view")
+    }
+        
     enum Tracker {
         static let habitTitle = NSLocalizedString("tracker.event_type.habit", comment: "Title for a new habit tracker")
         static let oneOffTitle = NSLocalizedString("tracker.event_type.one_off", comment: "Title for an irregular event tracker")

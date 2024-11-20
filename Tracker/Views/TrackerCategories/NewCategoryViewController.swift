@@ -57,7 +57,6 @@ final class NewCategoryViewController: LightStatusBarViewController {
         view.addSubview(categoryTextField)
         view.addSubview(createButton)
         
-        // Title Label Constraints
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),

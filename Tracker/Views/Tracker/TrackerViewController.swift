@@ -394,9 +394,8 @@ extension TrackerViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         
         if indexPath.row == 0 {
-            let trackerCategoriesViewController = CategoriesViewController()
+            let trackerCategoriesViewController = CategoriesViewController(delegate: self)
             trackerCategoriesViewController.selectedCategory = self.selectedCategory
-            trackerCategoriesViewController.delegate = self
             trackerCategoriesViewController.modalPresentationStyle = .pageSheet
             present(trackerCategoriesViewController, animated: true, completion: nil)
         } else {

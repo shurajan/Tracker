@@ -89,6 +89,7 @@ final class TrackersViewController: LightStatusBarViewController {
         button.titleLabel?.font = Fonts.textFieldFont
         button.layer.cornerRadius = Constants.radius
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside)
         return button
     }()
     
@@ -196,6 +197,14 @@ final class TrackersViewController: LightStatusBarViewController {
         viewModel?.fetchTrackers()
         dismiss(animated: true)
     }
+    
+    @IBAction
+    func filterButtonTapped(){
+        guard let viewModel else {return}
+        let filtersViewController = FiltersViewController(viewModel: viewModel)
+        filtersViewController.modalPresentationStyle = .pageSheet
+        present(filtersViewController, animated: true, completion: nil)
+    }
 }
 
 //MARK: - TrackersViewProtocol
@@ -213,3 +222,4 @@ extension TrackersViewController: UISearchBarDelegate {
         searchBar.resignFirstResponder()
     }
 }
+

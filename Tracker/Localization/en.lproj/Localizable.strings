@@ -23,6 +23,13 @@
 "delete.alert.action.delete" = "Delete";
 "delete.alert.action.cancel" = "Cancel";
 
+//MARK: - Filters
+"filters.title" = "Filters";
+"filters.all_trackers" = "All Trackers";
+"filters.today_trackers" = "Trackers for Today";
+"filters.completed" = "Completed";
+"filters.not_completed" = "Not Completed";
+
 // MARK: - Schedule View Controller
 "schedule.title" = "Schedule";
 "schedule.button.text" = "Done";

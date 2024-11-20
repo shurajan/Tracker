@@ -6,7 +6,7 @@
 //
 import UIKit
 
-final class CategoryTableViewCell: UITableViewCell {
+final class SelectionTableViewCell: UITableViewCell {
     
     let trackerLabel: UILabel = {
         let label = UILabel()

@@ -14,12 +14,13 @@ protocol NewCategoryDelegateProtocol: AnyObject {
 final class CategoriesViewController: LightStatusBarViewController {    
     var selectedCategory: String?
     
-    weak var delegate: TrackerDelegateProtocol?
+    private let delegate: TrackerDelegateProtocol
     
     private var viewModel: TrackerCategoryViewModel?
     
-    init(viewModel: TrackerCategoryViewModel = TrackerCategoryViewModel()) {
+    init(delegate: TrackerDelegateProtocol, viewModel: TrackerCategoryViewModel = TrackerCategoryViewModel()) {
         self.viewModel = viewModel
+        self.delegate = delegate
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -39,7 +40,7 @@ final class CategoriesViewController: LightStatusBarViewController {
     private lazy var tableView: UITableView = {
         let table = UITableView()
         table.backgroundColor = .ysWhite
-        table.register(CategoryTableViewCell.self, forCellReuseIdentifier: "cell")
+        table.register(SelectionTableViewCell.self, forCellReuseIdentifier: "cell")
         table.layer.cornerRadius = Constants.radius
         table.isScrollEnabled = true
         table.delegate = self
@@ -75,7 +76,6 @@ final class CategoriesViewController: LightStatusBarViewController {
         view.backgroundColor = .ysWhite
         setupLayout()
         
-        //viewModel = TrackerCategoryViewModel()
         viewModel?.trackerCategoriesBinding = updateTableView
         viewModel?.fetchTrackerCategories()
     }
@@ -156,7 +156,7 @@ extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? CategoryTableViewCell
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? SelectionTableViewCell
         else {
             return UITableViewCell()
         }
@@ -179,7 +179,7 @@ extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
         tableView.deselectRow(at: indexPath, animated: true)
         if let category = viewModel?.trackerCategories[indexPath.row].title {
             self.selectedCategory = category
-            delegate?.didSelectCategory(category: category)
+            delegate.didSelectCategory(category: category)
         }
         dismiss(animated: true)
     }

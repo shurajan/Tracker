@@ -6,8 +6,25 @@
 //
 import Foundation
 
-protocol TrackersViewModelProtocol {
+enum Filters: String, CaseIterable {
+    case allTrackers = "filters.all_trackers"
+    case todayTrackers = "filters.today_trackers"
+    case completed = "filters.completed"
+    case notCompleted = "filters.not_completed"
+    var localized: String {
+        return NSLocalizedString(self.rawValue, comment: "")
+    }
+}
+
+struct Filter {
+    let type: Filters
+    let query: String
+}
+
+
+protocol TrackersViewModelProtocol: AnyObject {
     var date: Date? { get set }
+    var filter: Filters { get }
     var trackersBinding: Binding<[TrackerCategory]>? {get set}
     var visibleCategories: [TrackerCategory] { get }
     func addTracker(tracker : Tracker, category : String)
@@ -17,12 +34,15 @@ protocol TrackersViewModelProtocol {
     func fetchTrackers()
     func category(for id: UUID) -> String?
     func filterItems (by searchText: String)
+    func didSelectFilter(filter: Filters)
 }
 
 final class TrackersViewModel: TrackersViewModelProtocol {
     var date: Date?
     
     var trackersBinding: Binding<[TrackerCategory]>?
+    
+    private(set) var filter: Filters = .allTrackers
     
     private let trackerStore: TrackerStore = TrackerStore()
     
@@ -60,6 +80,8 @@ final class TrackersViewModel: TrackersViewModelProtocol {
     func fetchTrackers() {
         if let date {
             categories = trackerStore.fetchTrackers(for: date)
+            let filter = Filter(type: self.filter, query: self.searchText)
+            
             filterItems(by: self.searchText)
         }
     }
@@ -84,12 +106,18 @@ final class TrackersViewModel: TrackersViewModelProtocol {
         }
     }
     
+    func didSelectFilter(filter: Filters) {
+        Log.info(message: "selected filter : \(filter.rawValue)")
+        if self.filter == filter {
+            return
+        }
+        fetchTrackers()
+    }
+
 }
 
 extension TrackersViewModel: StoreDelegate {
     func storeDidUpdate() {
         fetchTrackers()
     }
-    
-    
 }
