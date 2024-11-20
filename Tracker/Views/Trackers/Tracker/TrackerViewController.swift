@@ -81,6 +81,14 @@ final class TrackerViewController: LightStatusBarViewController {
         return label
     }()
     
+    private lazy var counterLabel: UILabel = {
+        let label = UILabel()
+        label.font = Fonts.largeLabelFont
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     private lazy var trackerNameTextField: PaddedTextField = {
         let textField = PaddedTextField()
         textField.placeholder = LocalizedStrings.Tracker.placeholderName
@@ -196,8 +204,9 @@ final class TrackerViewController: LightStatusBarViewController {
     }
     
     //MARK: - Public Methods
-    func configure(with tracker: Tracker, category: String) {
+    func configure(with tracker: Tracker, category: String, count: Int) {
         currentTracker = tracker
+        counterLabel.text = LocalizedStrings.TrackerCell.formatDaysText(days: count)
         trackerNameTextField.text = tracker.name
         selectedCategory = category
         categoryCell.detailTextLabel?.text = category
@@ -222,7 +231,9 @@ final class TrackerViewController: LightStatusBarViewController {
         contentView.addSubview(buttonsStackView)
         scrollView.addSubview(contentView)
         
-        NSLayoutConstraint.activate([
+        var constraints: [NSLayoutConstraint] = []
+        
+        constraints.append(contentsOf: [
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -236,8 +247,29 @@ final class TrackerViewController: LightStatusBarViewController {
             
             titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
             titleLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            titleLabel.heightAnchor.constraint(equalToConstant: 22),
+        ])
+        
+        
+        if eventType.isNew {
+            constraints.append(contentsOf: [
+                trackerNameTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
+
+            ])
+        } else {
+            scrollView.addSubview(counterLabel)
             
-            trackerNameTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
+            constraints.append(contentsOf: [
+                counterLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 38),
+                counterLabel.widthAnchor.constraint(equalToConstant: 38),
+                counterLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+                counterLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+                trackerNameTextField.topAnchor.constraint(equalTo: counterLabel.bottomAnchor, constant: 20),
+            ])
+        }
+        
+        
+        constraints.append(contentsOf: [
             trackerNameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             trackerNameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             trackerNameTextField.heightAnchor.constraint(equalToConstant: 75),
@@ -263,6 +295,8 @@ final class TrackerViewController: LightStatusBarViewController {
             buttonsStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24),
             buttonsStackView.heightAnchor.constraint(equalToConstant: 60)
         ])
+        
+        NSLayoutConstraint.activate(constraints)
         updateSaveButtonState(isActive: validateTracker())
     }
     
@@ -333,11 +367,11 @@ final class TrackerViewController: LightStatusBarViewController {
             guard let id = currentTracker?.id,
                   let isPinned = currentTracker?.isPinned
             else {
-                Log.warn(message: "failed to get Tracker data for update")
+                Log.warn(message: "failed to get tracker data for update")
                 dismiss(animated: true, completion: nil)
                 return
             }
-                    
+            
             let tracker = Tracker(id: id,
                                   name: name,
                                   color: color,

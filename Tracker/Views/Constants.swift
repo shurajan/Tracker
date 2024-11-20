@@ -26,6 +26,7 @@ enum Fonts {
     static let titleMediumFont = UIFont.systemFont(ofSize: 16, weight: .medium)
     static let titleLargeFont = UIFont.systemFont(ofSize: 34, weight: .bold)
     static let labelFont = UIFont.systemFont(ofSize: 12, weight: .medium)
+    static let largeLabelFont = UIFont.systemFont(ofSize: 32, weight: .bold)
     static let textFieldFont = UIFont.systemFont(ofSize: 17, weight: .regular)
     static let sectionHeaderFont = UIFont.systemFont(ofSize: 19, weight: .bold)
     static let emojiFont = UIFont.systemFont(ofSize: 32)

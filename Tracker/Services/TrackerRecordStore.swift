@@ -11,7 +11,7 @@ import CoreData
 protocol TrackerRecordDataProviderProtocol {
     func manageTrackerRecord(trackerRecord :TrackerRecord)
     func deleteById(by id: UUID)
-    func count(trackerRecord: TrackerRecord) -> Int
+    func count(by id: UUID) -> Int
     func exist(trackerRecord: TrackerRecord) -> Bool
 }
 
@@ -117,9 +117,9 @@ extension TrackerRecordStore: TrackerRecordDataProviderProtocol {
         }
     }
     
-    func count(trackerRecord: TrackerRecord) -> Int {
+    func count(by id: UUID) -> Int {
         let fetchRequest: NSFetchRequest<NSFetchRequestResult> = TrackerRecordCoreData.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "tracker_id == %@", trackerRecord.trackerId as CVarArg)
+        fetchRequest.predicate = NSPredicate(format: "tracker_id == %@", id as CVarArg)
         fetchRequest.resultType = .countResultType
         
         do {

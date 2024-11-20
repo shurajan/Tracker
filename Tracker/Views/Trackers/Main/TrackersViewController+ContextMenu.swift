@@ -96,13 +96,15 @@ extension TrackersViewController {
         }
         
         let schedule = tracker.schedule?.rawValue ?? 0
+        let count = trackerRecordStore?.count(by: tracker.id) ?? 0
         
         let updateTrackerViewController = TrackerViewController()
         updateTrackerViewController.selectedDate = selectedDate
         updateTrackerViewController.eventType = (schedule > 0) ? .updateHabit : .updateOneOff
         updateTrackerViewController.delegate = viewModel
         updateTrackerViewController.modalPresentationStyle = .pageSheet
-        updateTrackerViewController.configure(with: tracker, category: category)
+        updateTrackerViewController.configure(with: tracker, category: category, count: count)
+        trackerRecordStore?.count(by: tracker.id)
         present(updateTrackerViewController, animated: true, completion: nil)
     }
     

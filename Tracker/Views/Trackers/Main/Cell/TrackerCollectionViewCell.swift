@@ -133,7 +133,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         
         
         isDone = dataProvider.exist(trackerRecord: trackerRecord)
-        count = dataProvider.count(trackerRecord: trackerRecord)
+        count = dataProvider.count(by: trackerRecord.trackerId)
         
         setupPlusButton(isDone: isDone, color: tracker.color.uiColor)
         daysLabel.text = LocalizedStrings.TrackerCell.formatDaysText(days: count)
