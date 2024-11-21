@@ -7,29 +7,32 @@
 
 import Foundation
 
+import Foundation
+
 final class FilterPredicateBuilder {
     private var predicates: [NSPredicate]
     private var currentLogicalType: NSCompoundPredicate.LogicalType
     
-    init(_ initialPredicate: NSPredicate = NSPredicate(value: true)) {
+    init(type: PredicateType) {
+        let initialPredicate = FilterPredicateFactory.makePredicate(for: type)
         self.predicates = [initialPredicate]
         self.currentLogicalType = .and
     }
     
-    func and(_ filter: Filters, date: Date) -> FilterPredicateBuilder {
-        let predicate = FilterPredicateFactory.makePredicate(for: filter, date: date)
+    func and(_ type: PredicateType) -> FilterPredicateBuilder {
+        let predicate = FilterPredicateFactory.makePredicate(for: type)
         addPredicate(predicate, logicalType: .and)
+        return self
+    }
+    
+    func or(_ type: PredicateType) -> FilterPredicateBuilder {
+        let predicate = FilterPredicateFactory.makePredicate(for: type)
+        addPredicate(predicate, logicalType: .or)
         return self
     }
     
     func and(_ predicate: NSPredicate) -> FilterPredicateBuilder {
         addPredicate(predicate, logicalType: .and)
-        return self
-    }
-    
-    func or(_ filter: Filters, date: Date) -> FilterPredicateBuilder {
-        let predicate = FilterPredicateFactory.makePredicate(for: filter, date: date)
-        addPredicate(predicate, logicalType: .or)
         return self
     }
     
@@ -46,7 +49,6 @@ final class FilterPredicateBuilder {
     }
     
     // MARK: - Private Methods
-    
     private func addPredicate(_ predicate: NSPredicate, logicalType: NSCompoundPredicate.LogicalType) {
         if currentLogicalType != logicalType && !predicates.isEmpty {
             let compoundPredicate = NSCompoundPredicate(type: currentLogicalType, subpredicates: predicates)

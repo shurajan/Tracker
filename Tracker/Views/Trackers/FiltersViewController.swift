@@ -8,7 +8,9 @@
 import UIKit
 
 final class FiltersViewController: LightStatusBarViewController {
-    private let delegate: TrackersViewModelProtocol
+    private let delegate: FilterDelegateProtocol
+    
+    //private var filter: 
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
@@ -30,8 +32,8 @@ final class FiltersViewController: LightStatusBarViewController {
         return table
     }()
     
-    init(viewModel: TrackersViewModelProtocol) {
-        self.delegate = viewModel
+    init(delegate: FilterDelegateProtocol) {
+        self.delegate = delegate
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -98,7 +100,7 @@ extension FiltersViewController: UITableViewDelegate, UITableViewDataSource {
         }
         
         let filter = Filters.allCases[indexPath.row]
-        let isSelected = filter == delegate.filter
+        let isSelected = filter == delegate.currentFilter
         
         cell.configure(text: filter.localized, isSelected: isSelected)
         cell.backgroundColor = .ysBackground

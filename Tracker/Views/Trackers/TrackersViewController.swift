@@ -17,7 +17,8 @@ final class TrackersViewController: LightStatusBarViewController {
     
     private(set) var selectedDate = Date().startOfDay()
     private(set) var isSearchModeOn = false
-    
+    private(set) var currentFilter: Filters = .allTrackers
+        
     //MARK: - UI components
     private lazy var plusButton: UIButton = {
         let button = UIButton()
@@ -160,8 +161,7 @@ final class TrackersViewController: LightStatusBarViewController {
         viewModel = TrackersViewModel()
         collectionViewModel = TrackerCollectionViewModel(viewModel: viewModel)
         viewModel?.trackersBinding = updateCollectionView
-        viewModel?.date = selectedDate
-        viewModel?.fetchTrackers()
+        viewModel?.fetchTrackers(for: selectedDate)
     }
     
     
@@ -170,7 +170,7 @@ final class TrackersViewController: LightStatusBarViewController {
         let numberOfSections = categories.count
         let isHidden = numberOfSections > 0
         trackerCollectionView.isHidden = !isHidden
-        filterButton.isHidden = !isHidden
+        filterButton.isHidden = !(viewModel?.hasData() ?? false)
         
         if isSearchModeOn {
             placeHolderView.isHidden = true
@@ -178,6 +178,24 @@ final class TrackersViewController: LightStatusBarViewController {
         } else {
             placeHolderView.isHidden = isHidden
             searchPlaceHolderView.isHidden = true
+        }
+    }
+    
+    private func generateFilterPredicate() -> [(Tracker) -> Bool] {
+        var predicates: [(Tracker) -> Bool] = []
+        predicates.append(currentFilter.makePredicate())
+        let searchText = searchController.searchBar.text ?? ""
+        let trimmedText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        if !trimmedText.isEmpty {
+            predicates.append(textPredicate(for: trimmedText))
+        }
+        return predicates
+    }
+    
+    private func textPredicate(for text: String) -> (Tracker) -> Bool {
+        return { tracker in
+            tracker.name.lowercased().contains(text.lowercased())
         }
     }
         
@@ -193,15 +211,16 @@ final class TrackersViewController: LightStatusBarViewController {
     @IBAction
     private func datePickerValueChanged(_ sender: UIDatePicker) {
         selectedDate = sender.date.startOfDay()
-        viewModel?.date = selectedDate
-        viewModel?.fetchTrackers()
+        if currentFilter == .todayTrackers {
+            currentFilter = .allTrackers
+        }
+        viewModel?.fetchTrackers(for: selectedDate)
         dismiss(animated: true)
     }
     
     @IBAction
     func filterButtonTapped(){
-        guard let viewModel else {return}
-        let filtersViewController = FiltersViewController(viewModel: viewModel)
+        let filtersViewController = FiltersViewController(delegate: self)
         filtersViewController.modalPresentationStyle = .pageSheet
         present(filtersViewController, animated: true, completion: nil)
     }
@@ -211,15 +230,34 @@ final class TrackersViewController: LightStatusBarViewController {
 extension TrackersViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         isSearchModeOn = true
-        let trimmedText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        viewModel?.searchItems(by: trimmedText)
+        let filterPredicate = self.currentFilter.makePredicate()
+        let predicates = self.generateFilterPredicate()
+        viewModel?.filter(predicates: predicates)
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         isSearchModeOn = false
         searchBar.text = ""
-        viewModel?.searchItems(by: "")
+        let filterPredicate = self.currentFilter.makePredicate()
+        viewModel?.filter(predicates: [filterPredicate])
         searchBar.resignFirstResponder()
     }
+    
+
 }
 
+extension TrackersViewController: FilterDelegateProtocol {
+    func didSelectFilter(filter: Filters) {
+        self.currentFilter = filter
+        if self.currentFilter == .todayTrackers {
+            selectedDate = Date().startOfDay()
+            datePicker.date = selectedDate
+            viewModel?.fetchTrackers(for: selectedDate)
+        }
+        
+        let predicates = self.generateFilterPredicate()
+        viewModel?.filter(predicates: predicates)
+    }
+    
+    
+}

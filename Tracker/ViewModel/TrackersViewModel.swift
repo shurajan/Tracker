@@ -7,32 +7,23 @@
 import Foundation
 
 protocol TrackersViewModelProtocol: AnyObject {
-    var date: Date? { get set }
-    var filter: Filters { get }
-    var trackersBinding: Binding<[TrackerCategory]>? {get set}
+    var trackersBinding: Binding<[TrackerCategory]>? { get set }
     var visibleCategories: [TrackerCategory] { get }
-    func addTracker(tracker : Tracker, category : String)
+    func addTracker(tracker: Tracker, category: String)
     func updateTracker(tracker: Tracker, newCategory: String?)
     func deleteTracker(for id: UUID)
     func togglePinned(for id: UUID)
-    func fetchTrackers()
+    func fetchTrackers(for date: Date)
+    func filter(predicates: [ (Tracker) -> Bool ])
     func category(for id: UUID) -> String?
-    func searchItems (by searchText: String)
-    func didSelectFilter(filter: Filters)
+    func hasData() -> Bool
 }
 
 final class TrackersViewModel: TrackersViewModelProtocol {
-    var date: Date?
-    
     var trackersBinding: Binding<[TrackerCategory]>?
     
-    private(set) var filter: Filters = .allTrackers
-    
-    private let trackerStore: TrackerStore = TrackerStore()
-    
+    private let trackerStore = TrackerStore()
     private var categories: [TrackerCategory] = []
-    
-    private var searchText: String = ""
     
     private(set) var visibleCategories: [TrackerCategory] = [] {
         didSet {
@@ -40,12 +31,14 @@ final class TrackersViewModel: TrackersViewModelProtocol {
         }
     }
     
+    private var currentDate: Date?
+    private var currentPredicates: [ (Tracker) -> Bool ] = []
+    
     init() {
         trackerStore.delegate = self
-        fetchTrackers()
     }
     
-    func addTracker(tracker : Tracker, category : String) {
+    func addTracker(tracker: Tracker, category: String) {
         trackerStore.addTracker(tracker: tracker, category: category)
     }
     
@@ -61,47 +54,52 @@ final class TrackersViewModel: TrackersViewModelProtocol {
         trackerStore.togglePinned(for: id)
     }
     
-    func fetchTrackers() {
-        if let date {
-            categories = trackerStore.fetchTrackers(for: date, filters: [filter])
-            searchItems(by: self.searchText)
+    func fetchTrackers(for date: Date) {
+        self.currentDate = date
+        categories = trackerStore.fetchTrackers(for: date)
+        
+        if !currentPredicates.isEmpty {
+            filter(predicates: currentPredicates)
+        } else {
+            visibleCategories = categories
         }
+    }
+    
+    func filter(predicates: [ (Tracker) -> Bool ]) {
+        self.currentPredicates = predicates
+        visibleCategories = []
+        
+        for category in categories {
+            let filteredTrackers = category.trackers?.filter { tracker in
+                for predicate in predicates {
+                    if !predicate(tracker) {
+                        return false
+                    }
+                }
+                return true
+            }
+            
+            if let filteredTrackers = filteredTrackers, !filteredTrackers.isEmpty {
+                visibleCategories.append(TrackerCategory(title: category.title, trackers: filteredTrackers))
+            }
+        }
+        
+        trackersBinding?(visibleCategories)
     }
     
     func category(for id: UUID) -> String? {
         return trackerStore.getTrackerCategoryTitle(by: id)
     }
     
-    func searchItems(by searchText: String) {
-        self.searchText = searchText
-        
-        if searchText.isEmpty {
-            self.visibleCategories = self.categories
-        } else {
-            self.visibleCategories = []
-            for category in categories {
-                let filteredItems = category.trackers?.filter { $0.name.lowercased().contains(searchText.lowercased()) }
-                if !(filteredItems?.isEmpty ?? false) {
-                    self.visibleCategories.append(TrackerCategory(title: category.title, trackers: filteredItems))
-                }
-            }
-        }
+    func hasData() -> Bool {
+        return !categories.isEmpty
     }
-    
-    func didSelectFilter(filter: Filters) {
-        Log.info(message: "selected filter : \(filter.rawValue)")
-        if self.filter == filter {
-            return
-        }
-        
-        self.filter = filter
-        fetchTrackers()
-    }
-
 }
 
 extension TrackersViewModel: StoreDelegate {
     func storeDidUpdate() {
-        fetchTrackers()
+        if let currentDate = self.currentDate {
+            fetchTrackers(for: currentDate)
+        }
     }
 }

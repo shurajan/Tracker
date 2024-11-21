@@ -19,13 +19,13 @@ final class TrackerStore: BasicStore {
     private var dateFetchedResultsController: NSFetchedResultsController<TrackerCoreData>?
     
     // MARK: - Public Functions
-    func fetchTrackers(for date: Date, filters: [Filters] = []) -> [TrackerCategory] {
+    func fetchTrackers(for date: Date) -> [TrackerCategory] {
         var trackerCategories: [TrackerCategory] = []
         
-        if let pinnedController = createPinnedFetchedResultsController(date: date, filters: filters) {
+        if let pinnedController = createPinnedFetchedResultsController(date: date) {
             self.pinnedFetchedResultsController = pinnedController
             if let pinnedObjects = pinnedController.fetchedObjects {
-                let pinnedTrackers: [Tracker] = pinnedObjects.compactMap { try? from($0) }
+                let pinnedTrackers: [Tracker] = pinnedObjects.compactMap { try? from($0, for: date) }
                 if !pinnedTrackers.isEmpty {
                     let pinnedCategory = TrackerCategory(title: LocalizedStrings.Trackers.pinnedCategoryText, trackers: pinnedTrackers)
                     trackerCategories.append(pinnedCategory)
@@ -33,12 +33,12 @@ final class TrackerStore: BasicStore {
             }
         }
         
-        if let dateController = createDateFetchedResultsController(date: date, filters: filters) {
+        if let dateController = createDateFetchedResultsController(date: date) {
             self.dateFetchedResultsController = dateController
             if let sections = dateController.sections {
                 for section in sections {
                     guard let objects = section.objects as? [TrackerCoreData] else { continue }
-                    let trackers: [Tracker] = objects.compactMap { try? from($0) }
+                    let trackers: [Tracker] = objects.compactMap { try? from($0, for: date) }
                     let trackerCategory = TrackerCategory(title: section.name, trackers: trackers)
                     trackerCategories.append(trackerCategory)
                 }
@@ -156,13 +156,13 @@ final class TrackerStore: BasicStore {
     }
     
     // MARK: - Private Functions
-    private func createPinnedFetchedResultsController(date: Date, filters: [Filters] = []) -> NSFetchedResultsController<TrackerCoreData>? {
+    private func createPinnedFetchedResultsController(date: Date) -> NSFetchedResultsController<TrackerCoreData>? {
         let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         fetchRequest.sortDescriptors = [
             NSSortDescriptor(key: "creationDate", ascending: true)
         ]
         
-        fetchRequest.predicate = setupPinnedPredicate(date: date, filters: filters)
+        fetchRequest.predicate = FilterPredicateBuilder(type: .isPinned(true)).build()
         
         let fetchedResultsController = NSFetchedResultsController(
             fetchRequest: fetchRequest,
@@ -180,26 +180,16 @@ final class TrackerStore: BasicStore {
             return nil
         }
     }
-    
-    private func setupPinnedPredicate(date: Date, filters: [Filters] = []) -> NSPredicate {
-        let builder = FilterPredicateBuilder()
-            .and(NSPredicate(format: "isPinned == true"))
         
-        for filter in filters {
-            builder.and(filter, date: date)
-        }
-        
-        return builder.build()
-    }
-    
-    private func createDateFetchedResultsController(date: Date, filters: [Filters] = []) -> NSFetchedResultsController<TrackerCoreData>? {
+    private func createDateFetchedResultsController(date: Date) -> NSFetchedResultsController<TrackerCoreData>? {
         let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         fetchRequest.sortDescriptors = [
             NSSortDescriptor(key: "tracker_category.title", ascending: true),
             NSSortDescriptor(key: "creationDate", ascending: true)
         ]
         
-        fetchRequest.predicate = setupDatePredicate(date: date, filters: filters)
+        fetchRequest.predicate = FilterPredicateBuilder(type: .date(date))
+            .and(.isPinned(false)).build()
         
         let fetchedResultsController = NSFetchedResultsController(
             fetchRequest: fetchRequest,
@@ -217,41 +207,33 @@ final class TrackerStore: BasicStore {
             return nil
         }
     }
-    
-    private func setupDatePredicate(date: Date, filters: [Filters] = []) -> NSPredicate {
-        let builder = FilterPredicateBuilder()
-            .and(.todayTrackers, date: date)
-            .and(NSPredicate(format: "isPinned == false"))
         
-        for filter in filters {
-            builder.and(filter, date: date)
-        }
-        
-        return builder.build()
-    }
-    
-    
-    private func from(_ trackerCoreData: TrackerCoreData) throws -> Tracker {
+    private func from(_ trackerCoreData: TrackerCoreData, for date: Date) throws -> Tracker {
         guard let id = trackerCoreData.id,
               let name = trackerCoreData.name,
               let colorHex = trackerCoreData.colorHex,
               let color = TrackerColor(rawValue: colorHex),
               let emojiString = trackerCoreData.emoji,
               let emoji = Emoji(rawValue: emojiString),
-              let date = trackerCoreData.date
+              let trackerDate = trackerCoreData.date
         else {
             throw TrackerDecodingError.decodingErrorInvalidValue
         }
         
         let isPinned = trackerCoreData.isPinned
+        
+        let trackerRecord = TrackerRecord(trackerId: id, date: date)
+        let isComplete = trackerRecordStore.exist(trackerRecord: trackerRecord)
+        
         return Tracker(
             id: id,
             name: name,
             color: color,
             emoji: emoji,
-            date: date,
+            date: trackerDate,
             schedule: WeekDays(rawValue: trackerCoreData.schedule),
-            isPinned: isPinned
+            isPinned: isPinned,
+            isComplete: isComplete
         )
     }
     
