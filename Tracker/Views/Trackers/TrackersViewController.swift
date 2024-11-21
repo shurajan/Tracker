@@ -212,13 +212,13 @@ extension TrackersViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         isSearchModeOn = true
         let trimmedText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        viewModel?.filterItems(by: trimmedText)
+        viewModel?.searchItems(by: trimmedText)
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         isSearchModeOn = false
         searchBar.text = ""
-        viewModel?.filterItems(by: "")
+        viewModel?.searchItems(by: "")
         searchBar.resignFirstResponder()
     }
 }

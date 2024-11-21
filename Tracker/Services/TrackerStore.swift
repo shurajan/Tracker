@@ -19,24 +19,13 @@ final class TrackerStore: BasicStore {
     private var dateFetchedResultsController: NSFetchedResultsController<TrackerCoreData>?
     
     // MARK: - Public Functions
-    
-    func fetchTrackers(for date: Date) -> [TrackerCategory] {
+    func fetchTrackers(for date: Date, filters: [Filters] = []) -> [TrackerCategory] {
         var trackerCategories: [TrackerCategory] = []
         
-        pinnedFetchedResultsController = createFetchedResultsController(isPinned: true)
-        
-        if let pinnedController = pinnedFetchedResultsController {
-            if let pinnedSections = pinnedController.sections {
-                var pinnedTrackers: [Tracker] = []
-                
-                for section in pinnedSections {
-                    guard let objects = section.objects as? [TrackerCoreData] else { continue }
-                    let trackers: [Tracker] = objects.compactMap { try? from($0)}
-                    if !trackers.isEmpty {
-                        pinnedTrackers.append(contentsOf: trackers)
-                    }
-                }
-                
+        if let pinnedController = createPinnedFetchedResultsController(date: date, filters: filters) {
+            self.pinnedFetchedResultsController = pinnedController
+            if let pinnedObjects = pinnedController.fetchedObjects {
+                let pinnedTrackers: [Tracker] = pinnedObjects.compactMap { try? from($0) }
                 if !pinnedTrackers.isEmpty {
                     let pinnedCategory = TrackerCategory(title: LocalizedStrings.Trackers.pinnedCategoryText, trackers: pinnedTrackers)
                     trackerCategories.append(pinnedCategory)
@@ -44,9 +33,8 @@ final class TrackerStore: BasicStore {
             }
         }
         
-        dateFetchedResultsController = createFetchedResultsController(date: date.startOfDay(), isPinned: false)
-        
-        if let dateController = dateFetchedResultsController {
+        if let dateController = createDateFetchedResultsController(date: date, filters: filters) {
+            self.dateFetchedResultsController = dateController
             if let sections = dateController.sections {
                 for section in sections {
                     guard let objects = section.objects as? [TrackerCoreData] else { continue }
@@ -77,7 +65,7 @@ final class TrackerStore: BasicStore {
             try trackerCategoryStore.addTrackerCategory(category: category)
             trackerCoreData.tracker_category = findTrackerCategory(by: category)
         } catch {
-            Log.error(error: error, message: "failed to save tracker")
+            Log.error(error: error, message: "failed to save tracker category")
         }
         
         do {
@@ -146,11 +134,11 @@ final class TrackerStore: BasicStore {
                 Log.warn(message: "tracker with id \(trackerID) not found")
             }
         } catch {
-            Log.error(error: error, message: "failed to toggle isPinned for tracker with id \(trackerID)")
+            Log.error(error: error, message: "failed to toggle pinned state for tracker with id \(trackerID)")
         }
     }
     
-    func getTrackerCategoryTitle(by id: UUID)-> String? {
+    func getTrackerCategoryTitle(by id: UUID) -> String? {
         let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
         
@@ -161,20 +149,57 @@ final class TrackerStore: BasicStore {
                 Log.warn(message: "tracker with id \(id) not found")
             }
         } catch {
-            Log.error(error: error, message: "failed to delete tracker with id \(id)")
+            Log.error(error: error, message: "failed to get category for tracker with id \(id)")
         }
         
         return nil
     }
     
     // MARK: - Private Functions
-    private func createFetchedResultsController(date: Date? = nil, isPinned: Bool? = nil) -> NSFetchedResultsController<TrackerCoreData>? {
-        let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
+    private func createPinnedFetchedResultsController(date: Date, filters: [Filters] = []) -> NSFetchedResultsController<TrackerCoreData>? {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         fetchRequest.sortDescriptors = [
-            NSSortDescriptor(key: "tracker_category.title", ascending: false),
             NSSortDescriptor(key: "creationDate", ascending: true)
         ]
-        fetchRequest.predicate = setupPredicate(date: date, isPinned: isPinned)
+        
+        fetchRequest.predicate = setupPinnedPredicate(date: date, filters: filters)
+        
+        let fetchedResultsController = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: managedObjectContext,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
+        fetchedResultsController.delegate = self
+        
+        do {
+            try fetchedResultsController.performFetch()
+            return fetchedResultsController
+        } catch {
+            Log.error(error: error, message: "Failed to perform fetch for pinned trackers")
+            return nil
+        }
+    }
+    
+    private func setupPinnedPredicate(date: Date, filters: [Filters] = []) -> NSPredicate {
+        let builder = FilterPredicateBuilder()
+            .and(NSPredicate(format: "isPinned == true"))
+        
+        for filter in filters {
+            builder.and(filter, date: date)
+        }
+        
+        return builder.build()
+    }
+    
+    private func createDateFetchedResultsController(date: Date, filters: [Filters] = []) -> NSFetchedResultsController<TrackerCoreData>? {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "tracker_category.title", ascending: true),
+            NSSortDescriptor(key: "creationDate", ascending: true)
+        ]
+        
+        fetchRequest.predicate = setupDatePredicate(date: date, filters: filters)
         
         let fetchedResultsController = NSFetchedResultsController(
             fetchRequest: fetchRequest,
@@ -188,43 +213,23 @@ final class TrackerStore: BasicStore {
             try fetchedResultsController.performFetch()
             return fetchedResultsController
         } catch {
-            Log.error(error: error, message: "failed to perform fetch")
+            Log.error(error: error, message: "Failed to perform fetch for date-based trackers")
             return nil
         }
     }
     
-    private func setupPredicate(date: Date? = nil, isPinned: Bool? = nil) -> NSPredicate {
-        var subpredicates: [NSPredicate] = []
+    private func setupDatePredicate(date: Date, filters: [Filters] = []) -> NSPredicate {
+        let builder = FilterPredicateBuilder()
+            .and(.todayTrackers, date: date)
+            .and(NSPredicate(format: "isPinned == false"))
         
-        if let date = date {
-            let calendar = Calendar.current
-            let currentWeekdayInt = calendar.component(.weekday, from: date)
-            let currentWeekday = WeekDays.fromGregorianStyle(currentWeekdayInt)?.rawValue ?? 0
-            let dateStart = date.startOfDay() as NSDate
-            
-            let datePredicate = NSPredicate(format: "date == %@", dateStart)
-            let scheduleZeroPredicate = NSPredicate(format: "schedule == 0 OR schedule == nil")
-            
-            let dateAndNoSchedulePredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, scheduleZeroPredicate])
-            let scheduleContainsDayPredicate = NSPredicate(format: "(schedule & %d) != 0", currentWeekday)
-            
-            let orPredicate = NSCompoundPredicate(orPredicateWithSubpredicates: [dateAndNoSchedulePredicate, scheduleContainsDayPredicate])
-            subpredicates.append(orPredicate)
+        for filter in filters {
+            builder.and(filter, date: date)
         }
         
-        if let isPinned = isPinned {
-            let isPinnedPredicate = NSPredicate(format: "isPinned == %@", NSNumber(value: isPinned))
-            subpredicates.append(isPinnedPredicate)
-        }
-        
-        if subpredicates.count > 1 {
-            return NSCompoundPredicate(andPredicateWithSubpredicates: subpredicates)
-        } else if let singlePredicate = subpredicates.first {
-            return singlePredicate
-        } else {
-            return NSPredicate(value: true)
-        }
+        return builder.build()
     }
+    
     
     private func from(_ trackerCoreData: TrackerCoreData) throws -> Tracker {
         guard let id = trackerCoreData.id,

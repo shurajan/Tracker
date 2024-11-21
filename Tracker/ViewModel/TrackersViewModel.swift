@@ -6,22 +6,6 @@
 //
 import Foundation
 
-enum Filters: String, CaseIterable {
-    case allTrackers = "filters.all_trackers"
-    case todayTrackers = "filters.today_trackers"
-    case completed = "filters.completed"
-    case notCompleted = "filters.not_completed"
-    var localized: String {
-        return NSLocalizedString(self.rawValue, comment: "")
-    }
-}
-
-struct Filter {
-    let type: Filters
-    let query: String
-}
-
-
 protocol TrackersViewModelProtocol: AnyObject {
     var date: Date? { get set }
     var filter: Filters { get }
@@ -33,7 +17,7 @@ protocol TrackersViewModelProtocol: AnyObject {
     func togglePinned(for id: UUID)
     func fetchTrackers()
     func category(for id: UUID) -> String?
-    func filterItems (by searchText: String)
+    func searchItems (by searchText: String)
     func didSelectFilter(filter: Filters)
 }
 
@@ -79,10 +63,8 @@ final class TrackersViewModel: TrackersViewModelProtocol {
     
     func fetchTrackers() {
         if let date {
-            categories = trackerStore.fetchTrackers(for: date)
-            let filter = Filter(type: self.filter, query: self.searchText)
-            
-            filterItems(by: self.searchText)
+            categories = trackerStore.fetchTrackers(for: date, filters: [filter])
+            searchItems(by: self.searchText)
         }
     }
     
@@ -90,7 +72,7 @@ final class TrackersViewModel: TrackersViewModelProtocol {
         return trackerStore.getTrackerCategoryTitle(by: id)
     }
     
-    func filterItems(by searchText: String) {
+    func searchItems(by searchText: String) {
         self.searchText = searchText
         
         if searchText.isEmpty {
@@ -111,6 +93,8 @@ final class TrackersViewModel: TrackersViewModelProtocol {
         if self.filter == filter {
             return
         }
+        
+        self.filter = filter
         fetchTrackers()
     }
 
