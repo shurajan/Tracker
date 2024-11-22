@@ -39,7 +39,7 @@ final class CategoriesViewController: LightStatusBarViewController {
     
     private lazy var tableView: UITableView = {
         let table = UITableView()
-        table.backgroundColor = .ysWhite
+        table.backgroundColor = AppColors.Dynamic.white
         table.register(SelectionTableViewCell.self, forCellReuseIdentifier: "cell")
         table.layer.cornerRadius = Constants.radius
         table.isScrollEnabled = true
@@ -54,8 +54,8 @@ final class CategoriesViewController: LightStatusBarViewController {
         let button = UIButton(type: .system)
         button.setTitle(LocalizedStrings.Categories.addButton, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
-        button.setTitleColor(.ysWhite, for: .normal)
-        button.backgroundColor = .ysBlack
+        button.setTitleColor(AppColors.Dynamic.white, for: .normal)
+        button.backgroundColor = AppColors.Dynamic.black
         button.layer.cornerRadius = Constants.radius
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(addCategoryButtonTapped), for: .touchUpInside)
@@ -73,7 +73,7 @@ final class CategoriesViewController: LightStatusBarViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .ysWhite
+        view.backgroundColor = AppColors.Dynamic.white
         setupLayout()
         
         viewModel?.trackerCategoriesBinding = updateTableView
@@ -165,7 +165,6 @@ extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
         
         cell.configure(text: title,
                        isSelected: title == selectedCategory)
-        cell.backgroundColor = .ysBackground
         cell.layoutMargins = Insets.cellInsets
         
         return cell

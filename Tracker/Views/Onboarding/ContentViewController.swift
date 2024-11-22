@@ -34,8 +34,8 @@ final class ContentViewController: UIViewController {
         let button = UIButton(type: .system)
         button.setTitle(LocalizedStrings.Onboarding.buttonText, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
-        button.setTitleColor(.ysWhite, for: .normal)
-        button.backgroundColor = .ysBlack
+        button.setTitleColor(AppColors.Fixed.white, for: .normal)
+        button.backgroundColor = AppColors.Fixed.black
         button.layer.cornerRadius = Constants.radius
         button.addTarget(self, action: #selector(startButtonTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false

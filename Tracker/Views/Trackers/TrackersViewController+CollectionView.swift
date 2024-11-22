@@ -53,7 +53,7 @@ extension TrackersViewController: UICollectionViewDelegate {
             label.translatesAutoresizingMaskIntoConstraints = false
             label.text = sectionTitle
             label.textAlignment = .left
-            label.textColor = .ysBlack
+            label.textColor = AppColors.Dynamic.black
             label.font = Fonts.sectionHeaderFont
             
             headerView.subviews.forEach { $0.removeFromSuperview() }

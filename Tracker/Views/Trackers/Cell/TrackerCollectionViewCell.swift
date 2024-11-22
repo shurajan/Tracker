@@ -22,7 +22,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private lazy var daysLabel: UILabel = {
         let label = UILabel()
         label.font = Fonts.labelFont
-        label.textColor = .ysBlack
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()

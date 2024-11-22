@@ -23,7 +23,7 @@ final class NewCategoryViewController: LightStatusBarViewController {
         let textField = UITextField()
         textField.placeholder = LocalizedStrings.NewCategory.placeholder
         textField.font = Fonts.textFieldFont
-        textField.backgroundColor = .ysBackground
+        textField.backgroundColor = AppColors.Dynamic.background
         textField.layer.cornerRadius = Constants.radius
         textField.layer.masksToBounds = true
         textField.textAlignment = .center
@@ -37,7 +37,7 @@ final class NewCategoryViewController: LightStatusBarViewController {
         let button = UIButton(type: .system)
         button.setTitle(LocalizedStrings.NewCategory.doneButton, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
-        button.backgroundColor = .ysGray
+        button.backgroundColor = AppColors.Fixed.gray
         button.isEnabled = false
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = Constants.radius
@@ -79,12 +79,12 @@ final class NewCategoryViewController: LightStatusBarViewController {
        
         if isEmpty {
             createButton.isEnabled = false
-            createButton.backgroundColor = .ysGray
+            createButton.backgroundColor = AppColors.Fixed.gray
             return
         }
         
         createButton.isEnabled = true
-        createButton.backgroundColor = .ysBlack
+        createButton.backgroundColor = AppColors.Dynamic.black
     }
     
     @IBAction

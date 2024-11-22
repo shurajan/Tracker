@@ -23,7 +23,7 @@ final class FiltersViewController: LightStatusBarViewController {
     
     private lazy var tableView: UITableView = {
         let table = UITableView()
-        table.backgroundColor = .ysWhite
+        table.backgroundColor = AppColors.Dynamic.white
         table.register(SelectionTableViewCell.self, forCellReuseIdentifier: "cell")
         table.layer.cornerRadius = Constants.radius
         table.delegate = self
@@ -44,7 +44,7 @@ final class FiltersViewController: LightStatusBarViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .ysWhite
+        view.backgroundColor = AppColors.Dynamic.white
         setupLayout()
         tableView.reloadData()
     }
@@ -103,7 +103,7 @@ extension FiltersViewController: UITableViewDelegate, UITableViewDataSource {
         let isSelected = filter == delegate.currentFilter
         
         cell.configure(text: filter.localized, isSelected: isSelected)
-        cell.backgroundColor = .ysBackground
+        cell.backgroundColor = AppColors.Dynamic.background
         cell.layoutMargins = Insets.cellInsets
         
         return cell

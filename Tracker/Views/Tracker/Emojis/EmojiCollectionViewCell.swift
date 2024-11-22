@@ -29,7 +29,7 @@ final class EmojiCollectionViewCell: UICollectionViewCell {
     
     func configure(with emoji: String, isSelected: Bool) {
         emojiLabel.text = emoji
-        contentView.backgroundColor = isSelected ? .ysLightGray : .clear
+        contentView.backgroundColor = isSelected ? AppColors.Fixed.lightGray : .clear
     }
     
     private func setupLayout() {

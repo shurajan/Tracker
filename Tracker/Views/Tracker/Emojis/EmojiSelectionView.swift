@@ -28,7 +28,7 @@ final class EmojiSelectionView: UIView, UICollectionViewDelegate, UICollectionVi
     
     private lazy var emojiCollectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-        collectionView.backgroundColor = .ysWhite
+        collectionView.backgroundColor = AppColors.Dynamic.white
         collectionView.bounces = false
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.delegate = self

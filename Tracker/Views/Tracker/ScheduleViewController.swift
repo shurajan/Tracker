@@ -23,7 +23,7 @@ final class ScheduleViewController: LightStatusBarViewController {
     
     private lazy var tableView: UITableView = {
         let table = UITableView()
-        table.backgroundColor = .ysWhite
+        table.backgroundColor = AppColors.Dynamic.white
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         table.layer.cornerRadius = Constants.radius
         table.isScrollEnabled = false
@@ -38,8 +38,8 @@ final class ScheduleViewController: LightStatusBarViewController {
         let button = UIButton(type: .system)
         button.setTitle(LocalizedStrings.Schedule.buttonText, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
-        button.setTitleColor(.ysWhite, for: .normal)
-        button.backgroundColor = .ysBlack
+        button.setTitleColor(AppColors.Dynamic.white, for: .normal)
+        button.backgroundColor = AppColors.Dynamic.black
         button.layer.cornerRadius = Constants.radius
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(doneButtonTapped), for: .touchUpInside)
@@ -49,7 +49,7 @@ final class ScheduleViewController: LightStatusBarViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .ysWhite
+        view.backgroundColor = AppColors.Dynamic.white
         setupLayout()
     }
     
@@ -122,13 +122,13 @@ extension ScheduleViewController: UITableViewDelegate, UITableViewDataSource {
         cell.textLabel?.text = day.description
         
         let switchView = UISwitch()
-        switchView.onTintColor = .ysBlue
+        switchView.onTintColor = AppColors.Fixed.blue
         switchView.isOn = selectedDays.contains(day)
         switchView.tag = indexPath.row + 1
         switchView.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
         cell.accessoryView = switchView
         
-        cell.backgroundColor = .ysBackground
+        cell.backgroundColor = AppColors.Dynamic.background
         cell.layoutMargins = Insets.cellInsets
         
         return cell

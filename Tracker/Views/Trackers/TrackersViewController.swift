@@ -22,7 +22,11 @@ final class TrackersViewController: LightStatusBarViewController {
     //MARK: - UI components
     private lazy var plusButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "Add tracker"), for: UIControl.State.normal)
+        if let image = UIImage(systemName: "plus")?
+            .withTintColor(AppColors.Dynamic.black, renderingMode: .alwaysOriginal) {
+            
+            button.setImage(image, for: UIControl.State.normal)
+        }
         button.accessibilityIdentifier = "plusButton"
         button.addTarget(self, action: #selector(plusButtonTapped(_:)), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -31,8 +35,10 @@ final class TrackersViewController: LightStatusBarViewController {
     
     private lazy var datePicker: UIDatePicker = {
         let picker = UIDatePicker()
-        picker.backgroundColor = UIColor.ysBackground
+        picker.backgroundColor = AppColors.Fixed.cardBackground
+        picker.tintColor = AppColors.Fixed.black
         picker.layer.cornerRadius = Constants.smallRadius
+        picker.layer.masksToBounds = true
         picker.datePickerMode = .date
         picker.preferredDatePickerStyle = .compact
         picker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
@@ -73,7 +79,7 @@ final class TrackersViewController: LightStatusBarViewController {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.delegate = self
         collectionView.dataSource = self
-        collectionView.backgroundColor = .ysWhite
+        collectionView.backgroundColor = AppColors.Dynamic.white
         collectionView.register(UICollectionReusableView.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: "header")
@@ -86,7 +92,7 @@ final class TrackersViewController: LightStatusBarViewController {
         let button = UIButton(type: .system)
         button.setTitle(LocalizedStrings.Trackers.filterButtonText, for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .ysBlue
+        button.backgroundColor = AppColors.Fixed.blue
         button.titleLabel?.font = Fonts.textFieldFont
         button.layer.cornerRadius = Constants.radius
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -113,7 +119,7 @@ final class TrackersViewController: LightStatusBarViewController {
         ]
         navigationItem.largeTitleDisplayMode = .always
         
-        view.backgroundColor = UIColor.ysWhite
+        view.backgroundColor = AppColors.Dynamic.white
         
         view.addSubview(datePicker)
         view.addSubview(plusButton)
@@ -230,7 +236,6 @@ final class TrackersViewController: LightStatusBarViewController {
 extension TrackersViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         isSearchModeOn = true
-        let filterPredicate = self.currentFilter.makePredicate()
         let predicates = self.generateFilterPredicate()
         viewModel?.filter(predicates: predicates)
     }

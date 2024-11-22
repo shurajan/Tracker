@@ -84,6 +84,10 @@ enum LocalizedStrings {
         static let doneButton = NSLocalizedString("new_category.button.done", comment: "Text for done button")
     }
     
+    enum Statistics {
+        static let title = NSLocalizedString("statistics.title", comment: "Title for statistics view")
+    }
+    
     enum WeekDays {
         static let monday = NSLocalizedString("weekdays.monday", comment: "Monday")
         static let tuesday = NSLocalizedString("weekdays.tuesday", comment: "Tuesday")

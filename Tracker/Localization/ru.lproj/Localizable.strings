@@ -1,10 +1,10 @@
-/* 
-  Localizable.strings
-  Tracker
-
-  Created by Alexander Bralnin on 14.11.2024.
-  
-*/
+/*
+ Localizable.strings
+ Tracker
+ 
+ Created by Alexander Bralnin on 14.11.2024.
+ 
+ */
 
 // MARK: - Onboarding View Controllers
 "onboarding.first.title" = "Отслеживайте только то, что хотите";
@@ -63,6 +63,9 @@
 "new_category.title" = "Новая категория";
 "new_category.placeholder" = "Введите название категории";
 "new_category.button.done" = "Готово";
+
+//MARK: - Statistics
+"statistics.title" = "Статистика";
 
 //MARK: - WeekDays
 "weekdays.monday" = "Понедельник";

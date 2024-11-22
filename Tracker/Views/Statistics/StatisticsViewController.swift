@@ -7,4 +7,8 @@
 
 final class StatisticsViewController: LightStatusBarViewController {
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.title = LocalizedStrings.Statistics.title
+    }
 }

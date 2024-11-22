@@ -23,8 +23,8 @@ final class TrackerTypeSelectorViewController: LightStatusBarViewController {
         let button = UIButton(type: .system)
         button.setTitle(LocalizedStrings.TrackerCreation.habitButton, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
-        button.setTitleColor(.ysWhite, for: .normal)
-        button.backgroundColor = .ysBlack
+        button.setTitleColor(AppColors.Dynamic.white, for: .normal)
+        button.backgroundColor = AppColors.Dynamic.black
         button.layer.cornerRadius = Constants.radius
         button.addTarget(self, action: #selector(habitButtonTapped(_:)), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -35,8 +35,8 @@ final class TrackerTypeSelectorViewController: LightStatusBarViewController {
         let button = UIButton(type: .system)
         button.setTitle(LocalizedStrings.TrackerCreation.irregularEventButton, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
-        button.setTitleColor(.ysWhite, for: .normal)
-        button.backgroundColor = .ysBlack
+        button.setTitleColor(AppColors.Dynamic.white, for: .normal)
+        button.backgroundColor = AppColors.Dynamic.black
         button.layer.cornerRadius = Constants.radius
         button.addTarget(self, action: #selector(irregularEventButtonTapped(_:)), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -49,7 +49,7 @@ final class TrackerTypeSelectorViewController: LightStatusBarViewController {
     }
     
     private func setupLayout(){
-        view.backgroundColor = .ysWhite
+        view.backgroundColor = AppColors.Dynamic.white
         
         view.addSubview(titleLabel)
         view.addSubview(titleLabel)

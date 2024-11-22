@@ -22,7 +22,7 @@ final class TrackerCardView: UIView {
     lazy var nameLabel: UILabel = {
         let label = UILabel()
         label.font = Fonts.labelFont
-        label.textColor = .ysWhite
+        label.textColor = AppColors.Fixed.white
         label.numberOfLines = 2
         label.textAlignment = .left
         label.translatesAutoresizingMaskIntoConstraints = false

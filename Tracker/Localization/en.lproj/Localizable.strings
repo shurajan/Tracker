@@ -63,6 +63,9 @@
 "new_category.placeholder" = "Enter category name";
 "new_category.button.done" = "Done";
 
+//MARK: - Statistics
+"statistics.title" = "Statistics";
+
 //MARK: - WeekDays
 "weekdays.monday" = "Monday";
 "weekdays.tuesday" = "Tuesday";

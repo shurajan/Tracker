@@ -94,7 +94,7 @@ final class TrackerViewController: LightStatusBarViewController {
         textField.placeholder = LocalizedStrings.Tracker.placeholderName
         textField.layer.cornerRadius = Constants.radius
         textField.delegate = self
-        textField.backgroundColor = .ysBackground
+        textField.backgroundColor = AppColors.Dynamic.background
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.addTarget(self, action: #selector(trackerNameTextFieldChanged), for: .editingChanged)
         return textField
@@ -102,7 +102,7 @@ final class TrackerViewController: LightStatusBarViewController {
     
     private lazy var tableView: UITableView  = {
         let table = UITableView()
-        table.backgroundColor = .ysWhite
+        table.backgroundColor = AppColors.Dynamic.white
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         table.layer.cornerRadius = Constants.radius
         table.separatorInset = Insets.separatorInset
@@ -133,7 +133,7 @@ final class TrackerViewController: LightStatusBarViewController {
         button.layer.cornerRadius = Constants.radius
         button.layer.borderWidth = 1
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.layer.borderColor = UIColor.ysRed.cgColor
+        button.layer.borderColor =  AppColors.Fixed.red.cgColor
         button.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         return button
     }()
@@ -147,7 +147,7 @@ final class TrackerViewController: LightStatusBarViewController {
         }
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
-        button.backgroundColor = .ysGray
+        button.backgroundColor = AppColors.Fixed.gray
         button.layer.cornerRadius = Constants.radius
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
@@ -168,10 +168,10 @@ final class TrackerViewController: LightStatusBarViewController {
         cell.textLabel?.text = LocalizedStrings.Tracker.categoryTitle
         cell.accessoryType = .disclosureIndicator
         cell.layoutMargins = Insets.cellInsets
-        cell.backgroundColor = .ysBackground
+        cell.backgroundColor = AppColors.Dynamic.background
         cell.textLabel?.font = Fonts.textFieldFont
-        cell.detailTextLabel?.textColor = .ysGray
-        cell.textLabel?.textColor = .ysBlack
+        cell.detailTextLabel?.textColor = AppColors.Fixed.gray
+        cell.textLabel?.textColor = AppColors.Dynamic.black
         
         return cell
     }()
@@ -181,10 +181,10 @@ final class TrackerViewController: LightStatusBarViewController {
         cell.textLabel?.text = LocalizedStrings.Tracker.scheduleTitle
         cell.accessoryType = .disclosureIndicator
         cell.layoutMargins = Insets.cellInsets
-        cell.backgroundColor = .ysBackground
+        cell.backgroundColor = AppColors.Dynamic.background
         cell.textLabel?.font = Fonts.textFieldFont
-        cell.detailTextLabel?.textColor = .ysGray
-        cell.textLabel?.textColor = .ysBlack
+        cell.detailTextLabel?.textColor = AppColors.Fixed.gray
+        cell.textLabel?.textColor = AppColors.Dynamic.black
         
         return cell
     }()
@@ -220,7 +220,7 @@ final class TrackerViewController: LightStatusBarViewController {
     }
     
     private func setupLayout(){
-        view.backgroundColor = .ysWhite
+        view.backgroundColor = AppColors.Dynamic.white
         
         view.addSubview(scrollView)
         contentView.addSubview(titleLabel)
@@ -314,10 +314,10 @@ final class TrackerViewController: LightStatusBarViewController {
     
     private func updateSaveButtonState(isActive: Bool) {
         if isActive {
-            saveButton.backgroundColor = .ysBlack
+            saveButton.backgroundColor = AppColors.Dynamic.black
             saveButton.isEnabled = true
         } else {
-            saveButton.backgroundColor = .ysGray
+            saveButton.backgroundColor = AppColors.Fixed.gray
             saveButton.isEnabled = false
         }
     }

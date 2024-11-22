@@ -8,10 +8,10 @@ import UIKit
 
 final class SelectionTableViewCell: UITableViewCell {
     
-    let trackerLabel: UILabel = {
+    let label: UILabel = {
         let label = UILabel()
         label.font = Fonts.titleMediumFont
-        label.textColor = .black
+        label.textColor = AppColors.Dynamic.black
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -35,8 +35,9 @@ final class SelectionTableViewCell: UITableViewCell {
     }
     
     private func setupLayout() {
-        contentView.addSubview(trackerLabel)
+        contentView.addSubview(label)
         contentView.addSubview(selectedImageView)
+    
         
         NSLayoutConstraint.activate([
             selectedImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
@@ -44,15 +45,17 @@ final class SelectionTableViewCell: UITableViewCell {
             selectedImageView.widthAnchor.constraint(equalToConstant: 24),
             selectedImageView.heightAnchor.constraint(equalToConstant: 24),
             
-            trackerLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
-            trackerLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            trackerLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10)
+            label.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
+            label.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            label.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10)
         ])
     }
     
     
     func configure(text: String, isSelected: Bool) {
-        trackerLabel.text = text
+        label.text = text
         selectedImageView.image = isSelected ? UIImage(named: "Done") : nil
+        
+        contentView.backgroundColor = AppColors.Dynamic.background
     }
 }
