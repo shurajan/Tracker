@@ -86,6 +86,10 @@ enum LocalizedStrings {
     
     enum Statistics {
         static let title = NSLocalizedString("statistics.title", comment: "Title for statistics view")
+        static let bestPeriod = NSLocalizedString("statistics.bestPeriod", comment: "Best period")
+        static let perfectDays = NSLocalizedString("statistics.perfectDays", comment: "Perfect days")
+        static let trackersCompleted = NSLocalizedString("statistics.trackersCompleted", comment: "Trackers completed")
+        static let averageValue = NSLocalizedString("statistics.averageValue", comment: "Average value")
     }
     
     enum WeekDays {

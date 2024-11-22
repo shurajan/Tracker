@@ -31,12 +31,13 @@ final class MainTabBarController: UITabBarController {
         ])
     }
     
-    func addTabItems(){
+    func addTabItems() {
         let trackerViewController = UINavigationController(rootViewController: TrackersViewController())
         trackerViewController.tabBarItem = UITabBarItem(title: "", image: UIImage(named: "Record"), tag: 0)
         
-        let statisticsViewController = StatisticsViewController()
+        let statisticsViewController = UINavigationController(rootViewController: StatisticsViewController())
         statisticsViewController.tabBarItem = UITabBarItem(title: "", image: UIImage(named: "Hare"), tag: 1)
+        
         self.viewControllers = [trackerViewController, statisticsViewController]
     }
 }

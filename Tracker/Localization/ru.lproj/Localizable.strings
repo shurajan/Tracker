@@ -66,6 +66,10 @@
 
 //MARK: - Statistics
 "statistics.title" = "Статистика";
+"statistics.bestPeriod" = "Лучший период";
+"statistics.perfectDays" = "Идеальные дни";
+"statistics.trackersCompleted" = "Трекеров завершено";
+"statistics.averageValue" = "Среднее значение";
 
 //MARK: - WeekDays
 "weekdays.monday" = "Понедельник";

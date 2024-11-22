@@ -65,6 +65,10 @@
 
 //MARK: - Statistics
 "statistics.title" = "Statistics";
+"statistics.bestPeriod" = "Best period";
+"statistics.perfectDays" = "Perfect days";
+"statistics.trackersCompleted" = "Trackers completed";
+"statistics.averageValue" = "Average value";
 
 //MARK: - WeekDays
 "weekdays.monday" = "Monday";
