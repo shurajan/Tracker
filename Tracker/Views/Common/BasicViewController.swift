@@ -40,6 +40,9 @@ class BasicViewController: UIViewController {
         }
     }
     
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return traitCollection.userInterfaceStyle == .dark ? .lightContent : .darkContent
+    }
     
     private func addTapGesturer(){
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))

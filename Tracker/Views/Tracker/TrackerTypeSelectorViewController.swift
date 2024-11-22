@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class TrackerTypeSelectorViewController: LightStatusBarViewController {
+final class TrackerTypeSelectorViewController: BasicViewController {
     var delegate: TrackersViewProtocol?
     
     private lazy var titleLabel: UILabel = {

@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class NewCategoryViewController: LightStatusBarViewController {
+final class NewCategoryViewController: BasicViewController {
     weak var delegate: NewCategoryDelegateProtocol?
         
     private lazy var titleLabel: UILabel = {
@@ -37,9 +37,9 @@ final class NewCategoryViewController: LightStatusBarViewController {
         let button = UIButton(type: .system)
         button.setTitle(LocalizedStrings.NewCategory.doneButton, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
+        button.setTitleColor(AppColors.Dynamic.white, for: .normal)
         button.backgroundColor = AppColors.Fixed.gray
         button.isEnabled = false
-        button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = Constants.radius
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
@@ -48,7 +48,7 @@ final class NewCategoryViewController: LightStatusBarViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = AppColors.Dynamic.white
         setupLayout()
     }
     

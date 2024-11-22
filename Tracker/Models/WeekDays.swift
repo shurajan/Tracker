@@ -33,7 +33,29 @@ struct WeekDays: OptionSet {
         return intValue == 1 ? .Sunday : WeekDays(rawValue: 1 << (intValue - 2))
     }
     
+    static let allDays: [WeekDays] = [.Monday, .Tuesday, .Wednesday, .Thursday, .Friday, .Saturday, .Sunday]
+    
     var description: String {
+        if self == .Daily {
+            return LocalizedStrings.WeekDays.allDays
+        } else {
+            let selectedDays = WeekDays.allDays.filter { self.contains($0) }
+            let dayNames = selectedDays.map { $0.singleDayDescription }
+            return dayNames.joined(separator: ", ")
+        }
+    }
+    
+    var shortDescription: String {
+        if self == .Daily {
+            return LocalizedStrings.WeekDays.allDays
+        } else {
+            let selectedDays = WeekDays.allDays.filter { self.contains($0) }
+            let dayNames = selectedDays.map { $0.singleDayShortDescription }
+            return dayNames.joined(separator: ", ")
+        }
+    }
+    
+    private var singleDayDescription: String {
         switch self {
         case .Monday:
             return LocalizedStrings.WeekDays.monday
@@ -49,14 +71,12 @@ struct WeekDays: OptionSet {
             return LocalizedStrings.WeekDays.saturday
         case .Sunday:
             return LocalizedStrings.WeekDays.sunday
-        case .Daily:
-            return LocalizedStrings.WeekDays.allDays
         default:
             return "Unknown Day"
         }
     }
     
-    var shortDescription: String {
+    private var singleDayShortDescription: String {
         switch self {
         case .Monday:
             return LocalizedStrings.WeekDays.shortMonday
@@ -72,8 +92,6 @@ struct WeekDays: OptionSet {
             return LocalizedStrings.WeekDays.shortSaturday
         case .Sunday:
             return LocalizedStrings.WeekDays.shortSunday
-        case .Daily:
-            return LocalizedStrings.WeekDays.allDays
         default:
             return "?"
         }

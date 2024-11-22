@@ -6,7 +6,7 @@
 //
 import UIKit
 
-final class TrackersViewController: LightStatusBarViewController {
+final class TrackersViewController: BasicViewController {
     private(set) var viewModel: TrackersViewModelProtocol?
     private(set) var collectionViewModel: TrackerCollectionViewModelProtocol?
     private(set) var trackerRecordStore: TrackerRecordStore?
@@ -22,11 +22,12 @@ final class TrackersViewController: LightStatusBarViewController {
     //MARK: - UI components
     private lazy var plusButton: UIButton = {
         let button = UIButton()
-        if let image = UIImage(systemName: "plus")?
-            .withTintColor(AppColors.Dynamic.black, renderingMode: .alwaysOriginal) {
-            
-            button.setImage(image, for: UIControl.State.normal)
+        if let image = UIImage(systemName: "plus") {
+            let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .bold)
+            let resizedImage = image.withConfiguration(config)
+            button.setImage(resizedImage.withTintColor(AppColors.Dynamic.black, renderingMode: .alwaysOriginal), for: .normal)
         }
+        
         button.accessibilityIdentifier = "plusButton"
         button.addTarget(self, action: #selector(plusButtonTapped(_:)), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -37,10 +38,12 @@ final class TrackersViewController: LightStatusBarViewController {
         let picker = UIDatePicker()
         picker.backgroundColor = AppColors.Fixed.cardBackground
         picker.tintColor = AppColors.Fixed.black
+        picker.overrideUserInterfaceStyle = .light
         picker.layer.cornerRadius = Constants.smallRadius
         picker.layer.masksToBounds = true
         picker.datePickerMode = .date
         picker.preferredDatePickerStyle = .compact
+        picker.tintColor = .systemBlue
         picker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         picker.locale = Locale.current
         picker.accessibilityIdentifier = "datePicker"
@@ -172,18 +175,29 @@ final class TrackersViewController: LightStatusBarViewController {
     
     
     private func updateCollectionView(categories: [TrackerCategory]) {
+        guard let viewModel else { return }
+        
         trackerCollectionView.reloadData()
         let numberOfSections = categories.count
-        let isHidden = numberOfSections > 0
-        trackerCollectionView.isHidden = !isHidden
-        filterButton.isHidden = !(viewModel?.hasData() ?? false)
         
-        if isSearchModeOn {
+        let hasVisibleData = numberOfSections > 0
+        let hasData = viewModel.hasData()
+        
+        filterButton.isHidden = !hasData
+        
+        if hasVisibleData {
+            trackerCollectionView.isHidden = false
             placeHolderView.isHidden = true
-            searchPlaceHolderView.isHidden = isHidden
-        } else {
-            placeHolderView.isHidden = isHidden
             searchPlaceHolderView.isHidden = true
+        } else {
+            trackerCollectionView.isHidden = true
+            if hasData {
+                placeHolderView.isHidden = true
+                searchPlaceHolderView.isHidden = false
+            } else {
+                placeHolderView.isHidden = false
+                searchPlaceHolderView.isHidden = true
+            }
         }
     }
     

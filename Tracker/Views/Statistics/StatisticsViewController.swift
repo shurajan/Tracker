@@ -5,7 +5,7 @@
 //  Created by Alexander Bralnin on 04.10.2024.
 //
 
-final class StatisticsViewController: LightStatusBarViewController {
+final class StatisticsViewController: BasicViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()

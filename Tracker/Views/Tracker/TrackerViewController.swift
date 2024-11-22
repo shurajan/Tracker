@@ -52,7 +52,7 @@ enum TrackerError: Error {
     case trackerCreationError
 }
 
-final class TrackerViewController: LightStatusBarViewController {
+final class TrackerViewController: BasicViewController {
     var delegate: TrackersViewModelProtocol?
     var selectedDate: Date?
     private var currentTracker: Tracker?
@@ -145,8 +145,8 @@ final class TrackerViewController: LightStatusBarViewController {
         } else {
             button.setTitle(LocalizedStrings.Tracker.saveButton, for: .normal)
         }
-        button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
+        button.setTitleColor(AppColors.Dynamic.white, for: .normal)        
         button.backgroundColor = AppColors.Fixed.gray
         button.layer.cornerRadius = Constants.radius
         button.translatesAutoresizingMaskIntoConstraints = false

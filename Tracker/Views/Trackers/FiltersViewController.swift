@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class FiltersViewController: LightStatusBarViewController {
+final class FiltersViewController: BasicViewController {
     private let delegate: FilterDelegateProtocol
     
     //private var filter: 

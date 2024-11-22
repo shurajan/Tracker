@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class ScheduleViewController: LightStatusBarViewController {
+final class ScheduleViewController: BasicViewController {
     var selectedDays = WeekDays()
     
     weak var delegate: TrackerDelegateProtocol?

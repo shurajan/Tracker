@@ -11,7 +11,7 @@ protocol NewCategoryDelegateProtocol: AnyObject {
     func didTapCreateButton(category: String)
 }
 
-final class CategoriesViewController: LightStatusBarViewController {    
+final class CategoriesViewController: BasicViewController {    
     var selectedCategory: String?
     
     private let delegate: TrackerDelegateProtocol
