@@ -20,6 +20,7 @@ final class StatisticsViewModel {
     }
     
     func getStatisticsItems() -> [StatisticsItem] {
+        self.statisticsStore.loadData()
         let items = [
             (value: statisticsStore.countBestPeriod(), description: LocalizedStrings.Statistics.bestPeriod),
             (value: statisticsStore.countPerfectDays(), description: LocalizedStrings.Statistics.perfectDays),
@@ -27,8 +28,14 @@ final class StatisticsViewModel {
             (value: statisticsStore.getAverageValue(), description: LocalizedStrings.Statistics.averageValue)
         ]
         
-        return items
+        let count = items
             .filter { $0.value > 0 }
-            .map { StatisticsItem(value: "\($0.value)", description: $0.description) }
+            .count
+        
+        if count > 0  {
+            return items.map { StatisticsItem(value: "\($0.value)", description: $0.description) }
+        }
+        
+        return []
     }
 }

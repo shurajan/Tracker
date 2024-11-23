@@ -6,7 +6,7 @@
 //
 import UIKit
 
-struct WeekDays: OptionSet {
+struct WeekDays: OptionSet, Hashable {
     let rawValue: Int32
     
     static let Monday = WeekDays(rawValue: 1 << 0)

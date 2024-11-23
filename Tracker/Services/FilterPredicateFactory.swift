@@ -11,6 +11,8 @@ enum PredicateType {
     case all
     case date(Date)
     case isPinned(Bool)
+    case scheduled
+    case oneOff
 }
 
 final class FilterPredicateFactory {
@@ -23,6 +25,10 @@ final class FilterPredicateFactory {
             return trackersForDate(date: date)
         case .isPinned(let pinned):
             return NSPredicate(format: "isPinned == %@", NSNumber(value: pinned))
+        case .scheduled:
+            return NSPredicate(format: "schedule != 0 AND schedule != nil")
+        case .oneOff:
+            return NSPredicate(format: "schedule == 0 OR schedule == nil")
         }
     }
     
