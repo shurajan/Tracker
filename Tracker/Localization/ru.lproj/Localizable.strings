@@ -66,6 +66,7 @@
 
 //MARK: - Statistics
 "statistics.title" = "Статистика";
+"statistics.placeholder.text" = "Анализировать пока нечего";
 "statistics.bestPeriod" = "Лучший период";
 "statistics.perfectDays" = "Идеальные дни";
 "statistics.trackersCompleted" = "Трекеров завершено";

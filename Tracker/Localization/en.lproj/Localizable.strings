@@ -65,6 +65,7 @@
 
 //MARK: - Statistics
 "statistics.title" = "Statistics";
+"statistics.placeholder.text" = "Nothing to analyze";
 "statistics.bestPeriod" = "Best period";
 "statistics.perfectDays" = "Perfect days";
 "statistics.trackersCompleted" = "Trackers completed";
