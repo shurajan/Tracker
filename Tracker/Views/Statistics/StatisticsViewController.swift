@@ -31,6 +31,13 @@ final class StatisticsViewController: BasicViewController {
         return view
     }()
     
+    private let loadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+    
     private let viewModel: StatisticsViewModel
     
     init(viewModel: StatisticsViewModel = StatisticsViewModel()) {
@@ -50,7 +57,30 @@ final class StatisticsViewController: BasicViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        loadStatistics()
+        loadStatistics { [weak self] dataItems in
+            guard let self = self else { return }
+            
+            self.statisticsStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+            
+            self.placeHolderView.isHidden = !dataItems.isEmpty
+            self.scrollView.isHidden = dataItems.isEmpty
+            
+            for item in dataItems {
+                let itemView = StatisticsItemView(value: item.value, description: item.description)
+                itemView.borderWidth = 1.0
+                itemView.cornerRadius = Constants.radius
+                itemView.gradientColors = [
+                    UIColor(hex: "#007BFA"),
+                    UIColor(hex: "#46E69D"),
+                    UIColor(hex: "#FD4C49")
+                ]
+                itemView.translatesAutoresizingMaskIntoConstraints = false
+                itemView.heightAnchor.constraint(equalToConstant: 90).isActive = true
+                self.statisticsStackView.addArrangedSubview(itemView)
+            }
+            
+            self.loadingIndicator.stopAnimating()
+        }
     }
     
     private func setupView() {
@@ -64,6 +94,7 @@ final class StatisticsViewController: BasicViewController {
         navigationItem.largeTitleDisplayMode = .always
         
         view.addSubview(placeHolderView)
+        view.addSubview(loadingIndicator)
         view.addSubview(scrollView)
         scrollView.addSubview(statisticsStackView)
         
@@ -83,28 +114,25 @@ final class StatisticsViewController: BasicViewController {
             placeHolderView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             placeHolderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Insets.leading),
             placeHolderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: Insets.trailing),
+            
+            loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
         ])
     }
     
-    private func loadStatistics() {
-        statisticsStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        let dataItems = viewModel.getStatisticsItems()
+    private func loadStatistics(completion: @escaping ([StatisticsItem]) -> Void) {
+        loadingIndicator.startAnimating()
+        scrollView.isHidden = true
+        placeHolderView.isHidden = true
         
-        self.placeHolderView.isHidden = !dataItems.isEmpty
-        self.scrollView.isHidden = dataItems.isEmpty
-        
-        for item in dataItems {
-            let itemView = StatisticsItemView(value: item.value, description: item.description)
-            itemView.borderWidth = 1.0
-            itemView.cornerRadius = Constants.radius
-            itemView.gradientColors = [
-                UIColor(hex: "#007BFA"),
-                UIColor(hex: "#46E69D"),
-                UIColor(hex: "#FD4C49")
-            ]
-            itemView.translatesAutoresizingMaskIntoConstraints = false
-            itemView.heightAnchor.constraint(equalToConstant: 90).isActive = true
-            statisticsStackView.addArrangedSubview(itemView)
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+
+            let dataItems = self.viewModel.getStatisticsItems()
+            
+            DispatchQueue.main.async {
+                completion(dataItems)
+            }
         }
     }
 }
