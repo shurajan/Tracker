@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		D943B5DF2CA70B0600242A5C /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = D943B5DE2CA70B0600242A5C /* README.md */; };
 		D943B5E12CA70B0E00242A5C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = D943B5E02CA70B0E00242A5C /* .gitignore */; };
+		D9CF91AF2CF3B1080059F29C /* InlineSnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = D9CF91AE2CF3B1080059F29C /* InlineSnapshotTesting */; };
+		D9CF91B12CF3B1080059F29C /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = D9CF91B02CF3B1080059F29C /* SnapshotTesting */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,6 +81,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D9CF91AF2CF3B1080059F29C /* InlineSnapshotTesting in Frameworks */,
+				D9CF91B12CF3B1080059F29C /* SnapshotTesting in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,6 +97,7 @@
 				D943B5AB2CA70AF700242A5C /* Products */,
 				D943B5DE2CA70B0600242A5C /* README.md */,
 				D943B5E02CA70B0E00242A5C /* .gitignore */,
+				D9CF91AD2CF3B1080059F29C /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -103,6 +108,13 @@
 				D9CF91092CF349F60059F29C /* TrackerTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		D9CF91AD2CF3B1080059F29C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -149,6 +161,8 @@
 			);
 			name = TrackerTests;
 			packageProductDependencies = (
+				D9CF91AE2CF3B1080059F29C /* InlineSnapshotTesting */,
+				D9CF91B02CF3B1080059F29C /* SnapshotTesting */,
 			);
 			productName = TrackerTests;
 			productReference = D9CF91092CF349F60059F29C /* TrackerTests.xctest */;
@@ -516,6 +530,19 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D9CF91AE2CF3B1080059F29C /* InlineSnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D9CF91122CF34A310059F29C /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = InlineSnapshotTesting;
+		};
+		D9CF91B02CF3B1080059F29C /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D9CF91122CF34A310059F29C /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D943B5A22CA70AF700242A5C /* Project object */;
 }

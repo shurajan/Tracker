@@ -10,28 +10,66 @@ import SnapshotTesting
 @testable import Tracker
 
 final class TrackerTests: XCTestCase {
-
+    private var trackerStore = TrackerStore()
+    private var trackerRecordStore = TrackerRecordStore()
+    
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        try super.setUpWithError()
+        
+        prepareTestData()
     }
-
+    
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        trackerStore.deleteAll()
+        try super.tearDownWithError()
     }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    
+    private func prepareTestData() {
+        trackerStore.deleteAll()
+        let category = "Test Category"
+        
+        let date = Date().startOfDay()
+        
+        let id1 = UUID()
+        let id2 = UUID()
+        
+        let tracker1 = Tracker(
+            id: id1,
+            name: "Tracker 1",
+            color: .selection1,
+            emoji: .angel,
+            date: date,
+            schedule: nil,
+            isPinned: true,
+            isComplete: false
+        )
+        
+        let tracker2 = Tracker(
+            id: id2,
+            name: "Tracker 2",
+            color: .selection2,
+            emoji: .angry,
+            date: date,
+            schedule: WeekDays.Daily,
+            isPinned: false,
+            isComplete: false
+        )
+        
+        trackerStore.addTracker(tracker: tracker1, category: category)
+        trackerStore.addTracker(tracker: tracker2, category: category)
+        
+        let trackerRecord2 = TrackerRecord(trackerId: id2, date: date)
+        
+        trackerRecordStore.manageTrackerRecord(trackerRecord: trackerRecord2)
     }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        measure {
-            // Put the code you want to measure the time of here.
-        }
+    
+    func testViewController() throws {
+        let vc = TrackersViewController()
+        
+        vc.overrideUserInterfaceStyle = .light
+        assertSnapshot(of: vc, as: .image, named: "LightMode")
+        
+        vc.overrideUserInterfaceStyle = .dark
+        assertSnapshot(of: vc, as: .image, named: "DarkMode")
     }
-
 }

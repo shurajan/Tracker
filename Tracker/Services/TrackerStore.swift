@@ -121,7 +121,7 @@ final class TrackerStore: BasicStore {
             Log.error(error: error, message: "failed to delete tracker with id \(id)")
         }
     }
-    
+        
     func togglePinned(for trackerID: UUID) {
         let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id == %@", trackerID as CVarArg)
