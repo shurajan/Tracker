@@ -67,13 +67,6 @@ final class StatisticsViewController: BasicViewController {
             
             for item in dataItems {
                 let itemView = StatisticsItemView(value: item.value, description: item.description)
-                itemView.borderWidth = 1.0
-                itemView.cornerRadius = Constants.radius
-                itemView.gradientColors = [
-                    UIColor(hex: "#007BFA"),
-                    UIColor(hex: "#46E69D"),
-                    UIColor(hex: "#FD4C49")
-                ]
                 itemView.translatesAutoresizingMaskIntoConstraints = false
                 itemView.heightAnchor.constraint(equalToConstant: 90).isActive = true
                 self.statisticsStackView.addArrangedSubview(itemView)

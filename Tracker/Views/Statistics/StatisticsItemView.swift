@@ -40,6 +40,14 @@ final class StatisticsItemView: GradientBorderView {
         addSubview(valueLabel)
         addSubview(descriptionLabel)
         
+        self.borderWidth = 1.0
+        self.cornerRadius = Constants.radius
+        self.gradientColors = [
+            UIColor(hex: "#007BFA"),
+            UIColor(hex: "#46E69D"),
+            UIColor(hex: "#FD4C49")
+        ]
+        
         NSLayoutConstraint.activate([
             valueLabel.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             valueLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
