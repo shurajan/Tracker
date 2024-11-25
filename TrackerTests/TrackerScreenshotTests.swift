@@ -10,6 +10,9 @@ import SnapshotTesting
 @testable import Tracker
 
 final class TrackerScreenshotTests: XCTestCase {
+    // MARK: - set to true to clean up results
+    private let reset = false
+    
     private var trackerStore = TrackerStore()
     private var trackerRecordStore = TrackerRecordStore()
     
@@ -67,10 +70,10 @@ final class TrackerScreenshotTests: XCTestCase {
         let vc = TrackersViewController()
         
         vc.overrideUserInterfaceStyle = .light
-        assertSnapshot(of: vc, as: .image, named: "LightMode")
+        assertSnapshot(of: vc, as: .image, named: "LightMode", record: reset)
         
         vc.overrideUserInterfaceStyle = .dark
-        assertSnapshot(of: vc, as: .image, named: "DarkMode")
+        assertSnapshot(of: vc, as: .image, named: "DarkMode", record: reset)
     }
     
     func testFilterViewController() throws {
@@ -78,40 +81,40 @@ final class TrackerScreenshotTests: XCTestCase {
         let vc = FiltersViewController(delegate: delegate)
         
         vc.overrideUserInterfaceStyle = .light
-        assertSnapshot(of: vc, as: .image, named: "LightMode")
+        assertSnapshot(of: vc, as: .image, named: "LightMode", record: reset)
         
         vc.overrideUserInterfaceStyle = .dark
-        assertSnapshot(of: vc, as: .image, named: "DarkMode")
+        assertSnapshot(of: vc, as: .image, named: "DarkMode", record: reset)
     }
     
     func testTrackerViewController() throws {
         let vc = TrackerViewController()
         
         vc.overrideUserInterfaceStyle = .light
-        assertSnapshot(of: vc, as: .image, named: "LightMode")
+        assertSnapshot(of: vc, as: .image, named: "LightMode", record: reset)
         
         vc.overrideUserInterfaceStyle = .dark
-        assertSnapshot(of: vc, as: .image, named: "DarkMode")
+        assertSnapshot(of: vc, as: .image, named: "DarkMode", record: reset)
     }
     
     func testNewCategoryViewController() throws {
         let vc = NewCategoryViewController()
         
         vc.overrideUserInterfaceStyle = .light
-        assertSnapshot(of: vc, as: .image, named: "LightMode")
+        assertSnapshot(of: vc, as: .image, named: "LightMode", record: reset)
         
         vc.overrideUserInterfaceStyle = .dark
-        assertSnapshot(of: vc, as: .image, named: "DarkMode")
+        assertSnapshot(of: vc, as: .image, named: "DarkMode", record: reset)
     }
     
     func testScheduleViewController() throws {
         let vc = ScheduleViewController()
         
         vc.overrideUserInterfaceStyle = .light
-        assertSnapshot(of: vc, as: .image, named: "LightMode")
+        assertSnapshot(of: vc, as: .image, named: "LightMode", record: reset)
         
         vc.overrideUserInterfaceStyle = .dark
-        assertSnapshot(of: vc, as: .image, named: "DarkMode")
+        assertSnapshot(of: vc, as: .image, named: "DarkMode", record: reset)
     }
     
     func testCategoriesViewController() throws {
@@ -119,10 +122,10 @@ final class TrackerScreenshotTests: XCTestCase {
         let vc = CategoriesViewController(delegate: delegate)
         
         vc.overrideUserInterfaceStyle = .light
-        assertSnapshot(of: vc, as: .image, named: "LightMode")
+        assertSnapshot(of: vc, as: .image, named: "LightMode", record: reset)
         
         vc.overrideUserInterfaceStyle = .dark
-        assertSnapshot(of: vc, as: .image, named: "DarkMode")
+        assertSnapshot(of: vc, as: .image, named: "DarkMode", record: reset)
     }
     
     func testContentViewController() throws {
@@ -130,10 +133,10 @@ final class TrackerScreenshotTests: XCTestCase {
         let vc = ContentViewController()
         
         vc.overrideUserInterfaceStyle = .light
-        assertSnapshot(of: vc, as: .image, named: "LightMode")
+        assertSnapshot(of: vc, as: .image, named: "LightMode", record: reset)
         
         vc.overrideUserInterfaceStyle = .dark
-        assertSnapshot(of: vc, as: .image, named: "DarkMode")
+        assertSnapshot(of: vc, as: .image, named: "DarkMode", record: reset)
     }
     
     func testPageViewController() throws {
@@ -141,18 +144,18 @@ final class TrackerScreenshotTests: XCTestCase {
         let vc = PageViewController()
         
         vc.overrideUserInterfaceStyle = .light
-        assertSnapshot(of: vc, as: .image, named: "LightMode")
+        assertSnapshot(of: vc, as: .image, named: "LightMode", record: reset)
         
         vc.overrideUserInterfaceStyle = .dark
-        assertSnapshot(of: vc, as: .image, named: "DarkMode")
+        assertSnapshot(of: vc, as: .image, named: "DarkMode", record: reset)
     }
     
     func testPlaceHolderView() {
         let pv = PlaceHolderView()
         pv.setText(text: "Test placeholder view")
         pv.overrideUserInterfaceStyle = .light
-        assertSnapshot(of: pv, as: .image, named: "LightMode")
+        assertSnapshot(of: pv, as: .image, named: "LightMode", record: reset)
         pv.overrideUserInterfaceStyle = .dark
-        assertSnapshot(of: pv, as: .image, named: "DarkMode")
+        assertSnapshot(of: pv, as: .image, named: "DarkMode", record: reset)
     }
 }
