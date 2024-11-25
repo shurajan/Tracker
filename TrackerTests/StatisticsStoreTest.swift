@@ -1,17 +1,22 @@
 //
-//  TrackerTests.swift
-//  TrackerTests
+//  StatisticsStoreTest.swift
+//  Tracker
 //
-//  Created by Alexander Bralnin on 24.11.2024.
+//  Created by Alexander Bralnin on 25.11.2024.
 //
 
 import XCTest
-import SnapshotTesting
 @testable import Tracker
 
-final class TrackerTests: XCTestCase {
+final class StatisticsStoreTest: XCTestCase {
     private var trackerStore = TrackerStore()
     private var trackerRecordStore = TrackerRecordStore()
+    private var statisticsStore = StatisticsStore()
+    
+    private let id1 = UUID()
+    private let id2 = UUID()
+    
+    private let date = Date().startOfDay()
     
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -27,11 +32,6 @@ final class TrackerTests: XCTestCase {
     private func prepareTestData() {
         trackerStore.deleteAll()
         let category = "Test Category"
-        
-        let date = Date().startOfDay()
-        
-        let id1 = UUID()
-        let id2 = UUID()
         
         let tracker1 = Tracker(
             id: id1,
@@ -61,15 +61,32 @@ final class TrackerTests: XCTestCase {
         let trackerRecord2 = TrackerRecord(trackerId: id2, date: date)
         
         trackerRecordStore.manageTrackerRecord(trackerRecord: trackerRecord2)
+        statisticsStore.loadData()
     }
     
-    func testViewController() throws {
-        let vc = TrackersViewController()
+    func testCountBestPeriod() {
+        var bestPeriod = statisticsStore.countBestPeriod()
+        XCTAssertEqual(bestPeriod, 0, "Best period should be 0")
         
-        vc.overrideUserInterfaceStyle = .light
-        assertSnapshot(of: vc, as: .image, named: "LightMode")
-        
-        vc.overrideUserInterfaceStyle = .dark
-        assertSnapshot(of: vc, as: .image, named: "DarkMode")
+        let trackerRecord1 = TrackerRecord(trackerId: id1, date: date)
+        trackerRecordStore.manageTrackerRecord(trackerRecord: trackerRecord1)
+        statisticsStore.loadData()
+        bestPeriod = statisticsStore.countBestPeriod()
+        XCTAssertEqual(bestPeriod, 1, "Best period should be 1 after change")
+    }
+    
+    func testCountPerfectDays() {
+        let perfectDays = statisticsStore.countPerfectDays()
+        XCTAssertEqual(perfectDays, 1, "Perfect days should be 1")
+    }
+    
+    func testCountCompletedTrackers() {
+        let completedTrackers = statisticsStore.countCompletedTrackers()
+        XCTAssertEqual(completedTrackers, 1, "Completed trackers should be 1")
+    }
+    
+    func testGetAverageValue() {
+        let averageValue = statisticsStore.getAverageValue()
+        XCTAssertEqual(averageValue, 1, "Average value should be 1")
     }
 }
