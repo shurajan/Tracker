@@ -46,12 +46,23 @@ final class NewCategoryViewController: BasicViewController {
         return button
     }()
     
+    // MARK: - View Life Cycles
+    init() {
+        super.init(nibName: nil, bundle: nil)
+        self.screenName = AnalyticsEventData.NewCategory.name
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = AppColors.Dynamic.white
         setupLayout()
     }
     
+    // MARK: - Private func
     private func setupLayout() {
         view.addSubview(titleLabel)
         view.addSubview(categoryTextField)
@@ -92,6 +103,9 @@ final class NewCategoryViewController: BasicViewController {
         guard let category = categoryTextField.text,
               let delegate
         else {return}
+        
+        Log.info(message: "reporting create event")
+        AnalyticsService.shared.trackEvent(event: .click, params: AnalyticsEventData.NewCategory.clickCreate)
         
         delegate.didTapCreateButton(category: category)
         dismiss(animated: true, completion: nil)

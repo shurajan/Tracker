@@ -10,7 +10,7 @@ import SnapshotTesting
 @testable import Tracker
 
 final class TrackerScreenshotTests: XCTestCase {
-    // MARK: - set to true to clean up results
+    // set to true to clean up results
     private let reset = false
     
     private var trackerStore = TrackerStore()

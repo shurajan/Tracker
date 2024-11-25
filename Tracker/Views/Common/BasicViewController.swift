@@ -9,7 +9,7 @@ import UIKit
 
 
 class BasicViewController: UIViewController {
-    private var constraints = [NSLayoutConstraint]()
+    var screenName: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,6 +19,22 @@ class BasicViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         setNeedsStatusBarAppearanceUpdate()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let screenName {
+            Log.info(message: "reporting \(screenName) screen opening")
+            AnalyticsService.shared.trackEvent(event: .close, params: ["screen": "\(screenName)"])
+        }
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if let screenName {
+            Log.info(message: "reporting \(screenName) screen closing")
+            AnalyticsService.shared.trackEvent(event: .close, params: ["screen": "\(screenName)"])
+        }
     }
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {

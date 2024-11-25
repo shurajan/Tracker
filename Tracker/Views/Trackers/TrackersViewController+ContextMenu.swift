@@ -88,6 +88,9 @@ extension TrackersViewController {
     }
         
     private func editItem(at indexPath: IndexPath) {
+        Log.info(message: "reporting edit event")
+        AnalyticsService.shared.trackEvent(event: .click, params: AnalyticsEventData.MainScreen.clickEdit)
+        
         guard let tracker = collectionViewModel?.item(at: indexPath),
               let category = collectionViewModel?.categoryForItem(at: indexPath)
         else {
@@ -107,7 +110,7 @@ extension TrackersViewController {
         present(updateTrackerViewController, animated: true, completion: nil)
     }
     
-    private func deleteItem(at indexPath: IndexPath) {
+    private func deleteItem(at indexPath: IndexPath) {        
         guard let tracker = collectionViewModel?.item(at: indexPath)
         else {
             Log.warn(message: "failed to find item at \(indexPath.row)")
@@ -130,6 +133,8 @@ extension TrackersViewController {
             title: LocalizedStrings.Trackers.DeleteAlert.actionDelete,
             style: .destructive
         ) { _ in
+            Log.info(message: "reporting delete event")
+            AnalyticsService.shared.trackEvent(event: .click, params: AnalyticsEventData.MainScreen.clickDelete)
             onDelete(id)
         }
         

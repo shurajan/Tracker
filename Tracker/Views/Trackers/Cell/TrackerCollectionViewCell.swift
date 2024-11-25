@@ -146,6 +146,9 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
               date < Date()
         else { return }
         
+        Log.info(message: "reporting track event")
+        AnalyticsService.shared.trackEvent(event: .click, params: AnalyticsEventData.MainScreen.clickTracker)
+        
         let trackerRecord = TrackerRecord(trackerId: tracker.id, date: date)
         dataProvider.manageTrackerRecord(trackerRecord: trackerRecord)
         

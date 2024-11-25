@@ -35,6 +35,7 @@ final class FiltersViewController: BasicViewController {
     init(delegate: FilterDelegateProtocol) {
         self.delegate = delegate
         super.init(nibName: nil, bundle: nil)
+        self.screenName = AnalyticsEventData.FiltersScreen.name
     }
     
     required init?(coder: NSCoder) {
@@ -117,6 +118,9 @@ extension FiltersViewController: UITableViewDelegate, UITableViewDataSource {
         tableView.deselectRow(at: indexPath, animated: true)
         let selectedFilter = Filters.allCases[indexPath.row]
         delegate.didSelectFilter(filter: selectedFilter)
+        
+        Log.info(message: "reporting filter selection event")
+        AnalyticsService.shared.trackEvent(event: .click, params: AnalyticsEventData.FiltersScreen.selectFilter)
         dismiss(animated: true)
     }
 }

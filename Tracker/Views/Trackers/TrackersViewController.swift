@@ -11,14 +11,14 @@ final class TrackersViewController: BasicViewController {
     private(set) var collectionViewModel: TrackerCollectionViewModelProtocol?
     private(set) var trackerRecordStore: TrackerRecordStore?
     private(set) var params: GeometricParams = GeometricParams(cellCount: 2,
-                                                          leftInset: Insets.leading,
-                                                          rightInset: Insets.leading,
-                                                          cellSpacing: 10)
+                                                               leftInset: Insets.leading,
+                                                               rightInset: Insets.leading,
+                                                               cellSpacing: 10)
     
     private(set) var selectedDate = Date().startOfDay()
     private(set) var isSearchModeOn = false
     private(set) var currentFilter: Filters = .allTrackers
-        
+    
     //MARK: - UI components
     private lazy var plusButton: UIButton = {
         let button = UIButton()
@@ -58,7 +58,7 @@ final class TrackersViewController: BasicViewController {
         searchController.hidesNavigationBarDuringPresentation = false
         return searchController
     }()
-        
+    
     private let placeHolderView: PlaceHolderView = {
         let view = PlaceHolderView()
         view.setText(text: LocalizedStrings.Trackers.placeholderText)
@@ -104,6 +104,15 @@ final class TrackersViewController: BasicViewController {
     }()
     
     // MARK: - View Life Cycles
+    init() {
+        super.init(nibName: nil, bundle: nil)
+        self.screenName = AnalyticsEventData.MainScreen.name
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupLayout()
@@ -130,7 +139,7 @@ final class TrackersViewController: BasicViewController {
         view.addSubview(placeHolderView)
         view.addSubview(searchPlaceHolderView)
         view.addSubview(filterButton)
-                
+        
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: plusButton)
         navigationItem.searchController = searchController
@@ -218,10 +227,13 @@ final class TrackersViewController: BasicViewController {
             tracker.name.lowercased().contains(text.lowercased())
         }
     }
-        
+    
     //MARK: - IB Outlet
     @IBAction
     private func plusButtonTapped(_ sender: UIButton) {
+        Log.info(message: "reporting add event")
+        AnalyticsService.shared.trackEvent(event: .click, params: AnalyticsEventData.MainScreen.clickAddTracker)
+        
         let trackerCreationViewController = TrackerTypeSelectorViewController()
         trackerCreationViewController.delegate = self
         trackerCreationViewController.modalPresentationStyle = .pageSheet
@@ -240,6 +252,9 @@ final class TrackersViewController: BasicViewController {
     
     @IBAction
     func filterButtonTapped(){
+        Log.info(message: "reporting filter event")
+        AnalyticsService.shared.trackEvent(event: .click, params: AnalyticsEventData.MainScreen.clickFilter)
+        
         let filtersViewController = FiltersViewController(delegate: self)
         filtersViewController.modalPresentationStyle = .pageSheet
         present(filtersViewController, animated: true, completion: nil)
@@ -262,7 +277,7 @@ extension TrackersViewController: UISearchBarDelegate {
         searchBar.resignFirstResponder()
     }
     
-
+    
 }
 
 extension TrackersViewController: FilterDelegateProtocol {

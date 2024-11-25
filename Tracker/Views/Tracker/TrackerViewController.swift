@@ -196,6 +196,16 @@ final class TrackerViewController: BasicViewController {
     private var selectedColorIndex: IndexPath?
     private var selectedCategory: String?
     
+    // MARK: - View Life Cycles
+    init() {
+        super.init(nibName: nil, bundle: nil)
+        self.screenName = AnalyticsEventData.NewTrackerScreen.name
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         emojiSelectionView.delegate = self
@@ -330,6 +340,8 @@ final class TrackerViewController: BasicViewController {
     
     @IBAction
     private func cancelButtonTapped() {
+        Log.info(message: "reporting cancel event")
+        AnalyticsService.shared.trackEvent(event: .click, params: AnalyticsEventData.NewTrackerScreen.clickCancel)
         dismiss(animated: true, completion: nil)
     }
     
@@ -346,6 +358,9 @@ final class TrackerViewController: BasicViewController {
             Log.error(error: TrackerError.trackerCreationError, message: "failed to create tracker")
             return
         }
+        
+        Log.info(message: "reporting save event")
+        AnalyticsService.shared.trackEvent(event: .click, params: AnalyticsEventData.NewTrackerScreen.clickSave)
         
         let color = TrackerColor.allCases[selectedColorIndex.item]
         

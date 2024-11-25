@@ -43,6 +43,15 @@ final class TrackerTypeSelectorViewController: BasicViewController {
         return button
     }()
     
+    init() {
+        super.init(nibName: nil, bundle: nil)
+        self.screenName = AnalyticsEventData.TrackersTypeScreen.name
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupLayout()
@@ -79,6 +88,8 @@ final class TrackerTypeSelectorViewController: BasicViewController {
     //MARK: - IB Outlet
     @IBAction
     private func habitButtonTapped(_ sender: UIButton) {
+        Log.info(message: "reporting add habit event")
+        AnalyticsService.shared.trackEvent(event: .click, params: AnalyticsEventData.TrackersTypeScreen.clickAddTracker)
         dismiss(animated: true) { [weak self] in
             guard let self else {return}
             self.delegate?.showNewHabitViewController()
@@ -87,6 +98,8 @@ final class TrackerTypeSelectorViewController: BasicViewController {
     
     @IBAction
     private func irregularEventButtonTapped(_ sender: UIButton) {
+        Log.info(message: "reporting add irregular event")
+        AnalyticsService.shared.trackEvent(event: .click, params: AnalyticsEventData.TrackersTypeScreen.clickAddIrregularEvent)
         dismiss(animated: true) { [weak self] in
             guard let self else {return}
             self.delegate?.showNewIrregularEventController()

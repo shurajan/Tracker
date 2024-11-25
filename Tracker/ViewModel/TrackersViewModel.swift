@@ -46,7 +46,7 @@ final class TrackersViewModel: TrackersViewModelProtocol {
         trackerStore.updateTracker(with: tracker, newCategory: newCategory)
     }
     
-    func deleteTracker(for id: UUID) {
+    func deleteTracker(for id: UUID) {        
         trackerStore.deleteTracker(by: id)
     }
     
