@@ -11,6 +11,7 @@ enum AnalyticsEvent: String {
     case click  = "click"
 }
 
+
 enum AnalyticsEventData {
     enum MainScreen {
         static let name = "Main"
