@@ -25,7 +25,7 @@ class BasicViewController: UIViewController {
         super.viewDidAppear(animated)
         if let screenName {
             Log.info(message: "reporting \(screenName) screen opening")
-            AnalyticsService.shared.trackEvent(event: .close, params: ["screen": "\(screenName)"])
+            AnalyticsService.shared.trackEvent(event: .open, params: ["screen": "\(screenName)"])
         }
     }
     
