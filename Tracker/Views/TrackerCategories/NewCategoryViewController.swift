@@ -23,13 +23,14 @@ final class NewCategoryViewController: BasicViewController {
         let textField = UITextField()
         textField.placeholder = LocalizedStrings.NewCategory.placeholder
         textField.font = Fonts.textFieldFont
+        textField.textAlignment = .left
         textField.backgroundColor = AppColors.Dynamic.background
         textField.layer.cornerRadius = Constants.radius
         textField.layer.masksToBounds = true
-        textField.textAlignment = .center
         textField.delegate = self
         textField.addTarget(self, action: #selector(categoryTextFieldChanged), for: .editingChanged)
         textField.translatesAutoresizingMaskIntoConstraints = false
+        
         return textField
     }()
     
@@ -49,9 +50,10 @@ final class NewCategoryViewController: BasicViewController {
     // MARK: - View Life Cycles
     init() {
         super.init(nibName: nil, bundle: nil)
-        self.screenName = AnalyticsEventData.NewCategory.name
+        self.screenName = AnalyticsEventData.NewCategoryScreen.name
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -105,7 +107,7 @@ final class NewCategoryViewController: BasicViewController {
         else {return}
         
         Log.info(message: "reporting create event")
-        AnalyticsService.shared.trackEvent(event: .click, params: AnalyticsEventData.NewCategory.clickCreate)
+        AnalyticsService.shared.trackEvent(event: .click, params: AnalyticsEventData.NewCategoryScreen.clickCreate)
         
         delegate.didTapCreateButton(category: category)
         dismiss(animated: true, completion: nil)

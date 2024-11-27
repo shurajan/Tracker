@@ -7,8 +7,13 @@
 
 import UIKit
 
+protocol ContentViewControllerDelegate: AnyObject {
+    func didTapPageControl(to page: Int)
+}
+
 final class ContentViewController: UIViewController {
     
+    weak var delegate: ContentViewControllerDelegate?
     private var backgroundImageName: String = ""
     private var labelText: String = ""
     private var pageControlCurrentPage: Int = 0
@@ -46,6 +51,7 @@ final class ContentViewController: UIViewController {
         let control = UIPageControl()
         control.currentPageIndicatorTintColor = .black
         control.pageIndicatorTintColor = .lightGray
+        control.addTarget(self, action: #selector(pageControlValueChanged(_:)), for: .valueChanged)
         control.translatesAutoresizingMaskIntoConstraints = false
         return control
     }()
@@ -55,14 +61,16 @@ final class ContentViewController: UIViewController {
         setupLayout()
     }
     
-    func configure(backgroundImageName: String, labelText: String) {
+    func configure(backgroundImageName: String, labelText: String, currentPage: Int, numberOfPages: Int) {
         self.backgroundImageName = backgroundImageName
         self.labelText = labelText
+        self.pageControlCurrentPage = currentPage
+        self.pageControlNumberOfPages = numberOfPages
         
         backgroundImageView.image = UIImage(named: backgroundImageName)
         label.text = labelText
-        pageControl.currentPage = pageControlCurrentPage
-        pageControl.numberOfPages = pageControlNumberOfPages
+        pageControl.currentPage = currentPage
+        pageControl.numberOfPages = numberOfPages
     }
     
     private func setupLayout() {
@@ -86,7 +94,7 @@ final class ContentViewController: UIViewController {
             startButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             startButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             startButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            startButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant:  -50),
+            startButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -50),
             startButton.heightAnchor.constraint(equalToConstant: 60),
             
             pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -94,7 +102,11 @@ final class ContentViewController: UIViewController {
         ])
     }
     
-    //MARK: - IB Outlet
+    @IBAction
+    private func pageControlValueChanged(_ sender: UIPageControl) {
+        delegate?.didTapPageControl(to: sender.currentPage)
+    }
+    
     @IBAction
     private func startButtonTapped() {
         let tabBarController = MainTabBarController()

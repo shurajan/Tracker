@@ -247,9 +247,3 @@ final class StatisticsStore: BasicStore, StatisticsProtocol {
         }
     }
 }
-
-/*extension StatisticsStore: NSFetchedResultsControllerDelegate {
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        loadData()
-    }
-}*/

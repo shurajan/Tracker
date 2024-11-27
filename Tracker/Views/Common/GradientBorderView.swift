@@ -36,6 +36,7 @@ class GradientBorderView: UIView {
         setupGradientBorder()
     }
     
+
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupGradientBorder()

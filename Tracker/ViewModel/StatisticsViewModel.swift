@@ -7,11 +7,6 @@
 
 import Foundation
 
-struct StatisticsItem {
-    let value: String
-    let description: String
-}
-
 final class StatisticsViewModel {
     private let statisticsStore: StatisticsProtocol
     
