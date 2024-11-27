@@ -11,26 +11,27 @@ protocol NewCategoryDelegateProtocol: AnyObject {
     func didTapCreateButton(category: String)
 }
 
-final class CategoriesViewController: LightStatusBarViewController {
-    
+final class CategoriesViewController: BasicViewController {    
     var selectedCategory: String?
     
-    weak var delegate: NewTrackerDelegateProtocol?
+    private let delegate: TrackerDelegateProtocol
     
     private var viewModel: TrackerCategoryViewModel?
     
-    init(viewModel: TrackerCategoryViewModel = TrackerCategoryViewModel()) {
+    init(delegate: TrackerDelegateProtocol, viewModel: TrackerCategoryViewModel = TrackerCategoryViewModel()) {
         self.viewModel = viewModel
+        self.delegate = delegate
         super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Категория"
+        label.text = LocalizedStrings.Categories.title
         label.font = Fonts.titleMediumFont
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -39,8 +40,8 @@ final class CategoriesViewController: LightStatusBarViewController {
     
     private lazy var tableView: UITableView = {
         let table = UITableView()
-        table.backgroundColor = .ysWhite
-        table.register(CategoryTableViewCell.self, forCellReuseIdentifier: "cell")
+        table.backgroundColor = AppColors.Dynamic.white
+        table.register(SelectionTableViewCell.self, forCellReuseIdentifier: "cell")
         table.layer.cornerRadius = Constants.radius
         table.isScrollEnabled = true
         table.delegate = self
@@ -52,10 +53,10 @@ final class CategoriesViewController: LightStatusBarViewController {
     
     private lazy var addNewCategory: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Добавить категорию", for: .normal)
+        button.setTitle(LocalizedStrings.Categories.addButton, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
-        button.setTitleColor(.ysWhite, for: .normal)
-        button.backgroundColor = .ysBlack
+        button.setTitleColor(AppColors.Dynamic.white, for: .normal)
+        button.backgroundColor = AppColors.Dynamic.black
         button.layer.cornerRadius = Constants.radius
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(addCategoryButtonTapped), for: .touchUpInside)
@@ -65,7 +66,7 @@ final class CategoriesViewController: LightStatusBarViewController {
     private let placeHolderView: PlaceHolderView = {
         let view = PlaceHolderView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.setText(text: "Привычки и события можно \nобъединить по смыслу")
+        view.setText(text: LocalizedStrings.Categories.placeholderText)
         view.isHidden = true
         return view
     }()
@@ -73,10 +74,9 @@ final class CategoriesViewController: LightStatusBarViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .ysWhite
+        view.backgroundColor = AppColors.Dynamic.white
         setupLayout()
         
-        //viewModel = TrackerCategoryViewModel()
         viewModel?.trackerCategoriesBinding = updateTableView
         viewModel?.fetchTrackerCategories()
     }
@@ -157,7 +157,7 @@ extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? CategoryTableViewCell
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? SelectionTableViewCell
         else {
             return UITableViewCell()
         }
@@ -166,7 +166,6 @@ extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
         
         cell.configure(text: title,
                        isSelected: title == selectedCategory)
-        cell.backgroundColor = .ysBackground
         cell.layoutMargins = Insets.cellInsets
         
         return cell
@@ -180,7 +179,7 @@ extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
         tableView.deselectRow(at: indexPath, animated: true)
         if let category = viewModel?.trackerCategories[indexPath.row].title {
             self.selectedCategory = category
-            delegate?.didSelectCategory(category: category)
+            delegate.didSelectCategory(category: category)
         }
         dismiss(animated: true)
     }

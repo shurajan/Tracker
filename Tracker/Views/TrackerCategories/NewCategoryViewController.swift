@@ -7,12 +7,12 @@
 
 import UIKit
 
-final class NewCategoryViewController: LightStatusBarViewController {
+final class NewCategoryViewController: BasicViewController {
     weak var delegate: NewCategoryDelegateProtocol?
-    
+        
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Новая категория"
+        label.text = LocalizedStrings.NewCategory.title
         label.font = Fonts.titleMediumFont
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -21,43 +21,55 @@ final class NewCategoryViewController: LightStatusBarViewController {
     
     private lazy var categoryTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название категории"
+        textField.placeholder = LocalizedStrings.NewCategory.placeholder
         textField.font = Fonts.textFieldFont
-        textField.backgroundColor = .ysBackground
+        textField.textAlignment = .left
+        textField.backgroundColor = AppColors.Dynamic.background
         textField.layer.cornerRadius = Constants.radius
         textField.layer.masksToBounds = true
-        textField.textAlignment = .center
         textField.delegate = self
         textField.addTarget(self, action: #selector(categoryTextFieldChanged), for: .editingChanged)
         textField.translatesAutoresizingMaskIntoConstraints = false
+        
         return textField
     }()
     
     private lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(LocalizedStrings.NewCategory.doneButton, for: .normal)
         button.titleLabel?.font = Fonts.titleMediumFont
-        button.backgroundColor = .ysGray
+        button.setTitleColor(AppColors.Dynamic.white, for: .normal)
+        button.backgroundColor = AppColors.Fixed.gray
         button.isEnabled = false
-        button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = Constants.radius
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
         return button
     }()
     
+    // MARK: - View Life Cycles
+    init() {
+        super.init(nibName: nil, bundle: nil)
+        self.screenName = AnalyticsEventData.NewCategoryScreen.name
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = AppColors.Dynamic.white
         setupLayout()
     }
     
+    // MARK: - Private func
     private func setupLayout() {
         view.addSubview(titleLabel)
         view.addSubview(categoryTextField)
         view.addSubview(createButton)
         
-        // Title Label Constraints
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -80,12 +92,12 @@ final class NewCategoryViewController: LightStatusBarViewController {
        
         if isEmpty {
             createButton.isEnabled = false
-            createButton.backgroundColor = .ysGray
+            createButton.backgroundColor = AppColors.Fixed.gray
             return
         }
         
         createButton.isEnabled = true
-        createButton.backgroundColor = .ysBlack
+        createButton.backgroundColor = AppColors.Dynamic.black
     }
     
     @IBAction
@@ -93,6 +105,9 @@ final class NewCategoryViewController: LightStatusBarViewController {
         guard let category = categoryTextField.text,
               let delegate
         else {return}
+        
+        Log.info(message: "reporting create event")
+        AnalyticsService.shared.trackEvent(event: .click, params: AnalyticsEventData.NewCategoryScreen.clickCreate)
         
         delegate.didTapCreateButton(category: category)
         dismiss(animated: true, completion: nil)

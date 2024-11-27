@@ -9,6 +9,7 @@ import UIKit
 final class PageViewController: UIPageViewController {
     
     private lazy var pages: [ContentViewController] = createPages()
+    private var currentIndex: Int = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,50 +24,57 @@ final class PageViewController: UIPageViewController {
     private func createPages() -> [ContentViewController] {
         let firstPage = ContentViewController()
         firstPage.configure(backgroundImageName: "1",
-                            labelText: "Отслеживайте только то, что хотите")
+                            labelText: LocalizedStrings.Onboarding.firstTitle,
+                            currentPage: 0,
+                            numberOfPages: 2)
+        firstPage.delegate = self
         
         let secondPage = ContentViewController()
         secondPage.configure(backgroundImageName: "2",
-                             labelText: "Даже если это не литры воды и йога")
+                             labelText: LocalizedStrings.Onboarding.secondTitle,
+                             currentPage: 1,
+                             numberOfPages: 2)
+        secondPage.delegate = self
         
         return [firstPage, secondPage]
     }
 }
 
+// MARK: - ContentViewControllerDelegate
+extension PageViewController: ContentViewControllerDelegate {
+    func didTapPageControl(to page: Int) {
+        guard page != currentIndex, page >= 0, page < pages.count else { return }
+        let direction: UIPageViewController.NavigationDirection = page > currentIndex ? .forward : .reverse
+        currentIndex = page
+        setViewControllers([pages[page]], direction: direction, animated: true, completion: nil)
+    }
+}
+
 // MARK: - UIPageViewControllerDataSource
-extension PageViewController: UIPageViewControllerDataSource{
+extension PageViewController: UIPageViewControllerDataSource {
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
-        guard let currentPage = viewController as? ContentViewController,
-              let currentIndex = pages.firstIndex(of: currentPage) else {
+        guard let currentIndex = pages.firstIndex(of: viewController as! ContentViewController), currentIndex > 0 else {
             return nil
         }
-    
-        let previousIndex = currentIndex - 1
-        return previousIndex >= 0 ? pages[previousIndex] : nil
+        return pages[currentIndex - 1]
     }
     
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
-        guard let currentPage = viewController as? ContentViewController,
-              let currentIndex = pages.firstIndex(of: currentPage) else {
+        guard let currentIndex = pages.firstIndex(of: viewController as! ContentViewController), currentIndex < pages.count - 1 else {
             return nil
         }
-        
-        let nextIndex = currentIndex + 1
-        return nextIndex < pages.count ? pages[nextIndex] : nil
+        return pages[currentIndex + 1]
     }
-    
 }
 
 // MARK: - UIPageViewControllerDelegate
 extension PageViewController: UIPageViewControllerDelegate {
-    func pageViewController(_ pageViewController: UIPageViewController,
-                            didFinishAnimating finished: Bool,
-                            previousViewControllers: [UIViewController],
-                            transitionCompleted completed: Bool) {
+    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
         guard completed,
-           let currentViewController = viewControllers?.first as? ContentViewController,
-           let currentIndex = pages.firstIndex(of: currentViewController)
-        else { return }
-        pages[currentIndex].pageControl.currentPage = currentIndex
+              let currentViewController = viewControllers?.first as? ContentViewController,
+              let currentIndex = pages.firstIndex(of: currentViewController) else { return }
+        
+        self.currentIndex = currentIndex
+        currentViewController.pageControl.currentPage = currentIndex
     }
 }

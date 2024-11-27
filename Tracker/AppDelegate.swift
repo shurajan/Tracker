@@ -25,8 +25,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        AnalyticsService.activate()
         window = UIWindow()
-        window?.rootViewController = DarkStatusBarViewController()
+        window?.rootViewController = BasicViewController()
         window?.makeKeyAndVisible()
  
         return true
